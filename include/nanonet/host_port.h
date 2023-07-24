@@ -38,14 +38,14 @@ public:
     }
 
     std::string str_host() const {
-        return std::to_string((ip >> 24) & 0xFF)
-            + "." + std::to_string((ip >> 16) & 0xFF) 
-            + "." + std::to_string((ip >> 8) & 0xFF)
-            + "." + std::to_string(ip & 0xFF);
+        return std::to_string(ip & 0xFF)
+            + "." + std::to_string((ip >> 8) & 0xFF) 
+            + "." + std::to_string((ip >> 16) & 0xFF)
+            + "." + std::to_string((ip >> 24)& 0xFF);
     }
 
     std::string to_string() const {
-        return this->str_host() + ":" + std::to_string(port);
+        return this->str_host() + ":" + std::to_string(ntohs(port));
     }
 
 }; // class IPPort

@@ -2,3 +2,8 @@
 .vscode
 /test
 Makefile
+client.cpp
+server.cpp
+client
+server
+libnanonet.so
