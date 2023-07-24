@@ -5,7 +5,7 @@
 namespace nanonet {
 
 UdpSender::UdpSender(std::string targetHost, port_t targetPort)
-    : targetHost_(std::move(targetHost)), targetPort_(targetPort), server_({}) {
+    : targetHost_(targetHost), targetPort_(targetPort), sockfd_(-1), server_({}) {
     sockfd_ = socket(AF_INET, SOCK_DGRAM, 0);
     assert(sockfd_ >= 0);
     server_.sin_family = AF_INET;
@@ -20,7 +20,8 @@ UdpSender::~UdpSender() {
     }
 }
 
-ssize_t UdpSender::send(const std::string& message) {
+ssize_t UdpSender::send(const std::string message) {
+    assert(sockfd_ >= 0);
     return sendto(sockfd_, message.c_str(), message.size(), 0, (struct sockaddr*)&server_, sizeof server_);
 }
 

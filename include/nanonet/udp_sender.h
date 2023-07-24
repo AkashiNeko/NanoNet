@@ -24,7 +24,7 @@ class UdpSender {
 public:
     UdpSender(std::string targetHost, port_t targetPort);
     virtual ~UdpSender();
-    ssize_t send(const std::string& message);
+    ssize_t send(const std::string message);
 
 }; // class UdpSender
 

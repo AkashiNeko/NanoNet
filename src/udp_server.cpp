@@ -2,7 +2,7 @@
 
 namespace nanonet {
 
-UdpServer::UdpServer(port_t port, std::string host = "") : port(port), host(host), sockfd(-1) {
+UdpServer::UdpServer(port_t port, std::string host) : port(port), host(host), sockfd(-1) {
     // create socket
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0) {
