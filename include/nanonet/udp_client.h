@@ -1,6 +1,6 @@
 #pragma once
-#ifndef __UDP_SENDER_H__
-#define __UDP_SENDER_H__
+#ifndef __UDP_CLIENT_H__
+#define __UDP_CLIENT_H__
 
 #include <string>
 #include <strings.h>
@@ -16,14 +16,14 @@
 
 namespace nanonet {
 
-class UdpSender {
+class UdpClient {
     std::string targetHost_;
     port_t targetPort_;
     int sockfd_;
     struct sockaddr_in server_{};
 public:
-    UdpSender(std::string targetHost, port_t targetPort);
-    virtual ~UdpSender();
+    UdpClient(std::string targetHost, port_t targetPort);
+    virtual ~UdpClient();
     ssize_t send(const std::string message);
 
 }; // class UdpSender

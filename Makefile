@@ -4,12 +4,17 @@ all:server client
 libnanonet.so:
 	g++ -shared -fPIC src/*.cpp -o $@ -std=c++17 -I include/
 
-server:server.cpp libnanonet.so
-	g++ -o $@ server.cpp -L ./ -I include/ -std=c++17 -O3 -lnanonet -Wl,-rpath .
+lib/libnanonet.a:
+	g++ -c src/*.cpp -O3 -std=c++17 -static -I include
+	mv *.o bin
+	ar -rc lib/libnanonet.a bin/*.o
 
-client:client.cpp libnanonet.so
-	g++ -o $@ client.cpp -L ./ -I include/ -std=c++17 -O3 -lnanonet -Wl,-rpath .
+server:server.cpp lib/libnanonet.a
+	g++ -o $@ server.cpp -L lib -I include/ -std=c++17 -O3 -lnanonet -static
+
+client:client.cpp lib/libnanonet.a
+	g++ -o $@ client.cpp -L lib -I include/ -std=c++17 -O3 -lnanonet -static
 
 .PHONY:clean
 clean:
-	rm server client libnanonet.so
+	rm server client bin/* lib/*

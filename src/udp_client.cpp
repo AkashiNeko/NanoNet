@@ -1,10 +1,10 @@
 #include <utility>
 
-#include "nanonet/udp_sender.h"
+#include "nanonet/udp_client.h"
 
 namespace nanonet {
 
-UdpSender::UdpSender(std::string targetHost, port_t targetPort)
+UdpClient::UdpClient(std::string targetHost, port_t targetPort)
     : targetHost_(targetHost), targetPort_(targetPort), sockfd_(-1), server_({}) {
     sockfd_ = socket(AF_INET, SOCK_DGRAM, 0);
     assert(sockfd_ >= 0);
@@ -13,14 +13,14 @@ UdpSender::UdpSender(std::string targetHost, port_t targetPort)
     server_.sin_addr.s_addr = inet_addr(targetHost.c_str());
 }
 
-UdpSender::~UdpSender() {
+UdpClient::~UdpClient() {
     if (sockfd_ >= 0) {
         ::close(sockfd_);
         sockfd_ = -1;
     }
 }
 
-ssize_t UdpSender::send(const std::string message) {
+ssize_t UdpClient::send(const std::string message) {
     assert(sockfd_ >= 0);
     return sendto(sockfd_, message.c_str(), message.size(), 0, (struct sockaddr*)&server_, sizeof server_);
 }
