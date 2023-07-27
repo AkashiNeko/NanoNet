@@ -22,7 +22,7 @@ UdpClient::~UdpClient() {
 
 ssize_t UdpClient::send(const std::string message) {
     assert(sockfd_ >= 0);
-    return sendto(sockfd_, message.c_str(), message.size(), 0, (struct sockaddr*)&server_, sizeof server_);
+    return sendto(sockfd_, message.c_str(), message.size(), 0, (const struct sockaddr*)&server_, sizeof server_);
 }
 
 std::string UdpClient::wait() {

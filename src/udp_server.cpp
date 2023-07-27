@@ -49,7 +49,7 @@ ssize_t UdpServer::send(HostPort hostPort, std::string messages) {
     remote.sin_family = AF_INET;
     remote.sin_port = htons(hostPort.getPort());
     remote.sin_addr.s_addr = hostPort.getIP();
-    return sendto(sockfd, messages.c_str(), messages.size(), 0, (struct sockaddr*)&remote, sizeof(remote));
+    return sendto(sockfd, messages.c_str(), messages.size(), 0, (const struct sockaddr*)&remote, sizeof(remote));
 }
 
 } // namespace nanonet
