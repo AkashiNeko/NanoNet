@@ -28,6 +28,9 @@ public:
     virtual ~UdpServer();
 
     std::pair<HostPort, std::string> wait();
+
+    ssize_t send(HostPort hostPort, std::string messages);
+
 }; // class UdpServer
 
 } // namespace nanonet

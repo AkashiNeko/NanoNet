@@ -25,4 +25,14 @@ ssize_t UdpClient::send(const std::string message) {
     return sendto(sockfd_, message.c_str(), message.size(), 0, (struct sockaddr*)&server_, sizeof server_);
 }
 
+std::string UdpClient::wait() {
+    assert(sockfd_ >= 0);
+    char buf[4096];
+    ssize_t n = recvfrom(sockfd_, buf, sizeof buf, 0, nullptr, nullptr);
+    if (n > 0) {
+        return std::string(buf, n);
+    }
+    return std::string();
+}
+
 }  // namespace nanonet

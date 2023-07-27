@@ -25,6 +25,8 @@ public:
     UdpClient(std::string targetHost, port_t targetPort);
     virtual ~UdpClient();
     ssize_t send(const std::string message);
+    
+    std::string wait();
 
 }; // class UdpSender
 
