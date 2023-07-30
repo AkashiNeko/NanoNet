@@ -60,6 +60,7 @@ public:
         assert(bind_ret >= 0);
     }
 
+    // destructor (close socket fd)
     ~UdpSocket() {
         this->close();
     }
@@ -110,6 +111,7 @@ public:
         return packet;
     }
 
+    // close socket fd
     void close() {
         if (sockfd_ >= 0) {
             ::close(sockfd_);
@@ -121,4 +123,4 @@ public:
 
 } // namespace nanonet
 
-#endif // __UDP_SOCKET_H__
+#endif // __UDP_SOCKET_HPP__
