@@ -13,8 +13,8 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-#include "nanonet/nanotype.h"
-#include "nanonet/host_port.h"
+#include "nanonet/nano_def.h"
+#include "nanonet/addr_port.h"
 
 namespace nanonet {
 
@@ -27,9 +27,9 @@ public:
 
     virtual ~UdpServer();
 
-    std::pair<HostPort, std::string> wait();
+    std::pair<AddrPort, std::string> wait();
 
-    ssize_t send(HostPort hostPort, std::string messages);
+    ssize_t send(AddrPort hostPort, std::string messages);
 
 }; // class UdpServer
 

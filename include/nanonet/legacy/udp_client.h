@@ -6,13 +6,14 @@
 #include <strings.h>
 #include <string.h>
 
-#include "nanonet/nanotype.h"
+#include "nanonet/nano_def.h"
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <cassert>
+#include <utility>
 
 namespace nanonet {
 
