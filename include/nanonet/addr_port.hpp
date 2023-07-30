@@ -1,18 +1,23 @@
-// addr_port.h
+// addr_port.hpp
 
 #pragma once
-#ifndef __ADDR_PORT_H__
-#define __ADDR_PORT_H__
+#ifndef __ADDR_PORT_HPP__
+#define __ADDR_PORT_HPP__
 
-#include <stdexcept>
-#include <string>
+// nanonet
+#include "nanonet/nano_def.hpp"
 
-#include <cstdint>
+// Linux
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#include "nanonet/nano_def.h"
+// C
+#include <cassert>
+#include <cstdint>
+
+// C++
+#include <string>
 
 namespace nanonet {
 
@@ -34,29 +39,31 @@ public:
 
     // get address (network byte order)
     inline addr_t getNetAddr() const { return addr; }
+
     // get address (byte order address)
     inline addr_t getAddr() const { return ntohl(addr); }
 
     // get port (network byte order)
     inline port_t getNetPort() const { return port; }
+
     // get port (host byte order)
     inline port_t getPort() const { return ntohs(port); }
 
     // set address (from network byte order)
     inline void setNetAddr(addr_t addr) { this->addr = addr; }
+
     // set address (from host byte order)
     inline void setAddr(addr_t addr) { this->addr = htonl(addr); }
+
     // set address by string (from host byte order)
     inline void setAddr(std::string strAddr) {
-        addr_t addr = (addr_t)inet_addr(strAddr.c_str());
-        if (addr == INADDR_NONE)
-            throw std::invalid_argument("invalid address: " + strAddr);
-        else
-            this->addr = addr;
+        addr = (addr_t)inet_addr(strAddr.c_str());
+        assert(addr != INADDR_NONE);
     }
 
     // set port (from network byte order)
     inline void setNetPort(port_t port) { this->port = port; }
+
     // set port (from host byte order)
     inline void setPort(port_t port) { this->port = htons(port); }
 
@@ -78,4 +85,4 @@ public:
 
 } // namespace nanonet
 
-#endif // __IPPORT_H__
+#endif // __IPPORT_HPP__

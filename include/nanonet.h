@@ -2,13 +2,9 @@
 #ifndef __NANONET_H__
 #define __NANONET_H__
 
-#include "nanonet/udp_packet.h"
-#include "nanonet/udp_socket.h"
-
-// legacy
-// #include "nanonet/udp_client.h"
-// #include "nanonet/udp_server.h"
-
-#include "nanonet/addr_port.h"
+#include "nanonet/nano_def.hpp"
+#include "nanonet/addr_port.hpp"
+#include "nanonet/udp_socket.hpp"
+#include "nanonet/udp_packet.hpp"
 
 #endif // __NANONET_H__
