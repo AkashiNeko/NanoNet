@@ -35,7 +35,7 @@ public:
     // construct from address and port (network byte order)
     AddrPort(addr_t addr, port_t port) :addr(addr), port(port) {}
 
-    AddrPort(std::string ip, port_t port) :addr(0), port(htons(port)) { this->setAddr(ip); }
+    AddrPort(std::string ip, port_t port) :addr((addr_t)inet_addr(ip.c_str())), port(htons(port)) {}
 
     // get address (network byte order)
     inline addr_t getNetAddr() const { return addr; }

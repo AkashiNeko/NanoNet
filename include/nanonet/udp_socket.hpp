@@ -31,13 +31,13 @@ class UdpSocket {
     // local address
     struct sockaddr_in local_{};
     // target address
-    struct sockaddr_in target_{};
+    struct sockaddr_in remote_{};
 
 public:
 
     // constructor (not bind)
     UdpSocket()
-        : sockfd_(-1), local_({}), target_({}) {
+        : sockfd_(-1), local_({}), remote_({}) {
         local_.sin_family = AF_INET;
         sockfd_ = socket(AF_INET, SOCK_DGRAM, 0);
         assert(sockfd_ >= 0);
@@ -66,26 +66,26 @@ public:
     }
 
     // set target
-    void target(AddrPort addrPort) {
+    void remote(AddrPort addrPort) {
         assert(sockfd_ >= 0);
         // set ip and port of the target
-        target_.sin_family = AF_INET;
-        target_.sin_port = addrPort.getNetPort();
-        target_.sin_addr.s_addr = addrPort.getNetAddr();
+        remote_.sin_family = AF_INET;
+        remote_.sin_port = addrPort.getNetPort();
+        remote_.sin_addr.s_addr = addrPort.getNetAddr();
     }
 
     // set target from address and port
-    void target(std::string ip, port_t port) {
-        this->target({ip, port});
+    void remote(std::string ip, port_t port) {
+        this->remote({ip, port});
     }
 
     // send data
     int send(UdpPacket packet) {
         assert(sockfd_ >= 0);
-        std::string ip = inet_ntoa(target_.sin_addr);
-        auto port = ntohs(target_.sin_port);
+        std::string ip = inet_ntoa(remote_.sin_addr);
+        auto port = ntohs(remote_.sin_port);
         return (int)sendto(sockfd_, packet.data(), packet.size(),
-            0, (const struct sockaddr*)&target_, sizeof(target_));
+            0, (const struct sockaddr*)&remote_, sizeof(remote_));
     }
 
     int send(const char* data, size_t datalen) {
@@ -97,16 +97,20 @@ public:
     }
 
     // waiting to receive data from others
-    UdpPacket receive() {
+    UdpPacket receive(size_t bufSize = 4096) {
         assert(sockfd_ >= 0);
-        char buf[4096];
-        struct sockaddr_in remote{};
-        socklen_t socklen = sizeof(remote);
-        ssize_t len = recvfrom(sockfd_, buf, sizeof(buf) - 1, 0, (struct sockaddr*)&remote, &socklen);
+        socklen_t socklen = sizeof(remote_);
+
+        // new buffer
+        char* buf = new char[bufSize];
+        // receive data
+        ssize_t len = recvfrom(sockfd_, buf, sizeof(buf) - 1, 0, (struct sockaddr*)&remote_, &socklen);
         assert(len >= 0); // received successfully
         buf[len] = '\0';
-        AddrPort addrPort(remote.sin_addr.s_addr, remote.sin_port);
+        // build packet
         UdpPacket packet(buf, len);
+        delete[] buf;
+        AddrPort addrPort(remote_.sin_addr.s_addr, remote_.sin_port);
         packet.setAddrPort(addrPort);
         return packet;
     }
