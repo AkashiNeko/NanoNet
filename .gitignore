@@ -1,10 +1,7 @@
 .idea
 .vscode
-Makefile
+
 client.cpp
 server.cpp
 client
 server
-libnanonet.so
-lib/
-bin/
