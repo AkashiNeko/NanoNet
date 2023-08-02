@@ -48,17 +48,23 @@ public:
             this->close();
     }
 
-    inline int receive(char *buf, size_t maxSize) {
+    inline size_t receive(char *buf, size_t maxSize) {
         assert(sockfd_ >= 0);
-        return (int)recv(sockfd_, buf, maxSize, 0);
+        size_t ret = recv(sockfd_, buf, maxSize, 0);
+        buf[ret] = '\0';
+        assert(ret >= 0);
+        return (size_t)ret;
     }
 
-    inline int send(const char* msg, size_t size) {
-        return (int)::send(sockfd_, msg, size, 0);
+    inline ssize_t send(const char* msg, size_t size) {
+        assert(sockfd_ >= 0);
+        ssize_t ret = ::send(sockfd_, msg, size, 0);
+        assert(ret >= 0);
+        return ret;
     }
 
-    inline int send(std::string msg) {
-        return (int)::send(sockfd_, msg.c_str(), msg.size(), 0);
+    inline ssize_t send(std::string msg) {
+        return this->send(msg.c_str(), msg.size());
     }
 
     inline void connect() {
