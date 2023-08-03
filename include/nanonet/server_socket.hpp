@@ -26,26 +26,32 @@ namespace nanonet {
 
 class ServerSocket {
     
+    // ServerSocket fd
     int server_fd_;
+    // local address
     struct sockaddr_in local_;
 
 public:
 
+    // constructor (port)
     ServerSocket(port_t port) {
         // any ip address (0.0.0.0)
         this->init(nullptr, port);
     }
 
+    // constructor (ip, port)
     ServerSocket(std::string ip, port_t port) {
         this->init(ip.c_str(), port);
     }
 
+    // destructor
     ~ServerSocket() {
         // close server socket
         if (server_fd_ >= 0)
             this->close();
     }
 
+    // init object
     inline void init(const char* ip, port_t port) {
         // socket
         server_fd_ = socket(AF_INET, SOCK_STREAM, 0);

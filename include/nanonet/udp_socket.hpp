@@ -106,7 +106,8 @@ public:
         // receive data
         ssize_t len = recvfrom(sockfd_, buf, sizeof(buf) - 1, 0, (struct sockaddr*)&remote_, &socklen);
         assert(len >= 0); // received successfully
-        buf[len] = '\0';
+        if (len < bufSize)
+            buf[len] = '\0';
         // build packet
         UdpPacket packet(buf, len);
         delete[] buf;
