@@ -52,7 +52,7 @@ public:
     }
 
     // constructor (bind ip and port)
-        UdpSocket(std::string ip, port_t port) :UdpSocket() {
+    UdpSocket(std::string ip, port_t port) :UdpSocket() {
         in_addr_t addr = local_.sin_addr.s_addr = inet_addr(ip.c_str());
         assert(addr != INADDR_NONE);
         local_.sin_port = htons(port);
@@ -61,12 +61,12 @@ public:
     }
 
     // destructor (close socket fd)
-    ~UdpSocket() {
+    virtual ~UdpSocket() {
         this->close();
     }
 
     // set target
-    void remote(AddrPort addrPort) {
+    inline void remote(AddrPort addrPort) {
         assert(sockfd_ >= 0);
         // set ip and port of the target
         remote_.sin_family = AF_INET;
@@ -75,34 +75,33 @@ public:
     }
 
     // set target from address and port
-    void remote(std::string ip, port_t port) {
+    inline void remote(std::string ip, port_t port) {
         this->remote({ip, port});
     }
 
     // send data
-    int send(UdpPacket packet) {
+    inline int send(const char* data, size_t datalen) {
         assert(sockfd_ >= 0);
-        std::string ip = inet_ntoa(remote_.sin_addr);
-        auto port = ntohs(remote_.sin_port);
-        return (int)sendto(sockfd_, packet.data(), packet.size(),
-            0, (const struct sockaddr*)&remote_, sizeof(remote_));
-    }
-
-    int send(const char* data, size_t datalen) {
-        return this->send(UdpPacket(data, datalen));
+        return (int)::sendto(sockfd_, data, datalen, 0,
+            (const struct sockaddr*)&remote_, sizeof(remote_));
     }
     
-    int send(const std::string str) {
-        return this->send(UdpPacket(str.c_str(), str.size()));
+    inline int send(const std::string str) {
+        return this->send(str.c_str(), str.size());
+    }
+
+    inline int sendto(AddrPort addrPort, const char* data, size_t datalen) {
+        assert(sockfd_ >= 0);
+        this->remote(addrPort);
+        return (int)::sendto(sockfd_, data, datalen, 0,
+            (const struct sockaddr*)&addrPort, sizeof(addrPort));
     }
 
     // waiting to receive data from others
-    UdpPacket receive(size_t bufSize = 4096) {
+    inline UdpPacket receive(char* buf, size_t bufSize) {
         assert(sockfd_ >= 0);
         socklen_t socklen = sizeof(remote_);
 
-        // new buffer
-        char* buf = new char[bufSize];
         // receive data
         ssize_t len = recvfrom(sockfd_, buf, sizeof(buf) - 1, 0, (struct sockaddr*)&remote_, &socklen);
         assert(len >= 0); // received successfully
@@ -110,14 +109,13 @@ public:
             buf[len] = '\0';
         // build packet
         UdpPacket packet(buf, len);
-        delete[] buf;
         AddrPort addrPort(remote_.sin_addr.s_addr, remote_.sin_port);
         packet.setAddrPort(addrPort);
         return packet;
     }
 
     // close socket fd
-    void close() {
+    inline void close() {
         if (sockfd_ >= 0) {
             ::close(sockfd_);
             sockfd_ = -1;

@@ -53,20 +53,10 @@ public:
     }
 
     // get addrport
-    inline AddrPort addrPort() const {
+    inline AddrPort getAddrPort() const {
         return addrPort_;
     }
 
-    // get addr
-    inline addr_t addr() const {
-        return addrPort_.getAddr();
-    }
-
-    // get port
-    inline port_t port() const {
-        return addrPort_.getPort();
-    }
-    
     // get data length
     inline size_t size() const {
         return dataSize_;
@@ -81,7 +71,8 @@ public:
     inline void setAddrPort(AddrPort newAddrPort) {
         addrPort_ = newAddrPort;
     }
-};
+
+}; // UdpPacket
 
 } // namespace nanonet
 
