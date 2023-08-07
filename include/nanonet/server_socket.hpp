@@ -62,7 +62,11 @@ public:
         local_.sin_addr.s_addr = ip ? inet_addr(ip) : INADDR_ANY;
         local_.sin_port = htons(port);
         assert(bind(server_fd_, (const struct sockaddr*)&local_, sizeof(local_)) >= 0);
-
+        
+        // start in the TIME_WAIT state
+        const int on = 1;
+        setsockopt(server_fd_, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)); 
+        
         // listen
         assert(listen(server_fd_, 20) >= 0);
     }
