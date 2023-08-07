@@ -34,20 +34,22 @@ class ServerSocket {
 private:
 
     // init object
-    inline void init(const char* ip, port_t port) {
+    inline void init(const char* ip, port_t port, bool setsockopt_) {
         // socket
         server_fd_ = socket(AF_INET, SOCK_STREAM, 0);
         assert(server_fd_ >= 0);
 
+        // start in the TIME_WAIT state
+        if (setsockopt_) {
+            const int on = 1;
+            setsockopt(server_fd_, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+        }
+        
         // bind
         local_.sin_family = AF_INET;
         local_.sin_addr.s_addr = ip ? inet_addr(ip) : INADDR_ANY;
         local_.sin_port = htons(port);
         assert(bind(server_fd_, (const struct sockaddr*)&local_, sizeof(local_)) >= 0);
-        
-        // start in the TIME_WAIT state
-        const int on = 1;
-        setsockopt(server_fd_, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)); 
         
         // listen
         assert(listen(server_fd_, 20) >= 0);
@@ -56,14 +58,14 @@ private:
 public:
 
     // constructor (port)
-    ServerSocket(port_t port) {
+    ServerSocket(port_t port, bool setsockopt = true) {
         // any ip address (0.0.0.0)
-        this->init(nullptr, port);
+        this->init(nullptr, port, setsockopt);
     }
 
     // constructor (ip, port)
-    ServerSocket(std::string ip, port_t port) {
-        this->init(ip.c_str(), port);
+    ServerSocket(std::string ip, port_t port, bool setsockopt = true) {
+        this->init(ip.c_str(), port, setsockopt);
     }
 
     // destructor
