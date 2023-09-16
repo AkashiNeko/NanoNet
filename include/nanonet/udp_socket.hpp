@@ -40,7 +40,7 @@ public:
     // constructor (not bind)
     udp_socket() :sockfd_(-1), local_({}), remote_({}) {
         local_.sin_family = AF_INET;
-        sockfd_ = socket(AF_INET, SOCK_DGRAM, 0);
+        sockfd_ = ::socket(AF_INET, SOCK_DGRAM, 0);
         assert(sockfd_ >= 0);
     }
 
@@ -75,8 +75,8 @@ public:
         assert(sockfd_ >= 0);
         // set ip and port of the target
         remote_.sin_family = AF_INET;
-        remote_.sin_port = addrPort.getNetPort();
-        remote_.sin_addr.s_addr = addrPort.getNetAddr();
+        remote_.sin_port = addrPort.net_port();
+        remote_.sin_addr.s_addr = addrPort.net_addr();
     }
 
 
@@ -113,7 +113,7 @@ public:
         socklen_t socklen = sizeof(remote_);
 
         // receive data & write to buffer
-        ssize_t len = recvfrom(sockfd_, buf, buf_size, 0, (struct sockaddr*)&remote_, &socklen);
+        ssize_t len = ::recvfrom(sockfd_, buf, buf_size, 0, (struct sockaddr*)&remote_, &socklen);
         
         // received successfully
         assert(len >= 0);
@@ -137,8 +137,7 @@ public:
         }
     }
 
-
-}; // class UdpSocket
+}; // class udp_socket
 
 } // namespace nanonet
 
