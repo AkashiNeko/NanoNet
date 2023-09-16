@@ -32,7 +32,7 @@ class Socket {
     struct sockaddr_in remote_;
 
     // server socket (when build Socket object)
-    friend class ServerSocket;
+    friend class server_socket;
 
 public:
 

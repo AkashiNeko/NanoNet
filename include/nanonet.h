@@ -14,6 +14,5 @@
 
 // UDP
 #include "nanonet/udp_socket.hpp"
-#include "nanonet/udp_packet.hpp"
 
 #endif // __NANONET_H__

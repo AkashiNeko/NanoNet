@@ -24,7 +24,7 @@
 
 namespace nanonet {
 
-class ServerSocket {
+class server_socket {
     
     // ServerSocket fd
     int server_fd_;
@@ -58,18 +58,18 @@ private:
 public:
 
     // constructor (port)
-    ServerSocket(port_t port, bool setsockopt = true) {
+    server_socket(port_t port, bool setsockopt = true) {
         // any ip address (0.0.0.0)
         this->init(nullptr, port, setsockopt);
     }
 
     // constructor (ip, port)
-    ServerSocket(std::string ip, port_t port, bool setsockopt = true) {
+    server_socket(std::string ip, port_t port, bool setsockopt = true) {
         this->init(ip.c_str(), port, setsockopt);
     }
 
     // destructor
-    ~ServerSocket() {
+    ~server_socket() {
         // close server socket
         if (server_fd_ >= 0)
             this->close();

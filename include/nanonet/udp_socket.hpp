@@ -7,7 +7,6 @@
 // nanonet
 #include "nanonet/nano_def.hpp"
 #include "nanonet/addr_port.hpp"
-#include "nanonet/udp_packet.hpp"
 
 // linux
 #include <sys/socket.h>
@@ -24,35 +23,39 @@
 
 namespace nanonet {
 
-class UdpSocket {
+class udp_socket {
 
     // socket fd
     int sockfd_;
+
     // local address
     struct sockaddr_in local_{};
+
     // target address
     struct sockaddr_in remote_{};
+
 
 public:
 
     // constructor (not bind)
-    UdpSocket()
-        : sockfd_(-1), local_({}), remote_({}) {
+    udp_socket() :sockfd_(-1), local_({}), remote_({}) {
         local_.sin_family = AF_INET;
         sockfd_ = socket(AF_INET, SOCK_DGRAM, 0);
         assert(sockfd_ >= 0);
     }
 
+
     // constructor (bind port)
-    UdpSocket(port_t port) :UdpSocket() {
+    udp_socket(port_t port) :udp_socket() {
         local_.sin_addr.s_addr = INADDR_ANY; // any ip address
         local_.sin_port = htons(port);
         int bind_ret = bind(sockfd_, (const sockaddr*)&local_, sizeof(local_));
         assert(bind_ret >= 0);
     }
 
+
     // constructor (bind ip and port)
-    UdpSocket(std::string ip, port_t port) :UdpSocket() {
+    udp_socket(std::string ip, port_t port) :udp_socket() {
         in_addr_t addr = local_.sin_addr.s_addr = inet_addr(ip.c_str());
         assert(addr != INADDR_NONE);
         local_.sin_port = htons(port);
@@ -60,13 +63,15 @@ public:
         assert(bind_ret >= 0);
     }
 
+
     // destructor (close socket fd)
-    virtual ~UdpSocket() {
+    virtual ~udp_socket() {
         this->close();
     }
 
+
     // set target
-    inline void remote(AddrPort addrPort) {
+    inline void remote(addr_port addrPort) {
         assert(sockfd_ >= 0);
         // set ip and port of the target
         remote_.sin_family = AF_INET;
@@ -74,10 +79,13 @@ public:
         remote_.sin_addr.s_addr = addrPort.getNetAddr();
     }
 
+
     // set target from address and port
     inline void remote(std::string ip, port_t port) {
+        // ip, port -> addr_port
         this->remote({ip, port});
     }
+
 
     // send data
     inline int send(const char* data, size_t datalen) {
@@ -85,34 +93,41 @@ public:
         return (int)::sendto(sockfd_, data, datalen, 0,
             (const struct sockaddr*)&remote_, sizeof(remote_));
     }
-    
+
     inline int send(const std::string str) {
+        // string -> const char*
         return this->send(str.c_str(), str.size());
     }
 
-    inline int sendto(AddrPort addrPort, const char* data, size_t datalen) {
+    inline int sendto(addr_port addrPort, const char* data, size_t datalen) {
         assert(sockfd_ >= 0);
         this->remote(addrPort);
         return (int)::sendto(sockfd_, data, datalen, 0,
             (const struct sockaddr*)&addrPort, sizeof(addrPort));
     }
 
+
     // waiting to receive data from others
-    inline UdpPacket receive(char* buf, size_t bufSize) {
+    inline addr_port receive(char* buf, size_t buf_size) {
         assert(sockfd_ >= 0);
         socklen_t socklen = sizeof(remote_);
 
-        // receive data
-        ssize_t len = recvfrom(sockfd_, buf, sizeof(buf) - 1, 0, (struct sockaddr*)&remote_, &socklen);
-        assert(len >= 0); // received successfully
-        if (len < bufSize)
+        // receive data & write to buffer
+        ssize_t len = recvfrom(sockfd_, buf, buf_size, 0, (struct sockaddr*)&remote_, &socklen);
+        
+        // received successfully
+        assert(len >= 0);
+
+        // truncate buffer
+        if (len < buf_size)
             buf[len] = '\0';
-        // build packet
-        UdpPacket packet(buf, len);
-        AddrPort addrPort(remote_.sin_addr.s_addr, remote_.sin_port);
-        packet.setAddrPort(addrPort);
-        return packet;
+        else
+            buf[buf_size - 1] = '\0';
+
+        // return ip and port
+        return addr_port(remote_.sin_addr.s_addr, remote_.sin_port);
     }
+
 
     // close socket fd
     inline void close() {
@@ -121,6 +136,7 @@ public:
             sockfd_ = -1;
         }
     }
+
 
 }; // class UdpSocket
 

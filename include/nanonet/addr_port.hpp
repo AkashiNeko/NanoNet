@@ -21,7 +21,7 @@
 
 namespace nanonet {
 
-class AddrPort {
+class addr_port {
 
     // IP Address (network byte order)
     addr_t addr;
@@ -30,12 +30,12 @@ class AddrPort {
 
 public:
     // default constructor
-    AddrPort() : addr(0), port(0) {}
+    addr_port() : addr(0), port(0) {}
 
     // construct from address and port (network byte order)
-    AddrPort(addr_t addr, port_t port) :addr(addr), port(port) {}
+    addr_port(addr_t addr, port_t port) :addr(addr), port(port) {}
 
-    AddrPort(std::string ip, port_t port) :addr((addr_t)inet_addr(ip.c_str())), port(htons(port)) {}
+    addr_port(std::string ip, port_t port) :addr((addr_t)inet_addr(ip.c_str())), port(htons(port)) {}
 
     // get address (network byte order)
     inline addr_t getNetAddr() const { return addr; }
@@ -77,7 +77,7 @@ public:
     }
 
     // to string "xxx.xxx.xxx.xxx:port"
-    std::string toString() const {
+    std::string to_string() const {
         return this->getStrAddr() + ":" + std::to_string(ntohs(port));
     }
 
