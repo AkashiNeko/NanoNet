@@ -3,11 +3,10 @@
 using namespace std;
 
 #include "nanonet.h"
-using namespace nanonet;
 
 int main() {
     // create a socket
-    udp_socket socket;
+    nanonet::udp_socket socket;
 
     // connect to remote
     socket.remote("127.0.0.1", 8888);
@@ -26,11 +25,11 @@ int main() {
         // send message to server
         socket.send(msg);
 
-        // quit ?
+        // quit?
         if (msg == "quit") break;
 
         // receive from server
-        addr_port remote = socket.receive(buf, 4095);
+        nanonet::addr_port remote = socket.receive(buf, 4095);
         std::cout << "server> " << buf << std::endl;
     
     } // while

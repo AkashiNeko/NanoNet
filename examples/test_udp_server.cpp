@@ -2,11 +2,10 @@
 #include <string>
 
 #include "nanonet.h"
-using namespace nanonet;
 
 int main() {
     // create a socket and bind the port
-    udp_socket socket(8888);
+    nanonet::udp_socket socket(8888);
 
     // receive buffer
     char buf[4096]{};
@@ -15,11 +14,17 @@ int main() {
     while (true) {
 
         // receive message from client
-        addr_port ipport = socket.receive(buf, 4095);
+        nanonet::addr_port ipport = socket.receive(buf, 4095);
 
         // get data
         std::string msg = buf;
-        std::cout << "client: " << msg << std::endl;
+        std::cout << "[" << ipport.to_string() << "]# " << msg << std::endl;
+
+        // client quit?
+        if (msg == "quit") {
+            std::cout << "client " << ipport.to_string() << " quit" << std::endl;
+            continue;
+        }
 
         // set remote client
         socket.remote(ipport);
