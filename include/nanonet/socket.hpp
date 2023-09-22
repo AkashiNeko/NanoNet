@@ -119,17 +119,15 @@ public:
     }
 
 
-    // get string remote address (xxx.xxx.xxx.xxx)
-    inline std::string remote_addr_str() {
-        char buffer[INET_ADDRSTRLEN];
-        const char* result = ::inet_ntop(AF_INET, &(remote_.sin_addr.s_addr), buffer, sizeof(remote_));
-        return result == nullptr ? std::string() : buffer;
-    }
-
-
     // get remote port
     inline port_t remote_port() {
         return ::ntohs(remote_.sin_port);
+    }
+
+
+    // get remote addr_port
+    inline addr_port remote_addrport() {
+        return {remote_.sin_addr.s_addr, remote_.sin_port};
     }
 
 }; // class socket
