@@ -2,7 +2,7 @@
 #include <cstring>
 #include <signal.h>
 
-#include "nanonet.h"
+#include "nanonet"
 
 int main() {
 
@@ -15,7 +15,7 @@ int main() {
 
     while (true) {
         // wait for a client connection
-        nanonet::socket sock = ss.accept();
+        nanonet::tcp_socket sock = ss.accept();
 
         // create a child process, the parent process continues to listen
         if (!fork()) {
@@ -34,15 +34,25 @@ int main() {
             while (true) {
 
                 // receive message from client
-                sock.receive(buf, 4096);
-                std::string msg = buf;
-                std::cout << "[" << remoteName << "]# " << msg << std::endl;
+                int recv_length = sock.receive(buf, 4096);
 
-                // client quit?
-                if (msg == "quit") {
-                    std::cout << "client " << remoteName << " closed" << std::endl;
+                // client process exits
+                if (recv_length == 0) {
+                    std::cout << "client " << remoteName << " exit" << std::endl;
                     break;
                 }
+
+                // get message from buf
+                std::string msg = buf;
+
+                // client sends a "quit" message
+                if (msg == "quit") {
+                    std::cout << "client " << remoteName << " quit" << std::endl;
+                    break;
+                }
+
+                // show message
+                std::cout << "[" << remoteName << "]# " << msg << std::endl;
 
                 // reply client
                 sock.send(msg);

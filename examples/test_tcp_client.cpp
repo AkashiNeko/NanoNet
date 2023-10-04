@@ -1,12 +1,12 @@
 #include <iostream>
 #include <string>
 
-#include "nanonet.h"
+#include "nanonet"
 
 int main() {
 
     // create a socket
-    nanonet::socket socket("127.0.0.1", 8888);
+    nanonet::tcp_socket socket("127.0.0.1", 8888);
 
     // connect to server
     socket.connect();
@@ -21,11 +21,12 @@ int main() {
         std::cout << "client> ";
         std::string msg;
         getline(std::cin, msg);
+        if (msg.empty()) continue;
 
         // send message to server
         socket.send(msg);
 
-        // quit?
+        // client quit
         if (msg == "quit") break;
 
         // receive from server

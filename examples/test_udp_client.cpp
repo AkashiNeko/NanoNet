@@ -2,7 +2,7 @@
 #include <string>
 using namespace std;
 
-#include "nanonet.h"
+#include "nanonet"
 
 int main() {
     // create a socket
@@ -21,11 +21,12 @@ int main() {
         std::cout << "client> ";
         std::string msg;
         getline(std::cin, msg);
+        if (msg.empty()) continue;
 
         // send message to server
         socket.send(msg);
 
-        // quit?
+        // client quit
         if (msg == "quit") break;
 
         // receive from server

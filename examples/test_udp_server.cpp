@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 
-#include "nanonet.h"
+#include "nanonet"
 
 int main() {
     // create a socket and bind the port
@@ -14,17 +14,18 @@ int main() {
     while (true) {
 
         // receive message from client
-        nanonet::addr_port ipport = socket.receive(buf, 4095);
+        auto ipport = socket.receive(buf, 4095);
 
-        // get data
+        // get message from buf
         std::string msg = buf;
-        std::cout << "[" << ipport.to_string() << "]# " << msg << std::endl;
 
-        // client quit?
+        // client sends a "quit" message
         if (msg == "quit") {
             std::cout << "client " << ipport.to_string() << " quit" << std::endl;
             continue;
         }
+
+        std::cout << "[" << ipport.to_string() << "]# " << msg << std::endl;
 
         // set remote client
         socket.remote(ipport);
