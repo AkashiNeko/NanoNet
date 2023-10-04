@@ -8,6 +8,8 @@ server
 
 wwwroot/
 
+test/
+
 udp_client
 udp_server
 tcp_client
