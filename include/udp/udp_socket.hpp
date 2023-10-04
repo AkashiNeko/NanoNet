@@ -5,8 +5,8 @@
 #define __UDP_SOCKET_HPP__
 
 // nanonet
-#include "nanonet/nano_def.hpp"
-#include "nanonet/addr_port.hpp"
+#include "utility/nano_def.hpp"
+#include "utility/addr_port.hpp"
 
 // linux
 #include <sys/socket.h>

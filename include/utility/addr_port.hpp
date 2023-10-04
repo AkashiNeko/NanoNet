@@ -5,7 +5,7 @@
 #define __ADDR_PORT_HPP__
 
 // nanonet
-#include "nanonet/nano_def.hpp"
+#include "utility/nano_def.hpp"
 
 // Linux
 #include <sys/socket.h>

@@ -5,9 +5,9 @@
 #define __SERVER_SOCKET_HPP__
 
 // nanonet
-#include "nanonet/nano_def.hpp"
-#include "nanonet/addr_port.hpp"
-#include "nanonet/socket.hpp"
+#include "utility/nano_def.hpp"
+#include "utility/addr_port.hpp"
+#include "tcp/tcp_socket.hpp"
 
 // linux
 #include <sys/socket.h>
@@ -81,8 +81,8 @@ public:
 
 
     // accept from client
-    socket accept() const {
-        socket socket; // result socket
+    tcp_socket accept() const {
+        tcp_socket socket; // result socket
         socklen_t socklen = sizeof(socket.remote_);
         // accept
         socket.sockfd_ = ::accept(server_fd_, (struct sockaddr*)&socket.remote_, &socklen);

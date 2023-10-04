@@ -1,12 +1,12 @@
-// socket.hpp
+// tcp_socket.hpp
 
 #pragma once
-#ifndef __SOCKET_HPP__
-#define __SOCKET_HPP__
+#ifndef __TCP_SOCKET_HPP__
+#define __TCP_SOCKET_HPP__
 
 // nanonet
-#include "nanonet/nano_def.hpp"
-#include "nanonet/addr_port.hpp"
+#include "utility/nano_def.hpp"
+#include "utility/addr_port.hpp"
 
 // linux
 #include <sys/socket.h>
@@ -23,7 +23,7 @@
 
 namespace nanonet {
 
-class socket {
+class tcp_socket {
     
     // socket fd
     int sockfd_;
@@ -37,13 +37,13 @@ class socket {
 public:
 
     // default constructor
-    socket() {
+    tcp_socket() {
         remote_.sin_family = AF_INET;
     }
 
 
     // client constructor
-    socket(std::string ip, int port) {
+    tcp_socket(std::string ip, int port) {
         sockfd_ = ::socket(AF_INET, SOCK_STREAM, 0);
         remote_.sin_family = AF_INET;
         remote_.sin_addr.s_addr = ::inet_addr(ip.c_str());
@@ -52,7 +52,7 @@ public:
 
 
     // destructor (close fd)
-    ~socket() {
+    ~tcp_socket() {
         if (sockfd_ >= 0)
             this->close();
     }
