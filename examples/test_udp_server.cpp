@@ -28,7 +28,7 @@ int main() {
         std::cout << "[" << ipport.to_string() << "]# " << msg << std::endl;
 
         // set remote client
-        socket.remote(ipport);
+        socket.set_remote(ipport);
 
         // reply client
         socket.send(msg);

@@ -71,8 +71,6 @@ public:
         // truncate buffer
         if (ret < buf_size)
             buf[ret] = '\0';
-        else
-            buf[buf_size - 1] = '\0';
 
         // returns the number of bytes receive
         return (size_t)ret;

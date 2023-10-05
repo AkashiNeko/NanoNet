@@ -71,7 +71,7 @@ public:
 
 
     // set target
-    inline void remote(addr_port addrPort) {
+    inline void set_remote(addr_port addrPort) {
         assert(sockfd_ >= 0);
         // set ip and port of the target
         remote_.sin_family = AF_INET;
@@ -81,9 +81,9 @@ public:
 
 
     // set target from address and port
-    inline void remote(std::string ip, port_t port) {
+    inline void set_remote(std::string ip, port_t port) {
         // ip, port -> addr_port
-        this->remote({ip, port});
+        this->set_remote({ip, port});
     }
 
 
@@ -94,14 +94,14 @@ public:
             (const struct sockaddr*)&remote_, sizeof(remote_));
     }
 
-    inline int send(const std::string str) {
+    inline int send(const std::string& str) {
         // string -> const char*
         return this->send(str.c_str(), str.size());
     }
 
     inline int sendto(addr_port addrPort, const char* data, size_t datalen) {
         assert(sockfd_ >= 0);
-        this->remote(addrPort);
+        this->set_remote(addrPort);
         return (int)::sendto(sockfd_, data, datalen, 0,
             (const struct sockaddr*)&addrPort, sizeof(addrPort));
     }

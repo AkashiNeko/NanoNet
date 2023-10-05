@@ -9,7 +9,7 @@ int main() {
     nanonet::udp_socket socket;
 
     // connect to remote
-    socket.remote("127.0.0.1", 8888);
+    socket.set_remote("127.0.0.1", 8888);
 
     // send buffer
     char buf[4096]{};

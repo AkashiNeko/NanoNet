@@ -15,4 +15,8 @@
 // UDP
 #include "udp/udp_socket.hpp"
 
+// HTTP
+#include "http/http_request.hpp"
+#include "http/requestor.hpp"
+
 #endif // __NANONET_H__
