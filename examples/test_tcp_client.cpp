@@ -6,10 +6,11 @@
 int main() {
 
     // create a socket
-    nanonet::tcp_socket socket("127.0.0.1", 8888);
+    nanonet::TCPSocket socket;
 
     // connect to server
-    socket.connect();
+    int ret = socket.connect("127.0.0.1", 8888);
+    assert(ret >= 0);
 
     // receive buffer
     char buf[4096];

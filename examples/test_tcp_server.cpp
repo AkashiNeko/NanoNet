@@ -1,76 +1,56 @@
 #include <iostream>
 #include <cstring>
-#include <signal.h>
 
 #include "nanonet"
 
 int main() {
 
-    // ignore the SIGCHLD signal, let the child process reap itself
-    signal(SIGCHLD, SIG_IGN);
-
     // create a server socket
-    nanonet::server_socket ss(8888);
+    nanonet::ServerSocket server("127.0.0.1", 8888);
     std::cout << "server start, wait for client.." << std::endl;
 
     while (true) {
         // wait for a client connection
-        nanonet::tcp_socket sock = ss.accept();
+        nanonet::TCPSocket socket = server.accept();
 
-        // create a child process, the parent process continues to listen
-        if (!fork()) {
+        // get remote addr & port
+        std::string remoteName = socket.getRemoteAddrPort().toString();
+        std::cout << "client " << remoteName << " connected" << std::endl;
 
-            // close the server socket of the child process
-            ss.close();
+        // receive buffer
+        char buf[4096]{};
 
-            // get remote ip & port
-            std::string remoteName = sock.remote_addrport().to_string();
-            std::cout << "client " << remoteName << " connected" << std::endl;
+        // cyclically receive message
+        while (true) {
 
-            // receive buffer
-            char buf[4096]{};
-
-            // cyclically receive message
-            while (true) {
-
-                // receive message from client
-                int recv_length = sock.receive(buf, 4096);
-
-                // client process exits
-                if (recv_length == 0) {
-                    std::cout << "client " << remoteName << " exit" << std::endl;
-                    break;
-                }
-
-                // get message from buf
-                std::string msg = buf;
-
-                // client sends a "quit" message
-                if (msg == "quit") {
-                    std::cout << "client " << remoteName << " quit" << std::endl;
-                    break;
-                }
-
-                // show message
-                std::cout << "[" << remoteName << "]# " << msg << std::endl;
-
-                // reply client
-                sock.send(msg);
+            // receive message from client
+            if (socket.receive(buf, 4096) == 0) {
+                std::cout << "client " << remoteName << " exit" << std::endl;
+                break;
             }
 
-            // close socket
-            sock.close();
+            // get message from buf
+            std::string msg = buf;
 
-            // child process exits
-            return 0;
+            // client sends a "quit" message
+            if (msg == "quit") {
+                std::cout << "client " << remoteName << " quit" << std::endl;
+                break;
+            }
+
+            // show message
+            std::cout << "[" << remoteName << "]# " << msg << std::endl;
+
+            // reply client
+            socket.send(msg);
         }
 
         // parent process closes the socket
-        sock.close();
+        socket.close();
     }
 
     // close the server socket
-    ss.close();
+    server.close();
 
     return 0;
 }

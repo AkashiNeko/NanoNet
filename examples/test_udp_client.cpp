@@ -1,15 +1,13 @@
 #include <iostream>
 #include <string>
-using namespace std;
-
-#include "nanonet"
+#include "udp/udp_socket.hpp"
 
 int main() {
     // create a socket
-    nanonet::udp_socket socket;
+    nanonet::UDPSocket socket;
 
     // connect to remote
-    socket.set_remote("127.0.0.1", 8888);
+    socket.setRemote("127.0.0.1", 8888);
 
     // send buffer
     char buf[4096]{};
@@ -30,7 +28,7 @@ int main() {
         if (msg == "quit") break;
 
         // receive from server
-        nanonet::addr_port remote = socket.receive(buf, 4095);
+        nanonet::AddrPort remote = socket.receive(buf, 4095);
         std::cout << "server> " << buf << std::endl;
     
     } // while

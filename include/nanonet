@@ -1,21 +1,25 @@
+// nanonet all
+
 #pragma once
 #ifndef __NANONET_H__
 #define __NANONET_H__
 
-// types
-#include "utility/nano_def.hpp"
-
-// ip address and port
+// utility
+#include "utility/addr.hpp"
+#include "utility/port.hpp"
 #include "utility/addr_port.hpp"
 
-// TCP
+// tcp
 #include "tcp/tcp_socket.hpp"
 #include "tcp/server_socket.hpp"
 
-// UDP
+// udp
 #include "udp/udp_socket.hpp"
 
-// HTTP
+// dns
+#include "dns/dns_query.hpp"
+
+// http
 #include "http/http_request.hpp"
 #include "http/requestor.hpp"
 

@@ -5,14 +5,9 @@
 #define __TCP_SOCKET_HPP__
 
 // nanonet
-#include "utility/nano_def.hpp"
 #include "utility/addr_port.hpp"
 
 // linux
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <unistd.h>
 
 // C
@@ -23,112 +18,102 @@
 
 namespace nanonet {
 
-class tcp_socket {
+class TCPSocket {
     
-    // socket fd
-    int sockfd_;
+    // socket
+    int sockfd;
 
-    // remote address
-    struct sockaddr_in remote_;
+    // remote
+    struct sockaddr_in remote;
 
-    // server socket (when build socket object)
-    friend class server_socket;
+    // server socket
+    friend class ServerSocket;
 
 public:
 
     // default constructor
-    tcp_socket() {
-        remote_.sin_family = AF_INET;
-    }
-
-
-    // client constructor
-    tcp_socket(std::string ip, int port) {
-        sockfd_ = ::socket(AF_INET, SOCK_STREAM, 0);
-        remote_.sin_family = AF_INET;
-        remote_.sin_addr.s_addr = ::inet_addr(ip.c_str());
-        remote_.sin_port = ::htons(port);
+    TCPSocket() :sockfd(-1), remote({}) {
+        sockfd = ::socket(AF_INET, SOCK_STREAM, 0);
+        assert(sockfd >= 0);
+        remote.sin_family = AF_INET;
     }
 
 
     // destructor (close fd)
-    ~tcp_socket() {
-        if (sockfd_ >= 0)
-            this->close();
+    ~TCPSocket() {
+        if (sockfd >= 0) this->close();
+    }
+
+
+    // connect to server
+    inline int connect(const Addr& addr, const Port& port) {
+        assert(sockfd >= 0);
+        remote.sin_addr.s_addr = addr.hton();
+        remote.sin_port = port.hton();
+        return ::connect(sockfd, (const struct sockaddr*)&remote, sizeof(remote));
+    }
+
+    inline int connect(const AddrPort& addrPort) {
+        return this->connect(addrPort.addr, addrPort.port);
+    }
+
+    inline int connect(const std::string& ip, const Port& port) {
+        return this->connect(Addr(ip), port);
+    }
+
+    inline int connect(const char* ip, const Port& port) {
+        return this->connect(Addr(ip), port);
     }
 
 
     // receive from remote
-    inline size_t receive(char *buf, size_t buf_size) {
+    inline size_t receive(char *buf, size_t buf_size) const {
         // assert
-        assert(sockfd_ >= 0);
-        assert(buf_size > 0);
+        assert(sockfd >= 0);
 
         // receive from remote
-        size_t ret = ::recv(sockfd_, buf, buf_size, 0);
-        assert(ret >= 0);
+        size_t ret = ::recv(sockfd, buf, buf_size, 0);
 
         // truncate buffer
-        if (ret < buf_size)
-            buf[ret] = '\0';
+        if (ret < buf_size) buf[ret] = 0;
 
         // returns the number of bytes receive
-        return (size_t)ret;
+        return ret;
     }
 
 
-    // send to remote (C string)
-    inline ssize_t send(const char* msg, size_t size) {
-        assert(sockfd_ >= 0);
+    // send to remote
+    inline ssize_t send(const char* msg, size_t size) const {
+        assert(sockfd >= 0);
 
         // send to remote
-        ssize_t ret = ::send(sockfd_, msg, size, 0);
+        ssize_t ret = ::send(sockfd, msg, size, 0);
         assert(ret >= 0);
 
         // returns the number of bytes sent
         return ret;
     }
 
-
-    // send to remote (C++ string)
-    inline ssize_t send(std::string msg) {
+    inline ssize_t send(std::string msg) const {
         return this->send(msg.c_str(), msg.size());
-    }
-
-
-    // connect to server
-    inline void connect() {
-        assert(::connect(sockfd_, (const struct sockaddr*)&remote_, sizeof(remote_)) >= 0);
     }
 
 
     // close socket
     inline void close() {
-        if (sockfd_ >= 0) {
-            ::close(sockfd_);
-            sockfd_ = -1;
+        if (sockfd >= 0) {
+            ::close(sockfd);
+            sockfd = -1;
         }
     }
 
 
-    // get remote address (uint32_t)
-    inline addr_t remote_addr() {
-        return ::ntohl(remote_.sin_addr.s_addr);
+    // get remote addrport
+    inline AddrPort getRemoteAddrPort() const {
+        return AddrPort(::ntohl(remote.sin_addr.s_addr), ::ntohs(remote.sin_port));
     }
 
-
-    // get remote port
-    inline port_t remote_port() {
-        return ::ntohs(remote_.sin_port);
-    }
-
-
-    // get remote addr_port
-    inline addr_port remote_addrport() {
-        return {remote_.sin_addr.s_addr, remote_.sin_port};
-    }
-
-}; // class socket
+}; // class TCPSocket
 
 } // namespace nanonet
 

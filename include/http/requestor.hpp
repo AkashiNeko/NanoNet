@@ -15,17 +15,19 @@ namespace nanonet {
 const int BUF_SIZE = 4096;
 
 class requestor {
+    static Addr dnsServer;
 public:
     static std::string send(http_request request, bool wait_respond = true) {
         std::string host = request.get_host();
         int slashPos = host.find(':');
-        port_t port = 80;
+        Port port = 80;
         if (slashPos != std::string::npos) {
-            port = static_cast<port_t>(std::stoi(host.substr(slashPos + 1)));
+            port.val = static_cast<in_port_t>(std::stoi(host.substr(slashPos + 1)));
             host = host.substr(0, slashPos);
         }
-        tcp_socket socket(host, port);
-        socket.connect();
+        Addr remote = Addr::isValid(host) ? Addr(host) : DNSQuery(dnsServer).resolve(host).addr;
+        TCPSocket socket;
+        socket.connect(remote, port);
         socket.send(request.to_string());
         if (wait_respond) {
             std::string ret;
@@ -41,6 +43,8 @@ public:
         return {};
     }
 }; // class requestor
+
+Addr requestor::dnsServer = "114.114.114.114";
 
 } // namespace nanonet
 

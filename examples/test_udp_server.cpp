@@ -1,11 +1,13 @@
 #include <iostream>
 #include <string>
-
-#include "nanonet"
+#include "udp/udp_socket.hpp"
 
 int main() {
-    // create a socket and bind the port
-    nanonet::udp_socket socket(8888);
+    // create a socket
+    nanonet::UDPSocket socket;
+
+    // bind the address & port
+    int br = socket.bind("127.0.0.1", 8888);
 
     // receive buffer
     char buf[4096]{};
@@ -14,21 +16,21 @@ int main() {
     while (true) {
 
         // receive message from client
-        auto ipport = socket.receive(buf, 4095);
+        auto addrPort = socket.receive(buf, 4095);
 
         // get message from buf
         std::string msg = buf;
 
         // client sends a "quit" message
         if (msg == "quit") {
-            std::cout << "client " << ipport.to_string() << " quit" << std::endl;
+            std::cout << "client " << addrPort.toString() << " quit" << std::endl;
             continue;
         }
 
-        std::cout << "[" << ipport.to_string() << "]# " << msg << std::endl;
+        std::cout << "[" << addrPort.toString() << "]# " << msg << std::endl;
 
         // set remote client
-        socket.set_remote(ipport);
+        socket.setRemote(addrPort);
 
         // reply client
         socket.send(msg);
