@@ -1,5 +1,6 @@
 // udp_socket.hpp
 
+#pragma once
 #ifndef __UDP_SOCKET_HPP__
 #define __UDP_SOCKET_HPP__
 

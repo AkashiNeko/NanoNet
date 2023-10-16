@@ -21,6 +21,7 @@
 
 // http
 #include "http/http_request.hpp"
+#include "http/http_respond.hpp"
 #include "http/requestor.hpp"
 
 #endif // __NANONET_H__

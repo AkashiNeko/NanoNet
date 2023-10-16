@@ -8,17 +8,18 @@
 
 #include "tcp/tcp_socket.hpp"
 #include "http/http_request.hpp"
+#include "http/http_respond.hpp"
 
 
 namespace nanonet {
 
 const int BUF_SIZE = 4096;
 
-class requestor {
+class Requestor {
     static Addr dnsServer;
 public:
-    static std::string send(http_request request, bool wait_respond = true) {
-        std::string host = request.get_host();
+    static HTTPRespond send(HTTPRequest request, bool wait_respond = true) {
+        std::string host = request.getHost();
         int slashPos = host.find(':');
         Port port = 80;
         if (slashPos != std::string::npos) {
@@ -28,7 +29,7 @@ public:
         Addr remote = Addr::isValid(host) ? Addr(host) : DNSQuery(dnsServer).resolve(host).addr;
         TCPSocket socket;
         socket.connect(remote, port);
-        socket.send(request.to_string());
+        socket.send(request.toString());
         if (wait_respond) {
             std::string ret;
             int recv_length = 0;
@@ -38,13 +39,13 @@ public:
                 recv_length = socket.receive(buffer, BUF_SIZE - 1);
                 ret += buffer;
             } while (recv_length == BUF_SIZE - 1);
-            return ret;
+            return HTTPRespond(ret);
         }
         return {};
     }
-}; // class requestor
+}; // class Requestor
 
-Addr requestor::dnsServer = "114.114.114.114";
+Addr Requestor::dnsServer = "114.114.114.114";
 
 } // namespace nanonet
 

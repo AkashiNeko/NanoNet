@@ -19,7 +19,7 @@
 
 namespace nanonet {
 
-class http_request {
+class HTTPRequest {
 
     // request line
     std::string method;
@@ -33,7 +33,7 @@ class http_request {
     // request body
     std::string body;
 
-    void separateHostAndPath(const std::string& url,std::string& host, std::string& path) {
+    void separateHostPath(const std::string& url,std::string& host, std::string& path) {
         // find the position of the double slash after the protocol
         size_t doubleSlashPos = url.find("//");
         if (doubleSlashPos != std::string::npos) {
@@ -55,13 +55,13 @@ class http_request {
     }
 
 public:
-    http_request(const std::string& method,
+    HTTPRequest(const std::string& method,
                  const std::string& url,
                  const std::string& version = "HTTP/1.1")
         :version(version) {
 
         // set request-URI
-        separateHostAndPath(url, this->host, this->path);
+        separateHostPath(url, this->host, this->path);
 
         // set request method
         for (auto& ch : method) {
@@ -75,20 +75,20 @@ public:
         headers["Host"] = host;
     }
 
-    void set_header(const std::string& name, const std::string& value) {
+    void setHeader(const std::string& name, const std::string& value) {
         headers[name] = value;
     }
 
-    void set_body(const std::string& body) {
+    void setBody(const std::string& body) {
         this->body = body;
         headers["Content-Length"] = std::to_string(body.size());
     }
 
-    std::string get_host() const {
+    std::string getHost() const {
         return this->host;
     }
 
-    std::string to_string() const {
+    std::string toString() const {
         std::string request = method + ' ' + path + ' ' + version + "\r\n";
 
         for (const auto& [name, value] : headers)

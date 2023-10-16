@@ -1,5 +1,6 @@
 // dns_query.hpp
 
+#pragma once
 #ifndef __DNS_QUERY_HPP__
 #define __DNS_QUERY_HPP__
 
@@ -34,7 +35,7 @@ class DNSQuery {
     Addr serverAddr;
     Port serverPort;
     
-    static std::unordered_map<std::string, Addr> cache;
+    static std::unordered_map<std::string, std::vector<DNSQueryResult>> cache;
 
 private:
 
@@ -56,34 +57,27 @@ private:
 
 public:
 
-
-
     DNSQuery(const Addr& serverAddr, const Port& serverPort = 53)
         :serverAddr(serverAddr), serverPort(serverPort) {}
 
-
-    inline std::vector<DNSQueryResult> resolveAll(const char* domain) {
-        std::vector<DNSQueryResult> results;
-        dnsQuery(domain, results);
+    inline const std::vector<DNSQueryResult>& resolveAll(const std::string& domain) {
+        auto& results = cache[domain];
+        if (results.empty()) {
+            dnsQuery(domain.c_str(), results);
+        }
         return results;
     }
 
-    inline std::vector<DNSQueryResult> resolveAll(const std::string& domain) {
+    inline const DNSQueryResult& resolve(const std::string& domain) {
         std::vector<DNSQueryResult> results;
         dnsQuery(domain.c_str(), results);
-        return results;
-    }
-
-    inline DNSQueryResult resolve(const char* domain) {
-        std::vector<DNSQueryResult> results;
-        dnsQuery(domain, results);
         return *min_element(results.begin(), results.end(), [](auto& a, auto& b) {
             return a.ttl < b.ttl;
         });
     }
 
-    inline DNSQueryResult resolve(const std::string& domain) {
-        return resolve(domain.c_str());
+    inline void cleanCache() {
+        cache.clear();
     }
 
 private:
@@ -108,7 +102,7 @@ private:
 
     int createQueries(Queries* question, const char* hostname) {
         memset(question, 0, sizeof(struct Queries));
-        question->name = (char*)malloc(strlen(hostname) + 2);
+        question->name = new char[strlen(hostname) + 2];
         question->length = strlen(hostname) + 2;
         question->qtype = htons(1);
         question->qclass = htons(1);
@@ -123,7 +117,7 @@ private:
             qname += len;
             token = strtok(NULL, delim);
         }
-        free(hostname_dup);
+        delete[] hostname_dup;
         return 0;
     }
 

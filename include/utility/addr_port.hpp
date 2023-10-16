@@ -1,5 +1,6 @@
 // addr_port.hpp
 
+#pragma once
 #ifndef __ADDR_PORT_HPP__
 #define __ADDR_PORT_HPP__
 
