@@ -9,7 +9,7 @@ int main() {
     nanonet::TCPSocket socket;
 
     // connect to server
-    int ret = socket.connect("127.0.0.1", 8888);
+    int ret = socket.connect("localhost", 8888);
     assert(ret >= 0);
 
     // receive buffer

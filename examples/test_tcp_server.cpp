@@ -6,7 +6,7 @@
 int main() {
 
     // create a server socket
-    nanonet::ServerSocket server("127.0.0.1", 8888);
+    nanonet::ServerSocket server(8888);
     std::cout << "server start, wait for client.." << std::endl;
 
     while (true) {

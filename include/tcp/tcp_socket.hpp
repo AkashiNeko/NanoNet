@@ -40,9 +40,7 @@ public:
 
 
     // destructor (close fd)
-    ~TCPSocket() {
-        if (sockfd >= 0) this->close();
-    }
+    ~TCPSocket() {}
 
 
     // connect to server

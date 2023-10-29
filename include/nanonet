@@ -16,12 +16,10 @@
 // udp
 #include "udp/udp_socket.hpp"
 
-// dns
-#include "dns/dns_query.hpp"
-
 // http
 #include "http/http_request.hpp"
 #include "http/http_respond.hpp"
 #include "http/requestor.hpp"
+#include "http/requests.hpp"
 
 #endif // __NANONET_H__

@@ -6,16 +6,16 @@ udp:udp_client udp_server
 tcp:tcp_client tcp_server
 
 udp_server:test_udp_server.cpp
-	g++ -o $@ $^ -I ../include -std=c++17 -O3 -static
+	g++ -o $@ $^ -I ../include -std=c++17 -O3
 
 udp_client:test_udp_client.cpp
-	g++ -o $@ $^ -I ../include -std=c++17 -O3 -static
+	g++ -o $@ $^ -I ../include -std=c++17 -O3
 
 tcp_server:test_tcp_server.cpp
-	g++ -o $@ $^ -I ../include -std=c++17 -O3 -static
+	g++ -o $@ $^ -I ../include -std=c++17 -O3
 
 tcp_client:test_tcp_client.cpp
-	g++ -o $@ $^ -I ../include -std=c++17 -O3 -static
+	g++ -o $@ $^ -I ../include -std=c++17 -O3
 
 .PHONY:clean
 clean:

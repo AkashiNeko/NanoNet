@@ -33,7 +33,7 @@ class HTTPRequest {
     // request body
     std::string body;
 
-    void separateHostPath(const std::string& url,std::string& host, std::string& path) {
+    void separateHostPath(const std::string& url, std::string& host, std::string& path) {
         // find the position of the double slash after the protocol
         size_t doubleSlashPos = url.find("//");
         if (doubleSlashPos != std::string::npos) {

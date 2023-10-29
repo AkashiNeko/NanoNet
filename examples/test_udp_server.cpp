@@ -7,7 +7,8 @@ int main() {
     nanonet::UDPSocket socket;
 
     // bind the address & port
-    int br = socket.bind("127.0.0.1", 8888);
+    int bindret = socket.bind(8888);
+    assert(bindret >= 0);
 
     // receive buffer
     char buf[4096]{};
