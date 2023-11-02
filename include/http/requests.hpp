@@ -10,14 +10,13 @@
 
 #include "http_request.hpp"
 #include "http_respond.hpp"
-#include "requestor.hpp"
 
 namespace nanonet {
 
 class Requests {
     static HTTPRespond methods(const char* method, const std::string& url, const std::string& body) {
         HTTPRequest httpRequest(method, url);
-        httpRequest.setBody(body);
+        if (!body.empty()) httpRequest.setBody(body);
         return send(httpRequest);
     }
 public:
@@ -38,8 +37,8 @@ public:
         // send
         socket.send(request.toString());
     
-        Log::debug << "[http] send http request to \'" << host
-            << ":" << port.toString() << '\'' << std::endl;
+        Log::debug << "[http] send http request to \'"
+            << host << '\'' << std::endl;
 
         const int BUF_SIZE = 4096;
         char buffer[BUF_SIZE]{};
@@ -49,8 +48,8 @@ public:
         int recv_length = socket.receive(buffer, BUF_SIZE - 1);
 
         if (recv_length < 0) {
-            Log::warn << "[http] receive from \'" << host << ":"
-                << port.toString() << "\' timeout" << std::endl;
+            Log::warn << "[http] receive from \'"
+                << host  << "\' timeout" << std::endl;
             socket.close();
             return {};
         } else if (recv_length == 0) {
@@ -60,17 +59,17 @@ public:
         }
 
         HTTPRespond respond;
-        respond.append(buffer);
-        while (recv_length > 0) {
-            socket.setReceiveTimeout(0, 100);
+        bool done = respond.append(buffer);
+        while (!done && recv_length > 0) {
+            socket.setReceiveTimeout(0, 200);
             recv_length = socket.receive(buffer, BUF_SIZE - 1);
             if (recv_length >= 0) buffer[recv_length] = '\0';
-            bool done = respond.append(buffer);
-            if (done) break;
+            done = respond.append(buffer);
         }
-        socket.close();
-        Log::debug << "[http] receive from \'" << host << ":" << port.toString()
+
+        Log::debug << "[http] receive from \'" << host
             << "\', text length = " << respond.size() << std::endl;
+        socket.close();
         return respond;
     }
     inline static HTTPRespond GET(const std::string& url, const std::string& body = "") {
