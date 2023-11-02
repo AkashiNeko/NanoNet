@@ -19,7 +19,7 @@
 
 namespace nanonet {
 
-class UDPSocket {
+class UdpSocket {
 
     // socket fd
     int sockfd;
@@ -34,7 +34,7 @@ class UDPSocket {
 public:
 
     // default constructor
-    UDPSocket() :sockfd(-1), local({}), remote({}) {
+    UdpSocket() :sockfd(-1), local({}), remote({}) {
         local.sin_family = AF_INET;
         sockfd = ::socket(AF_INET, SOCK_DGRAM, 0);
         assert(sockfd >= 0);
@@ -42,39 +42,33 @@ public:
 
 
     // destructor
-    ~UDPSocket() {
-        this->close();
-    }
+    ~UdpSocket() {}
 
 
     // bind (addr : port)
-    inline int bind(const Addr& addr, const Port& port) {
+    inline void bind(const Addr& addr, const Port& port) {
         local.sin_addr.s_addr = addr.hton();
         local.sin_port = port.hton();
-        int bindResult = ::bind(sockfd, (const sockaddr*)&local, sizeof(local));
-        if (bindResult >= 0) {
-            Log::debug << "bind AddrPort " << addr.toString() << ":" << port.toString()
-                << " return value = " << bindResult << std::endl;
-        } else {
-            Log::warn << "bind failed: return val = " << bindResult << std::endl;
+        if (::bind(sockfd, (const sockaddr*)&local, sizeof(local)) < 0) {
+            Log::error << "[udp] bind: " << strerror(errno) << std::endl;
+            exit(-1);
         }
-        return bindResult;
     }
 
-    inline int bind(const AddrPort& addrPort) {
-        return this->bind(addrPort.addr, addrPort.port);
+    inline void bind(const AddrPort& addrPort) {
+        this->bind(addrPort.addr, addrPort.port);
     }
 
-    inline int bind(const std::string& ip, const Port& port) {
-        return this->bind(Addr(ip), port);
+    inline void bind(const std::string& ip, const Port& port) {
+        this->bind(Addr(ip), port);
     }
 
-    inline int bind(const char* ip, const Port& port) {
-        return this->bind(Addr(ip), port);
+    inline void bind(const char* ip, const Port& port) {
+        this->bind(Addr(ip), port);
     }
 
-    inline int bind(const Port& port) {
-        return this->bind(Addr(INADDR_ANY), port);
+    inline void bind(const Port& port) {
+        this->bind(Addr(INADDR_ANY), port);
     }
 
 
@@ -98,29 +92,49 @@ public:
         this->setRemote(Addr(ip), port);
     }
 
-
-    // send data
-    inline int send(const char* data, size_t datalen) {
-        assert(sockfd >= 0);
-        return (int)::sendto(sockfd, data, datalen, 0,
-            (const struct sockaddr*)&remote, sizeof(remote));
+    int setReceiveTimeout(long seconds, long milliseconds = 0) {
+        struct timeval tm = {seconds, milliseconds * 1000};
+        return this->setsockopt(SOL_SOCKET, SO_RCVTIMEO, &tm, sizeof(struct timeval));
     }
 
-    inline int send(const std::string& str) {
+    // send data
+    inline int send(const char* data, size_t datalen) const {
+        if (sockfd < 0) {
+            Log::error << "[udp] socket is closed" << std::endl;
+            exit(-1);
+        }
+        ssize_t ret = ::sendto(sockfd, data, datalen, 0,
+            (const struct sockaddr*)&remote, sizeof(remote));
+        if (ret < 0) {
+            Log::warn << "[udp] send: " << strerror(errno) << std::endl;
+        } else if (ret == 0) {
+            Log::warn << "[udp] send: no data was sent";
+        }
+        return (int)ret;
+    }
+
+    inline int send(const std::string& str) const {
         return this->send(str.c_str(), str.size());
     }
 
 
     // waiting to receive data from others
     inline AddrPort receive(char* buffer, size_t bufSize) const {
-        assert(sockfd >= 0);
-        socklen_t socklen = sizeof(remote);
+        if (sockfd < 0) {
+            Log::error << "[udp] socket is closed" << std::endl;
+            exit(-1);
+        }
 
         // receive data & write to buffer
+        socklen_t socklen = sizeof(remote);
         ssize_t len = ::recvfrom(sockfd, buffer, bufSize, 0, (struct sockaddr*)&remote, &socklen);
         
         // received successfully
-        assert(len >= 0);
+        if (len < 0) {
+            Log::warn << "[udp] receive: " << strerror(errno) << std::endl;
+        } else if (len == 0) {
+            Log::warn << "[udp] receive: no data was received";
+        }
 
         // truncate buffer
         if (len < bufSize) buffer[len] = 0;
@@ -135,10 +149,17 @@ public:
         if (sockfd >= 0) {
             ::close(sockfd);
             sockfd = -1;
+            Log::debug << "[udp] connection closed" << std::endl;
+        } else {
+            Log::warn << "[udp] call close() repeatedly" << std::endl;
         }
     }
 
-}; // class UDPSocket
+    inline int setsockopt(int level, int optname, const void* optval, socklen_t optlen) const {
+        return ::setsockopt(sockfd, level, optname, optval, optlen);
+    }
+
+}; // class UdpSocket
 
 } // namespace nanonet
 

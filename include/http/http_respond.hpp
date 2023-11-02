@@ -14,7 +14,7 @@
 
 namespace nanonet {
 
-class HTTPRespond {
+class HttpRespond {
 
     // line
     std::string version;
@@ -35,7 +35,7 @@ class HTTPRespond {
 
 public:
 
-    HTTPRespond() {}
+    HttpRespond() {}
 
     bool append(const char* msg) {
         if (isOK) return true;
@@ -123,7 +123,7 @@ public:
         return std::move(result);
     }
 
-}; // class HTTPRespond
+}; // class HttpRespond
 
 } // namespace nanonet
 

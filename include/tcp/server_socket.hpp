@@ -96,6 +96,8 @@ class ServerSocket {
             ::close(serverSockfd);
             serverSockfd = -1;
             Log::debug << "[tcp] server closed" << std::endl;
+        } else {
+            Log::warn << "[tcp] call close() repeatedly" << std::endl;
         }
     }
 

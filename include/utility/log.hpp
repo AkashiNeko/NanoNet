@@ -38,11 +38,16 @@
 #define COLOR_LIGHT_CYAN       "\033[36;1m"
 #define COLOR_LIGHT_WHITE      "\033[37;1m"
 
+#define OUTPUT_STREAM std::cerr
+
 namespace nanonet {
 
 enum Levels { DEBUG, INFO, WARN, ERROR, CLOSE };
 
+class Logs;
+
 class LogStream {
+
     // enable display
     bool enabled;
 
@@ -53,18 +58,17 @@ public:
     // logStrean << msg
     template<class T>
     LogStream& operator<<(const T& msg) {
-        if (enabled) std::cout << msg;
+        if (enabled) OUTPUT_STREAM << msg;
         return *this;
     }
     LogStream& operator<<(std::ostream& (*pf)(std::ostream&)) {
-        if (enabled) pf(std::cout);
+        if (enabled) pf(OUTPUT_STREAM);
         return *this;
     }
 
 }; // class LogStream
 
 class Logs {
-
     // output level
     const Levels level;
 
@@ -88,9 +92,11 @@ private:
         time_t tt = std::chrono::system_clock::to_time_t(now);
         auto time_tm = localtime(&tt);
         // print head
-        printf(COLOR_LIGHT_CYAN "[%d-%02d-%02d %02d:%02d:%02d.%03d] %s ",
+        char buffer[64]{};
+        sprintf(buffer, COLOR_LIGHT_CYAN "[%d-%02d-%02d %02d:%02d:%02d.%03d] %s ",
             time_tm->tm_year + 1900, time_tm->tm_mon + 1, time_tm->tm_mday, time_tm->tm_hour,
             time_tm->tm_min, time_tm->tm_sec, (int)dis_millseconds, levels[level]);
+        OUTPUT_STREAM << buffer;
     }
 
 public:
@@ -108,15 +114,13 @@ public:
         bool display = (displayLevel <= level);
         if (display) {
             showLogHead(level);
-            pf(std::cout);
+            pf(OUTPUT_STREAM);
         }
         return LogStream(display);
     }
 
     // set filter
-    static void setDisplayLevel(Levels newLevel) {
-        displayLevel = newLevel;
-    }
+    inline static void setDisplayLevel(Levels newLevel) { displayLevel = newLevel; }
 
 }; // class Logs
 

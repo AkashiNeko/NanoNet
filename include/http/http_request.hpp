@@ -19,7 +19,7 @@
 
 namespace nanonet {
 
-class HTTPRequest {
+class HttpRequest {
     // request line
     std::string method;
     std::string path;
@@ -54,7 +54,7 @@ class HTTPRequest {
     }
 
    public:
-    HTTPRequest(const std::string& method, const std::string& url) {
+    HttpRequest(const std::string& method, const std::string& url) {
         // set request-URI
         separateHostPath(url, this->host, this->path);
 
@@ -94,7 +94,7 @@ class HTTPRequest {
         return std::move(request);
     }
 
-};  // class http_request
+};  // class HttpRequest
 
 }  // namespace nanonet
 

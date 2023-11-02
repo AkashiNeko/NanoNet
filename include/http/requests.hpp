@@ -14,20 +14,19 @@
 namespace nanonet {
 
 class Requests {
-    static HTTPRespond methods(const char* method, const std::string& url, const std::string& body) {
-        HTTPRequest httpRequest(method, url);
+    static HttpRespond methods(const char* method, const std::string& url, const std::string& body) {
+        HttpRequest httpRequest(method, url);
         if (!body.empty()) httpRequest.setBody(body);
         return send(httpRequest);
     }
 public:
-    static HTTPRespond send(HTTPRequest request) {
+    static HttpRespond send(HttpRequest request) {
         // get addr and port from request
         std::string host = request.getHost();
         int slashPos = host.find(':');
         Port port = 80;
-        if (slashPos != std::string::npos) {
+        if (slashPos != std::string::npos)
             port.val = static_cast<in_port_t>(std::stoi(host.substr(slashPos + 1)));
-        }
         Addr addr(host.substr(0, slashPos));
 
         // connnect to server
@@ -48,17 +47,20 @@ public:
         int recv_length = socket.receive(buffer, BUF_SIZE - 1);
 
         if (recv_length < 0) {
+            // receive failed
             Log::warn << "[http] receive from \'"
                 << host  << "\' timeout" << std::endl;
             socket.close();
             return {};
         } else if (recv_length == 0) {
+            // server not responding
             Log::warn << "[http] server not responding" << std::endl;
             socket.close();
             return {};
         }
 
-        HTTPRespond respond;
+        HttpRespond respond;
+        buffer[recv_length] = '\0';
         bool done = respond.append(buffer);
         while (!done && recv_length > 0) {
             socket.setReceiveTimeout(0, 200);
@@ -72,31 +74,31 @@ public:
         socket.close();
         return respond;
     }
-    inline static HTTPRespond GET(const std::string& url, const std::string& body = "") {
+    inline static HttpRespond GET(const std::string& url, const std::string& body = "") {
         return methods("GET", url, body);
     }
-    inline static HTTPRespond HEAD(const std::string& url, const std::string& body = "") {
+    inline static HttpRespond HEAD(const std::string& url, const std::string& body = "") {
         return methods("HEAD", url, body);
     }
-    inline static HTTPRespond POST(const std::string& url, const std::string& body = "") {
+    inline static HttpRespond POST(const std::string& url, const std::string& body = "") {
         return methods("POST", url, body);
     }
-    inline static HTTPRespond PUT(const std::string& url, const std::string& body = "") {
+    inline static HttpRespond PUT(const std::string& url, const std::string& body = "") {
         return methods("PUT", url, body);
     }
-    inline static HTTPRespond DELETE(const std::string& url, const std::string& body = "") {
+    inline static HttpRespond DELETE(const std::string& url, const std::string& body = "") {
         return methods("DELETE", url, body);
     }
-    inline static HTTPRespond CONNECT(const std::string& url, const std::string& body = "") {
+    inline static HttpRespond CONNECT(const std::string& url, const std::string& body = "") {
         return methods("CONNECT", url, body);
     }
-    inline static HTTPRespond OPTIONS(const std::string& url, const std::string& body = "") {
+    inline static HttpRespond OPTIONS(const std::string& url, const std::string& body = "") {
         return methods("OPTIONS", url, body);
     }
-    inline static HTTPRespond TRACE(const std::string& url, const std::string& body = "") {
+    inline static HttpRespond TRACE(const std::string& url, const std::string& body = "") {
         return methods("TRACE", url, body);
     }
-    inline static HTTPRespond PATCH(const std::string& url, const std::string& body = "") {
+    inline static HttpRespond PATCH(const std::string& url, const std::string& body = "") {
         return methods("PATCH", url, body);
     }
 

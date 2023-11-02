@@ -4,7 +4,7 @@
 
 int main() {
     // create a socket
-    nanonet::UDPSocket socket;
+    nanonet::UdpSocket socket;
 
     // bind the address & port
     int bindret = socket.bind(8888);

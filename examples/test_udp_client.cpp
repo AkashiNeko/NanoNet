@@ -4,7 +4,7 @@
 
 int main() {
     // create a socket
-    nanonet::UDPSocket socket;
+    nanonet::UdpSocket socket;
 
     // connect to remote
     socket.setRemote("localhost", 8888);
