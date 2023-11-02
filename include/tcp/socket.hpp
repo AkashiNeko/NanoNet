@@ -1,11 +1,8 @@
-// tcp_socket.hpp
+// socket.hpp
 
 #pragma once
-#ifndef __TCP_SOCKET_HPP__
-#define __TCP_SOCKET_HPP__
-
-// nanonet
-#include "utility/addr_port.hpp"
+#ifndef __SOCKET_HPP__
+#define __SOCKET_HPP__
 
 // linux
 #include <unistd.h>
@@ -16,9 +13,12 @@
 // C++
 #include <string>
 
+// nanonet
+#include "utility/addr_port.hpp"
+
 namespace nanonet {
 
-class TCPSocket {
+class Socket {
     
     // socket
     int sockfd;
@@ -32,7 +32,7 @@ class TCPSocket {
 public:
 
     // default constructor
-    TCPSocket() :sockfd(-1), remote({}) {
+    Socket() :sockfd(-1), remote({}) {
         sockfd = ::socket(AF_INET, SOCK_STREAM, 0);
         assert(sockfd >= 0);
         remote.sin_family = AF_INET;
@@ -40,27 +40,33 @@ public:
 
 
     // destructor (close fd)
-    ~TCPSocket() {}
+    ~Socket() {}
 
 
     // connect to server
-    inline int connect(const Addr& addr, const Port& port) {
+    inline void connect(const Addr& addr, const Port& port) {
         assert(sockfd >= 0);
         remote.sin_addr.s_addr = addr.hton();
         remote.sin_port = port.hton();
-        return ::connect(sockfd, (const struct sockaddr*)&remote, sizeof(remote));
+        int connectResult = ::connect(sockfd, (const struct sockaddr*)&remote, sizeof(remote));
+        if (connectResult >= 0) {
+            Log::debug << "[tcp] connect to " << addr.toString() << ":" << port.toString() << " success" << std::endl;
+        } else {
+            Log::error << "[tcp] connect: " << strerror(errno) << std::endl;
+            exit(-1);
+        }
     }
 
-    inline int connect(const AddrPort& addrPort) {
-        return this->connect(addrPort.addr, addrPort.port);
+    inline void connect(const AddrPort& addrPort) {
+        this->connect(addrPort.addr, addrPort.port);
     }
 
-    inline int connect(const std::string& ip, const Port& port) {
-        return this->connect(Addr(ip), port);
+    inline void connect(const std::string& ip, const Port& port) {
+        this->connect(Addr(ip), port);
     }
 
-    inline int connect(const char* ip, const Port& port) {
-        return this->connect(Addr(ip), port);
+    inline void connect(const char* ip, const Port& port) {
+        this->connect(Addr(ip), port);
     }
 
 
@@ -77,6 +83,11 @@ public:
 
         // returns the number of bytes receive
         return ret;
+    }
+
+    int setReceiveTimeout(long seconds, long milliseconds) {
+        struct timeval tm = {seconds, milliseconds * 1000};
+        return this->setsockopt(SOL_SOCKET, SO_RCVTIMEO, &tm, sizeof(struct timeval));
     }
 
 
@@ -102,6 +113,7 @@ public:
         if (sockfd >= 0) {
             ::close(sockfd);
             sockfd = -1;
+            Log::debug << "[tcp] connection closed" << std::endl;
         }
     }
 
@@ -111,7 +123,11 @@ public:
         return AddrPort(::ntohl(remote.sin_addr.s_addr), ::ntohs(remote.sin_port));
     }
 
-}; // class TCPSocket
+    inline int setsockopt(int level, int optname, const void* optval, socklen_t optlen) {
+        return ::setsockopt(sockfd, level, optname, optval, optlen);
+    }
+
+}; // class Socket
 
 } // namespace nanonet
 

@@ -6,7 +6,7 @@
 
 // nanonet
 #include "utility/addr_port.hpp"
-#include "tcp/tcp_socket.hpp"
+#include "tcp/socket.hpp"
 
 // linux
 #include <unistd.h>
@@ -20,23 +20,24 @@
 namespace nanonet {
 
 class ServerSocket {
-    
     // server socket fd
     int serverSockfd;
 
     // local address
     struct sockaddr_in local;
 
-public:
-
+   public:
     // constructor (addr, port)
-    ServerSocket(const Addr& addr, const Port& port, int backlog = 20, bool setsockopt = true) {
+    ServerSocket(const Addr& addr, const Port& port, bool reuseAddr = true, int backlog = 100) {
         // socket
         serverSockfd = ::socket(AF_INET, SOCK_STREAM, 0);
-        assert(serverSockfd >= 0);
+        if (serverSockfd < 0) {
+            Log::error << "[tcp] socket: " << strerror(errno) << std::endl;
+            exit(-1);
+        }
 
         // set socket option
-        if (setsockopt) {
+        if (reuseAddr) {
             const int on = 1;
             ::setsockopt(serverSockfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
         }
@@ -45,51 +46,61 @@ public:
         local.sin_family = AF_INET;
         local.sin_addr.s_addr = addr.hton();
         local.sin_port = port.hton();
-        assert(::bind(serverSockfd, (const struct sockaddr*)&local, sizeof(local)) >= 0);
-        
+        if (::bind(serverSockfd, (const struct sockaddr*)&local, sizeof(local)) < 0) {
+            Log::error << "[tcp] bind: " << strerror(errno) << std::endl;
+            exit(-1);
+        }
+
         // listen
-        assert(::listen(serverSockfd, backlog) >= 0);
+        if (::listen(serverSockfd, backlog) < 0) {
+            Log::error << "[tcp] listen: " << strerror(errno) << std::endl;
+            exit(-1);
+        } else {
+            Log::debug << "[tcp] server listening to \'" << addr.toString() << ":"
+                << port.toString() << '\'' << std::endl;
+        }
     }
-    
-    ServerSocket(const std::string& ip, const Port& port, int backlog = 20, bool setsockopt = true)
-        :ServerSocket(Addr(ip), port, backlog, setsockopt) {}
 
-    ServerSocket(const char* ip, const Port& port, int backlog = 20, bool setsockopt = true)
-        :ServerSocket(Addr(ip), port, backlog, setsockopt) {}
+    ServerSocket(const std::string& ip, const Port& port, bool reuseAddr = true, int backlog = 100)
+        : ServerSocket(Addr(ip), port, reuseAddr, backlog) {}
 
-    ServerSocket(const Port& port, int backlog = 20, bool setsockopt = true)
-        :ServerSocket(Addr(INADDR_ANY), port, backlog, setsockopt) {}
+    ServerSocket(const char* ip, const Port& port, bool reuseAddr = true, int backlog = 100)
+        : ServerSocket(Addr(ip), port, reuseAddr, backlog) {}
 
+    ServerSocket(const Port& port, bool reuseAddr = true, int backlog = 100)
+        : ServerSocket(Addr(INADDR_ANY), port, reuseAddr, backlog) {}
 
     // destructor
-    ~ServerSocket() {
-        // close server socket
-        if (serverSockfd >= 0)
-            this->close();
-    }
-
+    ~ServerSocket() {}
 
     // accept from client
-    TCPSocket accept() {
-        TCPSocket socket; // result socket
+    Socket accept() {
+        Socket socket;  // result socket
         socklen_t socklen = sizeof(socket.remote);
         // accept
         socket.sockfd = ::accept(serverSockfd, (struct sockaddr*)&socket.remote, &socklen);
-        assert(socket.sockfd >= 0);
+        if (socket.sockfd >= 0) {
+            Log::debug << "[tcp] accept a connection from \'"
+                << Addr(ntohl(socket.remote.sin_addr.s_addr)).toString() << ":"
+                << Port(ntohs(socket.remote.sin_port)).toString() << '\'' << std::endl;
+        } else {
+            Log::error << "[tcp] accept: " << strerror(errno) << std::endl;
+            exit(-1);
+        }
         return socket;
     }
-
 
     // close server socket
     void close() {
         if (serverSockfd >= 0) {
             ::close(serverSockfd);
             serverSockfd = -1;
+            Log::debug << "[tcp] server closed" << std::endl;
         }
     }
 
-}; // class ServerSocket
+};  // class ServerSocket
 
-} // namespace nanonet
+}  // namespace nanonet
 
-#endif // __SERVER_SOCKET_HPP__
+#endif  // __SERVER_SOCKET_HPP__

@@ -5,29 +5,27 @@
 #define __HTTP_REQUEST_HPP__
 
 #include <iostream>
-#include <string>
 #include <map>
+#include <string>
 
-#define HTTP_GET        "GET"
-#define HTTP_POST       "POST"
-#define HTTP_PUT        "PUT"
-#define HTTP_DELETE     "DELETE"
-#define HTTP_HEAD       "HEAD"
-#define HTTP_OPTIONS    "OPTIONS"
-#define HTTP_TRACE      "TRACE"
-#define HTTP_CONNECT    "CONNECT"
+#define HTTP_GET "GET"
+#define HTTP_POST "POST"
+#define HTTP_PUT "PUT"
+#define HTTP_DELETE "DELETE"
+#define HTTP_HEAD "HEAD"
+#define HTTP_OPTIONS "OPTIONS"
+#define HTTP_TRACE "TRACE"
+#define HTTP_CONNECT "CONNECT"
 
 namespace nanonet {
 
 class HTTPRequest {
-
     // request line
     std::string method;
     std::string path;
-    std::string version;
 
     // request headers
-    std::map<std::string, std::string> headers;
+    std::map<const std::string, std::string> headers;
     std::string host;
 
     // request body
@@ -50,16 +48,13 @@ class HTTPRequest {
                 path = "/";
             }
         } else {
-            std::cerr << "Invalid URL." << std::endl;
+            Log::error << "[http] invalid URL: \'" << url << '\'' << std::endl;
+            exit(-1);
         }
     }
 
-public:
-    HTTPRequest(const std::string& method,
-                 const std::string& url,
-                 const std::string& version = "HTTP/1.1")
-        :version(version) {
-
+   public:
+    HTTPRequest(const std::string& method, const std::string& url) {
         // set request-URI
         separateHostPath(url, this->host, this->path);
 
@@ -70,9 +65,10 @@ public:
         }
 
         // set request headers
-        headers["Connection"] = "close";
+        headers["Connection"] = "keep-alive";
         headers["Content-Length"] = "0";
         headers["Host"] = host;
+        headers["User-Agent"] = "Nanonet";
     }
 
     void setHeader(const std::string& name, const std::string& value) {
@@ -89,7 +85,7 @@ public:
     }
 
     std::string toString() const {
-        std::string request = method + ' ' + path + ' ' + version + "\r\n";
+        std::string request = method + ' ' + path + ' ' + "HTTP/1.1\r\n";
 
         for (const auto& [name, value] : headers)
             request += name + ": " + value + "\r\n";
@@ -98,8 +94,8 @@ public:
         return std::move(request);
     }
 
-}; // class http_request
+};  // class http_request
 
-} // namespace nanonet
+}  // namespace nanonet
 
-#endif // __HTTP_REQUEST_HPP__
+#endif  // __HTTP_REQUEST_HPP__

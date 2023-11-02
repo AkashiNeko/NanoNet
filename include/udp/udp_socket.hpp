@@ -52,6 +52,12 @@ public:
         local.sin_addr.s_addr = addr.hton();
         local.sin_port = port.hton();
         int bindResult = ::bind(sockfd, (const sockaddr*)&local, sizeof(local));
+        if (bindResult >= 0) {
+            Log::debug << "bind AddrPort " << addr.toString() << ":" << port.toString()
+                << " return value = " << bindResult << std::endl;
+        } else {
+            Log::warn << "bind failed: return val = " << bindResult << std::endl;
+        }
         return bindResult;
     }
 

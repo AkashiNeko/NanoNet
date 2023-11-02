@@ -4,13 +4,13 @@
 #include "nanonet"
 
 int main() {
-
+    nanonet::Logs::setDisplayLevel(nanonet::DEBUG);
+    
     // create a socket
-    nanonet::TCPSocket socket;
+    nanonet::Socket socket;
 
     // connect to server
-    int ret = socket.connect("localhost", 8888);
-    assert(ret >= 0);
+    socket.connect("localhost", 8888);
 
     // receive buffer
     char buf[4096];

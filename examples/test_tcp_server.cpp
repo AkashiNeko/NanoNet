@@ -1,9 +1,9 @@
-#include <iostream>
 #include <cstring>
-
+#include <iostream>
 #include "nanonet"
 
 int main() {
+    nanonet::Logs::setDisplayLevel(nanonet::DEBUG);
 
     // create a server socket
     nanonet::ServerSocket server(8888);
@@ -11,7 +11,7 @@ int main() {
 
     while (true) {
         // wait for a client connection
-        nanonet::TCPSocket socket = server.accept();
+        nanonet::Socket socket = server.accept();
 
         // get remote addr & port
         std::string remoteName = socket.getRemoteAddrPort().toString();
@@ -22,7 +22,6 @@ int main() {
 
         // cyclically receive message
         while (true) {
-
             // receive message from client
             if (socket.receive(buf, 4096) == 0) {
                 std::cout << "client " << remoteName << " exit" << std::endl;

@@ -18,7 +18,7 @@ namespace nanonet {
 struct Port {
 public:
 
-    // port
+    // host byte order port
     in_port_t val;
 
 public:

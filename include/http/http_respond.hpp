@@ -16,46 +16,61 @@ namespace nanonet {
 
 class HTTPRespond {
 
+    // line
     std::string version;
     std::string statusCode;
     std::string statusMessage;
-    std::string text;
+
+    // headders
     std::unordered_map<std::string, std::string> headers;
+
+    // text
+    std::string body;
+
+    // check
+    std::string head;
+    size_t bodyStart = std::string::npos;
+    size_t contentLength = 0;
+    bool isValid = true;
 
 public:
 
     HTTPRespond() {}
 
-    HTTPRespond(const char* requestText) {
-        this->decode(requestText);
+    bool append(const char* msg) {
+        // check if the complete header has been received
+        if (bodyStart == std::string::npos) {
+            head += msg;
+            bodyStart = head.find("\r\n\r\n") + 4;
+            // header received in its entirety, decode the header
+            if (bodyStart != std::string::npos) {
+                // separate the head (line, headders)
+                body += head.substr(bodyStart);
+                body.resize(bodyStart - 2);
+
+                size_t pos = head.find("\r\n");
+                std::string respondLine = head.substr(0, pos);
+                size_t versionEnd = respondLine.find(' ');
+                this->version = respondLine.substr(0, versionEnd);
+                size_t statusCodeEnd = respondLine.find(' ', versionEnd + 1);
+                这里还没写完
+            }
+        } else {
+            // the complete header has been received
+            body += msg;
+        }
     }
 
-    HTTPRespond(const std::string& requestText)
-        :HTTPRespond(requestText.c_str()) {}
+    size_t size() const {
+        return body.size();
+    }
 
-    void decode(const char* requestText) {
-        std::istringstream iss(requestText);
-        std::string line;
-
-        std::getline(iss, line);
-        parseStatusLine(line);
-
-        while (std::getline(iss, line) && !line.empty()) {
-            if (line == "\r") break;
-            parseHeader(line);
-        }
-
-        std::stringstream ss;
-        ss << iss.rdbuf();
-        text = ss.str();
+    int getStatusCode() const {
+        return statusCode;
     }
 
     std::string getVersion() const {
         return version;
-    }
-
-    std::string getStatusCode() const {
-        return statusCode;
     }
 
     std::string getStatusMessage() const {
@@ -63,7 +78,7 @@ public:
     }
 
     std::string getText() const {
-        return text;
+        return body;
     }
 
     std::string getHeader(const std::string& headerName) const {
@@ -74,31 +89,14 @@ public:
     }
 
     std::string toString() const {
-        std::string result = version + ' ' + statusCode + ' ' + statusMessage + "\r\n";
+        std::string result = version + ' ' + std::to_string(statusCode) + ' ' + statusMessage + "\r\n";
 
         for (const auto& [name, value] : headers)
             result += name + ": " + value + "\r\n";
 
-        result += "\r\n" + text;
+        result += "\r\n" + body;
         return std::move(result);
     }
-
-private:
-    void parseStatusLine(const std::string& line) {
-        std::istringstream iss(line);
-        iss >> version >> statusCode;
-        std::getline(iss, statusMessage);
-    }
-
-    void parseHeader(const std::string& line) {
-        size_t colonPos = line.find(':');
-        if (colonPos != std::string::npos) {
-            std::string key = line.substr(0, colonPos);
-            std::string value = line.substr(colonPos + 2);
-            headers[key] = value;
-        }
-    }
-
 
 }; // class HTTPRespond
 

@@ -10,7 +10,7 @@
 #include "utility/addr_port.hpp"
 
 // tcp
-#include "tcp/tcp_socket.hpp"
+#include "tcp/socket.hpp"
 #include "tcp/server_socket.hpp"
 
 // udp

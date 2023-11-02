@@ -5,40 +5,44 @@
 #define __ADDR_HPP__
 
 // C
-#include <cstdint>
 #include <cassert>
+#include <cstdint>
 
 // C++
-#include <string>
 #include <regex>
+#include <string>
 
 // linux
-#include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <netinet/in.h>
+
+// nanonet
+#include <utility/log.hpp>
 
 namespace nanonet {
 
 struct Addr {
 public:
-
-    // ipv4 address
+    // host byte order addr (ipv4)
     in_addr_t val;
 
 public:
-
     // constructor
-    Addr(in_addr_t val = 0U) :val(val) {}
+    Addr(in_addr_t val = 0U)
+        : val(val) {}
 
-    Addr(const char* ip) {
-        if (isValid(ip)) {
-            this->val = ::ntohl(inet_addr(ip));
+    Addr(const char* host) {
+        if (isValid(host)) {
+            this->val = ::ntohl(inet_addr(host));
         } else {
-            this->val = getAddrByName(ip).val;
+            this->val = getAddrByName(host).val;
+            Log::debug << "[addr] getaddrinfo " << host << " -> " << this->toString() << std::endl;
         }
     }
 
-    Addr(const std::string& ip) :Addr(ip.c_str()) {}
+    Addr(const std::string& ip)
+        : Addr(ip.c_str()) {}
 
     // to string "xx.xx.xx.xx"
     std::string toString() const {
@@ -66,8 +70,8 @@ public:
         hints.ai_socktype = useTCP ? SOCK_STREAM : SOCK_DGRAM;
         status = getaddrinfo(domain, NULL, &hints, &result);
         if (status != 0) {
-            // std::cerr << "getaddrinfo error: " << gai_strerror(status) << std::endl;
-            return INADDR_ANY;
+            Log::error << "[addr] getaddrinfo: " << gai_strerror(status) << std::endl;
+            exit(-1);
         }
         in_addr_t addr = INADDR_ANY;
         for (p = result; p != NULL; p = p->ai_next) {
@@ -85,8 +89,8 @@ public:
         return Addr::getAddrByName(domain.c_str(), useTCP);
     }
 
-}; // struct Addr
+};  // struct Addr
 
-} // namespace nanonet
+}  // namespace nanonet
 
-#endif // __ADDR_HPP__
+#endif  // __ADDR_HPP__
