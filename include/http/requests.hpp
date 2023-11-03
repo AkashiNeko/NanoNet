@@ -5,39 +5,51 @@
 #define __REQUESTS_HPP__
 
 #include <iostream>
-#include <string>
 #include <map>
+#include <string>
 
-#include "http_request.hpp"
-#include "http_respond.hpp"
+#include "http/http_request.hpp"
+#include "http/http_respond.hpp"
+#include "utility/addr_port.hpp"
 
 namespace nanonet {
 
 class Requests {
+
+    // send method
     static HttpRespond methods(const char* method, const std::string& url, const std::string& body) {
         HttpRequest httpRequest(method, url);
-        if (!body.empty()) httpRequest.setBody(body);
+        if (!body.empty())
+            httpRequest.setBody(body);
         return send(httpRequest);
     }
+
 public:
-    static HttpRespond send(HttpRequest request) {
-        // get addr and port from request
-        std::string host = request.getHost();
+
+    // get addr and port from request
+    static AddrPort getAddrPortFromHost(const std::string& host) {
         int slashPos = host.find(':');
         Port port = 80;
         if (slashPos != std::string::npos)
             port.val = static_cast<in_port_t>(std::stoi(host.substr(slashPos + 1)));
         Addr addr(host.substr(0, slashPos));
+        return AddrPort(addr, port);
+    }
+
+    // send request
+    static HttpRespond send(HttpRequest request) {
+        std::string host = request.getHost();
+        AddrPort addrPort = getAddrPortFromHost(host);
 
         // connnect to server
         Socket socket;
-        socket.connect(addr, port);
+        socket.connect(addrPort);
 
         // send
         socket.send(request.toString());
-    
+
         Log::debug << "[http] send http request to \'"
-            << host << '\'' << std::endl;
+                   << host << '\'' << std::endl;
 
         const int BUF_SIZE = 4096;
         char buffer[BUF_SIZE]{};
@@ -49,7 +61,7 @@ public:
         if (recv_length < 0) {
             // receive failed
             Log::warn << "[http] receive from \'"
-                << host  << "\' timeout" << std::endl;
+                      << host << "\' timeout" << std::endl;
             socket.close();
             return {};
         } else if (recv_length == 0) {
@@ -65,15 +77,31 @@ public:
         while (!done && recv_length > 0) {
             socket.setReceiveTimeout(0, 200);
             recv_length = socket.receive(buffer, BUF_SIZE - 1);
-            if (recv_length >= 0) buffer[recv_length] = '\0';
+            if (recv_length >= 0)
+                buffer[recv_length] = '\0';
             done = respond.append(buffer);
         }
 
         Log::debug << "[http] receive from \'" << host
-            << "\', text length = " << respond.size() << std::endl;
+                   << "\', text length = " << respond.size() << std::endl;
         socket.close();
         return respond;
     }
+
+    // // download web file
+    // inline static long long downloadFile(const char* url,
+    //                                      const char* pathtofile,
+    //                                      const char* modes = "w") {
+    //     FILE* file = fopen(pathtofile, modes);
+    //     if (file == nullptr) {
+    //         Log::error << "[http] download - fopen: " << strerror(errno) << std::endl;
+    //         return -1LL;
+    //     }
+    //     // TODO
+    //     fclose(file);
+    // }
+
+    // methods
     inline static HttpRespond GET(const std::string& url, const std::string& body = "") {
         return methods("GET", url, body);
     }
@@ -102,8 +130,8 @@ public:
         return methods("PATCH", url, body);
     }
 
-}; // class Requests
+};  // class Requests
 
-} // namespace nanonet
+}  // namespace nanonet
 
-#endif // __REQUESTS_HPP__
+#endif  // __REQUESTS_HPP__

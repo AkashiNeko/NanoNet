@@ -90,27 +90,39 @@ public:
         return body.size();
     }
 
-    std::string getStatusCode() const {
+    const std::string& getStatusCode() const {
         return statusCode;
     }
 
-    std::string getVersion() const {
+    const std::string& getVersion() const {
         return version;
     }
 
-    std::string getStatusMessage() const {
+    const std::string& getStatusMessage() const {
         return statusMessage;
     }
 
-    std::string getText() const {
+    const std::string& getText() const {
         return body;
     }
 
-    std::string getHeader(const std::string& headerName) const {
-        if (headers.count(headerName) > 0) {
-            return headers.at(headerName);
+    std::string& getText() {
+        return body;
+    }
+
+    const std::string& getHeader(const std::string& headerName) const {
+        static std::string notFound = "header not found";
+        auto it = headers.find(headerName);
+        if (it != headers.end()) {
+            return it->second;
+        } else {
+            Log::warn << "header \'" << headerName << "\' not found" << std::endl;
+            return notFound;
         }
-        return std::string();
+    }
+
+    const std::unordered_map<std::string, std::string>& getHeaders() const {
+        return headers;
     }
 
     std::string toString() const {

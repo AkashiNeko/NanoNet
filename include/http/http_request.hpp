@@ -65,8 +65,7 @@ class HttpRequest {
         }
 
         // set request headers
-        headers["Connection"] = "keep-alive";
-        headers["Content-Length"] = "0";
+        headers["Accept"] = "*/*";
         headers["Host"] = host;
         headers["User-Agent"] = "Nanonet";
     }
