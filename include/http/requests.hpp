@@ -8,6 +8,7 @@
 #include <map>
 #include <string>
 
+#include "tcp/socket.hpp"
 #include "http/http_request.hpp"
 #include "http/http_respond.hpp"
 #include "utility/addr_port.hpp"
@@ -70,12 +71,12 @@ public:
             socket.close();
             return {};
         }
+        buffer[recv_length] = '\0';
 
         HttpRespond respond;
-        buffer[recv_length] = '\0';
         bool done = respond.append(buffer);
         while (!done && recv_length > 0) {
-            socket.setReceiveTimeout(0, 200);
+            socket.setReceiveTimeout(5, 0);
             recv_length = socket.receive(buffer, BUF_SIZE - 1);
             if (recv_length >= 0)
                 buffer[recv_length] = '\0';
@@ -87,19 +88,6 @@ public:
         socket.close();
         return respond;
     }
-
-    // // download web file
-    // inline static long long downloadFile(const char* url,
-    //                                      const char* pathtofile,
-    //                                      const char* modes = "w") {
-    //     FILE* file = fopen(pathtofile, modes);
-    //     if (file == nullptr) {
-    //         Log::error << "[http] download - fopen: " << strerror(errno) << std::endl;
-    //         return -1LL;
-    //     }
-    //     // TODO
-    //     fclose(file);
-    // }
 
     // methods
     inline static HttpRespond GET(const std::string& url, const std::string& body = "") {

@@ -23,6 +23,7 @@ class HttpRequest {
     // request line
     std::string method;
     std::string path;
+    std::string version = "HTTP/1.1";
 
     // request headers
     std::map<const std::string, std::string> headers;
@@ -65,18 +66,20 @@ class HttpRequest {
         }
 
         // set request headers
-        headers["Accept"] = "*/*";
-        headers["Host"] = host;
-        headers["User-Agent"] = "Nanonet";
+        this->headers["Accept"] = "*/*";
+        this->headers["Host"] = host;
+        this->headers["User-Agent"] = "Nanonet";
     }
 
     void setHeader(const std::string& name, const std::string& value) {
-        headers[name] = value;
+        this->headers[name] = value;
     }
 
     void setBody(const std::string& body) {
-        this->body = body;
-        headers["Content-Length"] = std::to_string(body.size());
+        if (!body.empty()) {
+            this->body = body;
+            headers["Content-Length"] = std::to_string(body.size());
+        }
     }
 
     std::string getHost() const {
@@ -84,7 +87,7 @@ class HttpRequest {
     }
 
     std::string toString() const {
-        std::string request = method + ' ' + path + ' ' + "HTTP/1.1\r\n";
+        std::string request = method + ' ' + path + ' ' + version + "\r\n";
 
         for (const auto& [name, value] : headers)
             request += name + ": " + value + "\r\n";
