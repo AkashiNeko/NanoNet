@@ -8,22 +8,13 @@
 #include <map>
 #include <string>
 
-#define HTTP_GET "GET"
-#define HTTP_POST "POST"
-#define HTTP_PUT "PUT"
-#define HTTP_DELETE "DELETE"
-#define HTTP_HEAD "HEAD"
-#define HTTP_OPTIONS "OPTIONS"
-#define HTTP_TRACE "TRACE"
-#define HTTP_CONNECT "CONNECT"
-
 namespace nanonet {
 
 class HttpRequest {
     // request line
     std::string method;
     std::string path;
-    std::string version = "HTTP/1.1";
+    std::string version = "HTTP/1.0";
 
     // request headers
     std::map<const std::string, std::string> headers;
@@ -32,10 +23,21 @@ class HttpRequest {
     // request body
     std::string body;
 
+    // https
+    bool useSSL = false;
+
     void separateHostPath(const std::string& url, std::string& host, std::string& path) {
         // find the position of the double slash after the protocol
         size_t doubleSlashPos = url.find("//");
         if (doubleSlashPos != std::string::npos) {
+            std::string protocol = url.substr(0, doubleSlashPos - 1);
+            if (protocol == "https") {
+                this->useSSL = true;
+            } else if (protocol != "http") {
+                Log::error << "[http] Unsupported protocols: \'"
+                    << protocol << '\'' << std::endl;
+                exit(-1);
+            }
             // find the position of the first slash after the double slash
             size_t slashPos = url.find('/', doubleSlashPos + 2);
             if (slashPos != std::string::npos) {
@@ -80,6 +82,10 @@ class HttpRequest {
             this->body = body;
             headers["Content-Length"] = std::to_string(body.size());
         }
+    }
+
+    bool usingSSL() const {
+        return useSSL;
     }
 
     std::string getHost() const {

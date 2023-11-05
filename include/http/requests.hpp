@@ -5,7 +5,6 @@
 #define __REQUESTS_HPP__
 
 #include <iostream>
-#include <map>
 #include <string>
 
 #include "tcp/socket.hpp"
@@ -28,9 +27,9 @@ class Requests {
 public:
 
     // get addr and port from request
-    static AddrPort getAddrPortFromHost(const std::string& host) {
+    static AddrPort getAddrPortFromHost(const std::string& host, bool useSSL = false) {
         int slashPos = host.find(':');
-        Port port = 80;
+        Port port = useSSL ? 443 : 80;
         if (slashPos != std::string::npos)
             port.val = static_cast<in_port_t>(std::stoi(host.substr(slashPos + 1)));
         Addr addr(host.substr(0, slashPos));
@@ -38,9 +37,9 @@ public:
     }
 
     // send request
-    static HttpRespond send(HttpRequest request) {
+    static HttpRespond send(HttpRequest request, int timeout = 10) {
         std::string host = request.getHost();
-        AddrPort addrPort = getAddrPortFromHost(host);
+        AddrPort addrPort = getAddrPortFromHost(host, request.usingSSL());
 
         // connnect to server
         Socket socket;
@@ -50,41 +49,42 @@ public:
         socket.send(request.toString());
 
         Log::debug << "[http] send http request to \'"
-                   << host << '\'' << std::endl;
+            << host << '\'' << std::endl;
 
         const int BUF_SIZE = 4096;
         char buffer[BUF_SIZE]{};
-        socket.setReceiveTimeout(20, 0);
+        socket.setReceiveTimeout(timeout, 0);
 
         // receive
-        int recv_length = socket.receive(buffer, BUF_SIZE - 1);
+        int receiveLength = socket.receive(buffer, BUF_SIZE - 1);
 
-        if (recv_length < 0) {
+        if (receiveLength < 0) {
             // receive failed
             Log::warn << "[http] receive from \'"
-                      << host << "\' timeout" << std::endl;
+                << host << "\' timeout" << std::endl;
             socket.close();
             return {};
-        } else if (recv_length == 0) {
+        } else if (receiveLength == 0) {
             // server not responding
             Log::warn << "[http] server not responding" << std::endl;
             socket.close();
             return {};
         }
-        buffer[recv_length] = '\0';
+        buffer[receiveLength] = '\0';
 
         HttpRespond respond;
-        bool done = respond.append(buffer);
-        while (!done && recv_length > 0) {
+        HttpAssembler assembler;
+        bool receiveDone = assembler.append(respond, buffer);
+        while (!receiveDone && receiveLength > 0) {
             socket.setReceiveTimeout(5, 0);
-            recv_length = socket.receive(buffer, BUF_SIZE - 1);
-            if (recv_length >= 0)
-                buffer[recv_length] = '\0';
-            done = respond.append(buffer);
+            receiveLength = socket.receive(buffer, BUF_SIZE - 1);
+            if (receiveLength >= 0)
+                buffer[receiveLength] = '\0';
+            receiveDone = assembler.append(respond, buffer);
         }
 
         Log::debug << "[http] receive from \'" << host
-                   << "\', text length = " << respond.size() << std::endl;
+            << "\', text length = " << respond.size() << std::endl;
         socket.close();
         return respond;
     }

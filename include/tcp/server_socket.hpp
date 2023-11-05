@@ -26,9 +26,9 @@ class ServerSocket {
     // local address
     struct sockaddr_in local;
 
-   public:
+public:
     // constructor (addr, port)
-    ServerSocket(const Addr& addr, const Port& port, bool reuseAddr = true, int backlog = 100) {
+    ServerSocket(const Addr& addr, const Port& port, bool reuseAddr = true, int backlog = 30) {
         // socket
         serverSockfd = ::socket(AF_INET, SOCK_STREAM, 0);
         if (serverSockfd < 0) {

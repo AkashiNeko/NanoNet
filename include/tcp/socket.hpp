@@ -86,6 +86,15 @@ public:
         }
     }
 
+    // close socket
+    inline void close() {
+        if (sockfd >= 0) {
+            ::close(sockfd);
+            sockfd = -1;
+            Log::debug << "[tcp] connection closed" << std::endl;
+        }
+    }
+
     int setReceiveTimeout(long seconds, long milliseconds = 0) const {
         struct timeval tm = {seconds, milliseconds * 1000};
         return this->setsockopt(SOL_SOCKET, SO_RCVTIMEO, &tm, sizeof(struct timeval));
@@ -115,7 +124,7 @@ public:
     }
 
     // receive from remote
-    inline int receive(char *buf, size_t buf_size) const {
+    inline int receive(char *buf, size_t buf_size) {
         if (sockfd < 0) {
             Log::error << "[tcp] socket is closed" << std::endl;
             exit(-1);
@@ -123,23 +132,18 @@ public:
 
         // receive from remote
         ssize_t ret = ::recv(sockfd, buf, buf_size, 0);
+        if (ret < 0) {
+            Log::error << "[tcp] receive: "
+                << strerror(errno) << std::endl;
+            this->close();
+            return ret;
+        }
 
         // truncate buffer
         if (ret < buf_size) buf[ret] = 0;
 
         // returns the number of bytes receive
         return (int)ret;
-    }
-
-    // close socket
-    inline void close() {
-        if (sockfd >= 0) {
-            ::close(sockfd);
-            sockfd = -1;
-            Log::debug << "[tcp] connection closed" << std::endl;
-        } else {
-            Log::warn << "[tcp] call close() repeatedly" << std::endl;
-        }
     }
 
 
