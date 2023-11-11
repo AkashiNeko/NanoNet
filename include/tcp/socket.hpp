@@ -55,9 +55,7 @@ public:
         remote.sin_addr.s_addr = addr.hton();
         remote.sin_port = port.hton();
         int connectResult = ::connect(sockfd, (const struct sockaddr*)&remote, sizeof(remote));
-        if (connectResult >= 0) {
-            Log::debug << "[tcp] connect to " << addr.toString() << ":" << port.toString() << " success" << std::endl;
-        } else {
+        if (connectResult < 0) {
             Log::error << "[tcp] connect: " << strerror(errno) << std::endl;
             exit(-1);
         }
@@ -91,7 +89,6 @@ public:
         if (sockfd >= 0) {
             ::close(sockfd);
             sockfd = -1;
-            Log::debug << "[tcp] connection closed" << std::endl;
         }
     }
 
@@ -127,20 +124,14 @@ public:
     inline int receive(char *buf, size_t buf_size) {
         if (sockfd < 0) {
             Log::error << "[tcp] socket is closed" << std::endl;
-            exit(-1);
+            return -1;
         }
 
         // receive from remote
         ssize_t ret = ::recv(sockfd, buf, buf_size, 0);
-        if (ret < 0) {
-            Log::error << "[tcp] receive: "
-                << strerror(errno) << std::endl;
-            this->close();
-            return ret;
-        }
 
         // truncate buffer
-        if (ret < buf_size) buf[ret] = 0;
+        if (ret >= 0 && ret < buf_size) buf[ret] = 0;
 
         // returns the number of bytes receive
         return (int)ret;

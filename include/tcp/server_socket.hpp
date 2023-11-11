@@ -79,11 +79,7 @@ public:
         socklen_t socklen = sizeof(socket.remote);
         // accept
         socket.sockfd = ::accept(serverSockfd, (struct sockaddr*)&socket.remote, &socklen);
-        if (socket.sockfd >= 0) {
-            Log::debug << "[tcp] accept a connection from \'"
-                << Addr(ntohl(socket.remote.sin_addr.s_addr)).toString() << ":"
-                << Port(ntohs(socket.remote.sin_port)).toString() << '\'' << std::endl;
-        } else {
+        if (socket.sockfd < 0) {
             Log::error << "[tcp] accept: " << strerror(errno) << std::endl;
             exit(-1);
         }
@@ -95,7 +91,6 @@ public:
         if (serverSockfd >= 0) {
             ::close(serverSockfd);
             serverSockfd = -1;
-            Log::debug << "[tcp] server closed" << std::endl;
         } else {
             Log::warn << "[tcp] call close() repeatedly" << std::endl;
         }

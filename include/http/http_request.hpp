@@ -56,7 +56,10 @@ class HttpRequest {
         }
     }
 
-   public:
+public:
+
+    HttpRequest() {}
+
     HttpRequest(const std::string& method, const std::string& url) {
         // set request-URI
         separateHostPath(url, this->host, this->path);
@@ -71,6 +74,36 @@ class HttpRequest {
         this->headers["Accept"] = "*/*";
         this->headers["Host"] = host;
         this->headers["User-Agent"] = "Nanonet";
+    }
+
+    inline size_t size() const {
+        return body.size();
+    }
+
+    void setMethod(const std::string& method) {
+        this->method = method;
+        for (char& c : this->method)
+            c = std::toupper(c);
+    }
+
+    const std::string& getMethod() const {
+        return this->method;
+    }
+
+    void setVersion(const std::string& version) {
+        this->version = version;
+    }
+
+    const std::string& getVersion() const {
+        return this->version;
+    }
+
+    void setPath(const std::string& path) {
+        this->path = path;
+    }
+
+    const std::string& getPath() const {
+        return this->path;
     }
 
     void setHeader(const std::string& name, const std::string& value) {
@@ -92,11 +125,39 @@ class HttpRequest {
         return this->host;
     }
 
+    const std::map<const std::string, std::string>& getHeaders() const {
+        return this->headers;
+    }
+
+    std::map<const std::string, std::string>& getHeaders() {
+        return this->headers;
+    }
+
+    // body
+    inline const std::string& getText() const {
+        return body;
+    }
+    inline std::string& getText() {
+        return body;
+    }
+    inline void setText(const std::string& newText) {
+        this->body = newText;
+    }
+    inline void setText(std::string&& newText) {
+        this->body = std::move(newText);
+    }
+    inline void appendText(const std::string& newText) {
+        this->body += newText;
+    }
+    inline void appendText(std::string&& newText) {
+        this->body += newText;
+    }
+
     std::string toString() const {
         std::string request = method + ' ' + path + ' ' + version + "\r\n";
 
-        for (const auto& [name, value] : headers)
-            request += name + ": " + value + "\r\n";
+        for (const auto& e : headers)
+            request += e.first + ": " + e.second + "\r\n";
 
         request += "\r\n" + body;
         return std::move(request);

@@ -77,6 +77,7 @@ public:
         bool receiveDone = assembler.append(respond, buffer);
         while (!receiveDone && receiveLength > 0) {
             socket.setReceiveTimeout(5, 0);
+            buffer[0] = '\0';
             receiveLength = socket.receive(buffer, BUF_SIZE - 1);
             if (receiveLength >= 0)
                 buffer[receiveLength] = '\0';

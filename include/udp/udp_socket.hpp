@@ -149,7 +149,6 @@ public:
         if (sockfd >= 0) {
             ::close(sockfd);
             sockfd = -1;
-            Log::debug << "[udp] connection closed" << std::endl;
         } else {
             Log::warn << "[udp] call close() repeatedly" << std::endl;
         }

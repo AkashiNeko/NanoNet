@@ -32,7 +32,10 @@ class HttpRespond {
 
 public:
 
-    HttpRespond() {}
+    HttpRespond(const std::string& version = "HTTP/1.0",
+                const std::string& statusCode = "200",
+                const std::string& statusMessage = "OK")
+        : version(version), statusCode(statusCode), statusMessage(statusMessage) {}
 
     inline size_t size() const {
         return body.size();
@@ -117,8 +120,8 @@ public:
 
         std::string result = version + ' ' + statusCode + ' ' + statusMessage + "\r\n";
 
-        for (const auto& [name, value] : headers)
-            result += name + ": " + value + "\r\n";
+        for (const auto& e : headers)
+            result += e.first + ": " + e.second + "\r\n";
 
         result += "\r\n" + body;
         return std::move(result);

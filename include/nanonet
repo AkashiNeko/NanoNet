@@ -21,5 +21,6 @@
 #include "http/http_respond.hpp"
 #include "http/http_assembler.hpp"
 #include "http/requests.hpp"
+#include "http/web_server.hpp"
 
 #endif // __NANONET_H__
