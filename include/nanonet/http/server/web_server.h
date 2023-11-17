@@ -44,7 +44,7 @@ public:
 
     WebServer(const Addr& addr, const Port& port) :server(addr, port) {
         ::signal(SIGCHLD, SIG_IGN);
-        Log::info << "[http] web serber listening to "
+        info << "[http] web serber listening to "
             << addr.toString() << " port "
             << port.toString() << std::endl;
     }
@@ -72,31 +72,31 @@ public:
 
                 if (receiveLength < 0) {
                     // receive failed
-                    Log::warn << "[http] receive: " << strerror(errno) << std::endl;
+                    warn << "[http] receive: " << strerror(errno) << std::endl;
                     socket.close();
                     return {};
                 } else if (receiveLength == 0) {
                     // server not responding
-                    Log::warn << "[http] server not responding" << std::endl;
+                    warn << "[http] server not responding" << std::endl;
                     socket.close();
                     return {};
                 }
                 buffer[receiveLength] = '\0';
 
                 HttpRequest request;
-                HttpAssembler assembler;
-                bool receiveDone = assembler.append(request, buffer);
+                HttpAssembler<HttpRequest> assembler(request);
+                bool receiveDone = assembler.append(buffer);
                 while (!receiveDone && receiveLength > 0) {
                     socket.setReceiveTimeout(1, 0);
                     buffer[0] = '\0';
                     receiveLength = socket.receive(buffer, BUF_SIZE - 1);
                     if (receiveLength >= 0)
                         buffer[receiveLength] = '\0';
-                    receiveDone = assembler.append(request, buffer);
+                    receiveDone = assembler.append(buffer);
                 }
                 HttpRespond respond;
                 fillRespond(request, respond);
-                Log::info << "[http] receive from " << socket.getRemoteAddrPort().toString()
+                info << "[http] receive from " << socket.getRemoteAddrPort().toString()
                     << " - " << request.getPath() << std::endl;
                 socket.send(respond.toString());
                 socket.close();

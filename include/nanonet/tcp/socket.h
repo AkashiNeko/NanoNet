@@ -55,7 +55,7 @@ public:
 
     int setsockopt(int level, int optname, const void* optval, socklen_t optlen) const;
 
-    int setReceiveTimeout(long seconds, long milliseconds) const;
+    int setReceiveTimeout(long seconds, long milliseconds = 0) const;
 
     // send to remote
     int send(const char* msg, size_t size) const;

@@ -70,7 +70,7 @@ int Socket::setsockopt(int level, int optname, const void* optval, socklen_t opt
     return ::setsockopt(sockfd, level, optname, optval, optlen);
 }
 
-int Socket::setReceiveTimeout(long seconds, long milliseconds = 0) const {
+int Socket::setReceiveTimeout(long seconds, long milliseconds) const {
     struct timeval tm = {seconds, milliseconds * 1000};
     return this->setsockopt(SOL_SOCKET, SO_RCVTIMEO, &tm, sizeof(struct timeval));
 }

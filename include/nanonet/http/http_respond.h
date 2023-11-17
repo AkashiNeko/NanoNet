@@ -34,8 +34,7 @@ public:
 
     HttpRespond(const std::string& version = "HTTP/1.0",
                 const std::string& statusCode = "200",
-                const std::string& statusMessage = "OK")
-        : version(version), statusCode(statusCode), statusMessage(statusMessage) {}
+                const std::string& statusMessage = "OK");
 
     inline size_t size() const {
         return body.size();
@@ -90,42 +89,24 @@ public:
     }
 
     // headers
-    inline const std::string& getHeader(const std::string& headerName) const {
-        static std::string notFound = "header not found";
+    inline const std::string& getHeader(const std::string& headerName) {
         auto it = headers.find(headerName);
-        if (it != headers.end()) {
-            return it->second;
-        } else {
-            warn << "header \'" << headerName << "\' not found" << std::endl;
-            return notFound;
-        }
+        if (it == headers.end()) throw nullptr;
+        return it->second;
     }
     inline void setHeader(const std::string& key, const std::string& value) {
         headers[key] = value;
     }
-
     inline bool findHeader(const std::string& headerName) const {
         return this->headers.find(headerName) != this->headers.end();
     }
 
-    inline const std::unordered_map<std::string, std::string>& getHeaders() const {
+    inline std::unordered_map<std::string, std::string>& getHeaders() {
         return headers;
     }
 
     // to string
-    inline std::string toString() const {
-
-        if (version.empty() || statusCode.empty() || statusMessage.empty())
-            return "";
-
-        std::string result = version + ' ' + statusCode + ' ' + statusMessage + "\r\n";
-
-        for (const auto& e : headers)
-            result += e.first + ": " + e.second + "\r\n";
-
-        result += "\r\n" + body;
-        return std::move(result);
-    }
+    inline std::string toString() const;
 
 }; // class HttpRespond
 
