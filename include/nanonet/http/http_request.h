@@ -1,12 +1,14 @@
-// http_request.hpp
+// http_request.h
 
 #pragma once
-#ifndef __HTTP_REQUEST_HPP__
-#define __HTTP_REQUEST_HPP__
+#ifndef __HTTP_REQUEST_H__
+#define __HTTP_REQUEST_H__
 
 #include <iostream>
 #include <map>
 #include <string>
+
+#include "nanonet/utility/log.h"
 
 namespace nanonet {
 
@@ -34,7 +36,7 @@ class HttpRequest {
             if (protocol == "https") {
                 this->useSSL = true;
             } else if (protocol != "http") {
-                Log::error << "[http] Unsupported protocols: \'"
+                error << "[http] Unsupported protocols: \'"
                     << protocol << '\'' << std::endl;
                 exit(-1);
             }
@@ -51,7 +53,7 @@ class HttpRequest {
                 path = "/";
             }
         } else {
-            Log::error << "[http] invalid URL: \'" << url << '\'' << std::endl;
+            error << "[http] invalid URL: \'" << url << '\'' << std::endl;
             exit(-1);
         }
     }
@@ -167,4 +169,4 @@ public:
 
 }  // namespace nanonet
 
-#endif  // __HTTP_REQUEST_HPP__
+#endif  // __HTTP_REQUEST_H__

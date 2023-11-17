@@ -1,6 +1,6 @@
-// src/udp/udp_socket.cpp
+// udp/udp_socket.cpp
 
-#include "udp/udp_socket.hpp"
+#include "nanonet/udp/udp_socket.h"
 
 namespace nanonet {
 

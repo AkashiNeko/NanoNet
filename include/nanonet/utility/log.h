@@ -1,8 +1,8 @@
-// log.hpp
+// log.h
 
 #pragma once
-#ifndef __LOG_HPP__
-#define __LOG_HPP__
+#ifndef __LOG_H__
+#define __LOG_H__
 
 // C
 #include <cstdint>
@@ -79,4 +79,4 @@ extern Log error;
 
 } // namespace nanonet
 
-#endif // __LOG_HPP__
+#endif // __LOG_H__

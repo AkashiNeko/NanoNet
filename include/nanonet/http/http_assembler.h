@@ -1,14 +1,14 @@
-// http_assembler.hpp
+// http_assembler.h
 
 #pragma once
-#ifndef __HTTP_ASSEMBLER_HPP__
-#define __HTTP_ASSEMBLER_HPP__
+#ifndef __HTTP_ASSEMBLER_H__
+#define __HTTP_ASSEMBLER_H__
 
 #include <iostream>
 #include <string>
 
-#include "http/http_request.hpp"
-#include "http/http_respond.hpp"
+#include "nanonet/http/http_request.h"
+#include "nanonet/http/http_respond.h"
 
 namespace nanonet {
 
@@ -298,4 +298,4 @@ public:
 
 }  // namespace nanonet
 
-#endif  // __HTTP_ASSEMBLER_HPP__
+#endif  // __HTTP_ASSEMBLER_H__

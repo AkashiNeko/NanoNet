@@ -1,16 +1,16 @@
-// requests.hpp
+// requests.h
 
 #pragma once
-#ifndef __REQUESTS_HPP__
-#define __REQUESTS_HPP__
+#ifndef __REQUESTS_H__
+#define __REQUESTS_H__
 
 #include <iostream>
 #include <string>
 
-#include "tcp/socket.hpp"
-#include "http/http_request.hpp"
-#include "http/http_respond.hpp"
-#include "utility/addr_port.hpp"
+#include "nanonet/tcp/socket.h"
+#include "nanonet/http/http_request.h"
+#include "nanonet/http/http_respond.h"
+#include "nanonet/utility/addr_port.h"
 
 namespace nanonet {
 
@@ -31,7 +31,7 @@ public:
         int slashPos = host.find(':');
         Port port = useSSL ? 443 : 80;
         if (slashPos != std::string::npos)
-            port.val = static_cast<in_port_t>(std::stoi(host.substr(slashPos + 1)));
+            port = static_cast<in_port_t>(std::stoi(host.substr(slashPos + 1)));
         Addr addr(host.substr(0, slashPos));
         return AddrPort(addr, port);
     }
@@ -48,7 +48,7 @@ public:
         // send
         socket.send(request.toString());
 
-        Log::debug << "[http] send http request to \'"
+        debug << "[http] send http request to \'"
             << host << '\'' << std::endl;
 
         const int BUF_SIZE = 4096;
@@ -60,13 +60,13 @@ public:
 
         if (receiveLength < 0) {
             // receive failed
-            Log::warn << "[http] receive from \'"
+            warn << "[http] receive from \'"
                 << host << "\' timeout" << std::endl;
             socket.close();
             return {};
         } else if (receiveLength == 0) {
             // server not responding
-            Log::warn << "[http] server not responding" << std::endl;
+            warn << "[http] server not responding" << std::endl;
             socket.close();
             return {};
         }
@@ -84,7 +84,7 @@ public:
             receiveDone = assembler.append(respond, buffer);
         }
 
-        Log::debug << "[http] receive from \'" << host
+        debug << "[http] receive from \'" << host
             << "\', text length = " << respond.size() << std::endl;
         socket.close();
         return respond;
@@ -123,4 +123,4 @@ public:
 
 }  // namespace nanonet
 
-#endif  // __REQUESTS_HPP__
+#endif  // __REQUESTS_H__

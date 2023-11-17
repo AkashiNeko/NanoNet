@@ -1,8 +1,8 @@
-// http_respond.hpp
+// http_respond.h
 
 #pragma once
-#ifndef __HTTP_RESPOND_HPP__
-#define __HTTP_RESPOND_HPP__
+#ifndef __HTTP_RESPOND_H__
+#define __HTTP_RESPOND_H__
 
 // C
 #include <cassert>
@@ -13,7 +13,7 @@
 #include <sstream>
 
 // nanonet
-#include "utility/addr_port.hpp"
+#include "nanonet/utility/addr_port.h"
 
 namespace nanonet {
 
@@ -96,7 +96,7 @@ public:
         if (it != headers.end()) {
             return it->second;
         } else {
-            Log::warn << "header \'" << headerName << "\' not found" << std::endl;
+            warn << "header \'" << headerName << "\' not found" << std::endl;
             return notFound;
         }
     }
@@ -131,4 +131,4 @@ public:
 
 } // namespace nanonet
 
-#endif // __HTTP_RESPOND_HPP__
+#endif // __HTTP_RESPOND_H__

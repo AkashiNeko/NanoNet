@@ -1,8 +1,8 @@
-// addr.hpp
+// addr.h
 
 #pragma once
-#ifndef __ADDR_HPP__
-#define __ADDR_HPP__
+#ifndef __ADDR_H__
+#define __ADDR_H__
 
 // C
 #include <cassert>
@@ -18,7 +18,7 @@
 #include <netinet/in.h>
 
 // nanonet
-#include "utility/log.hpp"
+#include "nanonet/utility/log.h"
 
 namespace nanonet {
 
@@ -46,6 +46,11 @@ public:
 
     static Addr getAddrByName(const std::string& domain, bool useTCP = true);
 
+    inline Addr& operator=(in_addr_t val) {
+        this->setVal(val);
+        return *this;
+    }
+
     // host byte order -> network byte order
     inline in_addr_t hton() const {
         return ::htonl(this->val);
@@ -62,4 +67,4 @@ public:
 
 }  // namespace nanonet
 
-#endif  // __ADDR_HPP__
+#endif  // __ADDR_H__

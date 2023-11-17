@@ -1,11 +1,11 @@
-// udp_socket.hpp
+// udp_socket.h
 
 #pragma once
-#ifndef __UDP_SOCKET_HPP__
-#define __UDP_SOCKET_HPP__
+#ifndef __UDP_SOCKET_H__
+#define __UDP_SOCKET_H__
 
 // nanonet
-#include "utility/addr_port.hpp"
+#include "nanonet/utility/addr_port.h"
 
 // linux
 #include <sys/socket.h>
@@ -81,4 +81,4 @@ public:
 
 } // namespace nanonet
 
-#endif // __UDP_SOCKET_HPP__
+#endif // __UDP_SOCKET_H__

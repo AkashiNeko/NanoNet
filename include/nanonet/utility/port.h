@@ -1,8 +1,8 @@
-// port.hpp
+// port.h
 
 #pragma once
-#ifndef __PORT_HPP__
-#define __PORT_HPP__
+#ifndef __PORT_H__
+#define __PORT_H__
 
 // C
 #include <cstdint>
@@ -28,6 +28,11 @@ public:
     // to string
     std::string toString() const;
 
+    inline Port& operator=(in_port_t val) {
+        this->setVal(val);
+        return *this;
+    }
+
     // host byte order -> network byte order
     inline uint16_t hton() const {
         return ::htons(this->val);
@@ -45,4 +50,4 @@ public:
 
 } // namespace nanonet
 
-#endif // __PORT_HPP__
+#endif // __PORT_H__

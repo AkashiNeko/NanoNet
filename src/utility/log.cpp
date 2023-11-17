@@ -1,6 +1,6 @@
-// src/utility/log.cpp
+// utility/log.cpp
 
-#include "utility/log.hpp"
+#include "nanonet/utility/log.h"
 
 namespace nanonet {
 

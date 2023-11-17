@@ -1,8 +1,8 @@
-// socket.hpp
+// socket.h
 
 #pragma once
-#ifndef __SOCKET_HPP__
-#define __SOCKET_HPP__
+#ifndef __SOCKET_H__
+#define __SOCKET_H__
 
 // linux
 #include <unistd.h>
@@ -14,7 +14,7 @@
 #include <string>
 
 // nanonet
-#include "utility/addr_port.hpp"
+#include "nanonet/utility/addr_port.h"
 
 namespace nanonet {
 
@@ -73,4 +73,4 @@ public:
 
 } // namespace nanonet
 
-#endif // __SOCKET_HPP__
+#endif // __SOCKET_H__

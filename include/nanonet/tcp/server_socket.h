@@ -1,12 +1,12 @@
-// server_socket.hpp
+// server_socket.h
 
 #pragma once
-#ifndef __SERVER_SOCKET_HPP__
-#define __SERVER_SOCKET_HPP__
+#ifndef __SERVER_SOCKET_H__
+#define __SERVER_SOCKET_H__
 
 // nanonet
-#include "utility/addr_port.hpp"
-#include "tcp/socket.hpp"
+#include "nanonet/utility/addr_port.h"
+#include "nanonet/tcp/socket.h"
 
 // linux
 #include <unistd.h>
@@ -48,4 +48,4 @@ public:
 
 }  // namespace nanonet
 
-#endif  // __SERVER_SOCKET_HPP__
+#endif  // __SERVER_SOCKET_H__

@@ -1,6 +1,6 @@
-// src/tcp/socket.cpp
+// tcp/socket.cpp
 
-#include "tcp/socket.hpp"
+#include "nanonet/tcp/socket.h"
 
 namespace nanonet {
 

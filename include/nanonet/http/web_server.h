@@ -1,17 +1,17 @@
-// web_server.hpp
+// web_server.h
 
 #pragma once
-#ifndef __WEB_SERVER_HPP__
-#define __WEB_SERVER_HPP__
+#ifndef __WEB_SERVER_H__
+#define __WEB_SERVER_H__
 
 #include <signal.h>
 
-#include "utility/addr_port.hpp"
-#include "tcp/socket.hpp"
-#include "tcp/server_socket.hpp"
-#include "http/http_request.hpp"
-#include "http/http_respond.hpp"
-#include "http/http_assembler.hpp"
+#include "nanonet/utility/addr_port.h"
+#include "nanonet/tcp/socket.h"
+#include "nanonet/tcp/server_socket.h"
+#include "nanonet/http/http_request.h"
+#include "nanonet/http/http_respond.h"
+#include "nanonet/http/http_assembler.h"
 
 #include <string>
 #include <unordered_map>
@@ -110,4 +110,4 @@ public:
 
 } // namespace nanonet
 
-#endif // __WEB_SERVER_HPP__
+#endif // __WEB_SERVER_H__

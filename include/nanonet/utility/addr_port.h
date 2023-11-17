@@ -1,12 +1,12 @@
-// addr_port.hpp
+// addr_port.h
 
 #pragma once
-#ifndef __ADDR_PORT_HPP__
-#define __ADDR_PORT_HPP__
+#ifndef __ADDR_PORT_H__
+#define __ADDR_PORT_H__
 
 // nanonet
-#include "utility/addr.hpp"
-#include "utility/port.hpp"
+#include "nanonet/utility/addr.h"
+#include "nanonet/utility/port.h"
 
 // C
 #include <cassert>
@@ -49,4 +49,4 @@ public:
 
 } // namespace nanonet
 
-#endif // __ADDR_PORT_HPP__
+#endif // __ADDR_PORT_H__
