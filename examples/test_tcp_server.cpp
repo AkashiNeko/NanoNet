@@ -3,7 +3,6 @@
 #include "nanonet"
 
 int main() {
-    nanonet::Logs::setDisplayLevel(nanonet::DEBUG);
 
     // create a server socket
     nanonet::ServerSocket server(8888);

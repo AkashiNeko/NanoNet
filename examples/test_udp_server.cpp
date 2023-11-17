@@ -7,8 +7,7 @@ int main() {
     nanonet::UdpSocket socket;
 
     // bind the address & port
-    int bindret = socket.bind(8888);
-    assert(bindret >= 0);
+    socket.bind(8888);
 
     // receive buffer
     char buf[4096]{};

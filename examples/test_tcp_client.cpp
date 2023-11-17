@@ -4,7 +4,6 @@
 #include "nanonet"
 
 int main() {
-    nanonet::Logs::setDisplayLevel(nanonet::DEBUG);
     
     // create a socket
     nanonet::Socket socket;

@@ -1,19 +1,9 @@
-.idea
-.vscode
-
-client.cpp
-server.cpp
-client
-server
+.idea/
+.vscode/
 
 wwwroot/
 
+build*/
+lib/
+bin/
 test/
-
-udp_client
-udp_server
-tcp_client
-tcp_server
-
-client_demo.cpp
-server_demo.cpp

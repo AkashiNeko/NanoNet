@@ -18,78 +18,47 @@
 #include <netinet/in.h>
 
 // nanonet
-#include <utility/log.hpp>
+#include "utility/log.hpp"
 
 namespace nanonet {
 
-struct Addr {
-public:
+class Addr {
+
     // host byte order addr (ipv4)
     in_addr_t val;
 
 public:
     // constructor
-    Addr(in_addr_t val = 0U)
-        : val(val) {}
+    Addr(in_addr_t val = 0U);
 
-    Addr(const char* host) {
-        if (isValid(host)) {
-            this->val = ::ntohl(inet_addr(host));
-        } else {
-            this->val = getAddrByName(host).val;
-            Log::debug << "[addr] getaddrinfo " << host << " -> " << this->toString() << std::endl;
-        }
-    }
+    Addr(const char* host);
 
-    Addr(const std::string& ip)
-        : Addr(ip.c_str()) {}
+    Addr(const std::string& ip);
 
     // to string "xx.xx.xx.xx"
-    std::string toString() const {
-        struct in_addr inAddr;
-        inAddr.s_addr = ::htonl(this->val);
-        char strAddr[INET_ADDRSTRLEN];
-        const char* result = ::inet_ntop(AF_INET, &(inAddr.s_addr), strAddr, sizeof(strAddr));
-        return result == nullptr ? std::string() : strAddr;
-    }
-
-    // host byte order -> network byte order
-    in_addr_t hton() const { return ::htonl(this->val); }
+    std::string toString() const;
 
     // is valid ipv4 address
-    static bool isValid(const std::string& ip) {
-        std::regex pattern("^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$");
-        return std::regex_match(ip, pattern);
-    }
+    static bool isValid(const std::string& ip);
 
     // DNS query
-    static Addr getAddrByName(const char* domain, bool useTCP = true) {
-        struct addrinfo hints = {}, *result, *p;
-        int status;
-        hints.ai_family = AF_INET;
-        hints.ai_socktype = useTCP ? SOCK_STREAM : SOCK_DGRAM;
-        status = getaddrinfo(domain, NULL, &hints, &result);
-        if (status != 0) {
-            Log::error << "[addr] getaddrinfo: " << gai_strerror(status) << std::endl;
-            exit(-1);
-        }
-        in_addr_t addr = INADDR_ANY;
-        for (p = result; p != NULL; p = p->ai_next) {
-            if (p->ai_family == AF_INET) {
-                struct sockaddr_in* ipv4 = (struct sockaddr_in*)p->ai_addr;
-                addr = ipv4->sin_addr.s_addr;
-                break;
-            }
-        }
-        freeaddrinfo(result);
-        return Addr(::htonl(addr));
+    static Addr getAddrByName(const char* domain, bool useTCP = true);
+
+    static Addr getAddrByName(const std::string& domain, bool useTCP = true);
+
+    // host byte order -> network byte order
+    inline in_addr_t hton() const {
+        return ::htonl(this->val);
     }
 
-    static Addr getAddrByName(const std::string& domain, bool useTCP = true) {
-        return Addr::getAddrByName(domain.c_str(), useTCP);
+    inline void setVal(in_addr_t val) {
+        this->val = val;
+    }
+    inline in_addr_t getVal() const {
+        return this->val;
     }
 
-};  // struct Addr
+};  // class Addr
 
 }  // namespace nanonet
 

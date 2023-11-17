@@ -15,8 +15,7 @@
 
 namespace nanonet {
 
-struct Port {
-public:
+class Port {
 
     // host byte order port
     in_port_t val;
@@ -24,15 +23,25 @@ public:
 public:
 
     // constructor
-    Port(in_port_t val = 0U) :val(val) {}
+    Port(in_port_t val = 0U);
 
     // to string
-    std::string toString() const { return std::to_string(this->val); }
+    std::string toString() const;
 
     // host byte order -> network byte order
-    uint16_t hton() const { return ::htons(this->val); }
+    inline uint16_t hton() const {
+        return ::htons(this->val);
+    }
 
-}; // struct Port
+    // getter & setter
+    inline in_addr_t getVal() const {
+        return this->val;
+    }
+    inline void setVal(in_addr_t val) {
+        this->val = val;
+    }
+
+}; // class Port
 
 } // namespace nanonet
 
