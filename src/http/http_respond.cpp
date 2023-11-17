@@ -9,7 +9,7 @@ HttpRespond::HttpRespond(const std::string& version, const std::string& statusCo
     : version(version), statusCode(statusCode), statusMessage(statusMessage) {}
 
 // to string
-inline std::string HttpRespond::toString() const {
+std::string HttpRespond::toString() const {
 
     if (version.empty() || statusCode.empty() || statusMessage.empty())
         return "";

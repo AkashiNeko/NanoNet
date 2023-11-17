@@ -106,7 +106,7 @@ public:
     }
 
     // to string
-    inline std::string toString() const;
+    std::string toString() const;
 
 }; // class HttpRespond
 

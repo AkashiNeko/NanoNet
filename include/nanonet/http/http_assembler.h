@@ -34,11 +34,16 @@ class HttpAssembler {
     bool headDone = false;
 
     bool fillHead(HttpRespond& respond, const char* msg);
-
     bool fillHead(HttpRequest& request, const char* msg);
 
     // converts hex text to digit, on error, -1 is returned
-    static size_t hex2digit(const std::string& hexStr);
+    static size_t hex2digit(const std::string& hexStr) {
+        try {
+            return (size_t)std::stol(hexStr, nullptr, 16);
+        } catch (const std::exception& e) {
+            return (size_t)std::string::npos;
+        }
+    }
 
     // append chunks when 'Transfer-Encoding' is 'chunked'
     bool appendChunk(const char* msg);
@@ -52,6 +57,9 @@ public:
     bool append(const char* msg);
 
 };  // class HttpAssembler
+
+template class HttpAssembler<HttpRequest>;
+template class HttpAssembler<HttpRespond>;
 
 }  // namespace nanonet
 

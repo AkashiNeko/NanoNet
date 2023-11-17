@@ -114,16 +114,6 @@ bool HttpAssembler<MsgType>::fillHead(HttpRequest& request, const char* msg) {
     return false;
 }
 
-// converts hex text to digit, on error, -1 is returned
-template <class MsgType>
-size_t HttpAssembler<MsgType>::hex2digit(const std::string& hexStr) {
-    try {
-        return (size_t)std::stol(hexStr, nullptr, 16);
-    } catch (const std::exception& e) {
-        return (size_t)std::string::npos;
-    }
-}
-
 // append chunks when 'Transfer-Encoding' is 'chunked'
 template <class MsgType>
 bool HttpAssembler<MsgType>::appendChunk(const char* msg) {
@@ -187,7 +177,6 @@ bool HttpAssembler<MsgType>::appendBody(const char* msg) {
     }
     return false;
 }
-
 
 template <class MsgType>
 HttpAssembler<MsgType>::HttpAssembler(MsgType& httpmsg) :httpmsg(httpmsg) {}
