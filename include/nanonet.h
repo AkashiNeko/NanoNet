@@ -4,6 +4,10 @@
 #ifndef __NANONET_H__
 #define __NANONET_H__
 
+#if __cplusplus < 201103L
+    #error "Sorry, nanonet requires at least C++11"
+#endif
+
 // utility
 #include "nanonet/utility/log.h"
 #include "nanonet/utility/addr.h"
@@ -23,5 +27,8 @@
 #include "nanonet/http/http_assembler.h"
 #include "nanonet/http/requests.h"
 #include "nanonet/http/server/web_server.h"
+
+// exception
+#include "nanonet/exception/nanoerr.h"
 
 #endif // __NANONET_H__

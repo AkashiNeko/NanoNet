@@ -9,7 +9,11 @@ AddrPort::AddrPort(const Addr& addr, const Port& port) :addr(addr), port(port) {
 
 // to string "xxx.xxx.xxx.xxx:port"
 std::string AddrPort::toString() const {
-    return addr.toString() + ":" + port.toString();
+    return this->addr.toString() + ":" + this->port.toString();
+}
+
+std::string AddrPort::toString(const Addr& addr, const Port& port, char separator) {
+    return addr.toString() + separator + port.toString();
 }
 
 } // namespace nanonet

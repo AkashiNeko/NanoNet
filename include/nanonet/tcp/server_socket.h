@@ -23,20 +23,49 @@ const int BACKLOG_QUEUE_SIZE = 20;
 
 class ServerSocket {
     // server socket fd
-    int serverSockfd;
+    int serverfd = -1;
 
     // local address
     struct sockaddr_in local;
 
+    // is listening
+    bool listening = false;
+
 public:
     // constructor (addr, port)
-    ServerSocket(const Addr& addr, const Port& port, bool reuseAddr = true, int backlog = BACKLOG_QUEUE_SIZE);
-    ServerSocket(const std::string& ip, const Port& port, bool reuseAddr = true, int backlog = BACKLOG_QUEUE_SIZE);
-    ServerSocket(const char* ip, const Port& port, bool reuseAddr = true, int backlog = BACKLOG_QUEUE_SIZE);
-    ServerSocket(const Port& port, bool reuseAddr = true, int backlog = BACKLOG_QUEUE_SIZE);
+    ServerSocket();
+
+    ServerSocket(const Addr& addr, const Port& port);
+
+    inline ServerSocket(const std::string& ip, const Port& port)
+        :ServerSocket(Addr(ip), port) {}
+
+    inline ServerSocket(const char* ip, const Port& port)
+        :ServerSocket(Addr(ip), port) {}
+
+    inline ServerSocket(const Port& port)
+        :ServerSocket(Addr(INADDR_ANY), port) {}
 
     // destructor
-    ~ServerSocket();
+    virtual ~ServerSocket();
+
+    void setReuseAddr(bool reuseAddr);
+
+    void bind(const Addr& addr, const Port& port);
+
+    inline void bind(const std::string& ip, const Port& port) {
+        this->bind(Addr(ip), port);
+    }
+
+    inline void bind(const char* ip, const Port& port) {
+        this->bind(Addr(ip), port);
+    }
+
+    inline void bind(const Port& port) {
+        this->bind(Addr(INADDR_ANY), port);
+    }
+
+    void listen(int backlog = 20);
 
     // accept from client
     Socket accept();

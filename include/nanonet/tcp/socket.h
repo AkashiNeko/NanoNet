@@ -21,7 +21,7 @@ namespace nanonet {
 class Socket {
     
     // socket fd
-    int sockfd;
+    int sockfd = -1;
 
     // remote
     struct sockaddr_in remote;
@@ -42,20 +42,30 @@ public:
     // connect to server
     void connect(const Addr& addr, const Port& port);
 
-    void connect(const AddrPort& addrPort);
+    inline void connect(const AddrPort& addrPort) {
+        this->connect(addrPort.getAddr(), addrPort.getPort());
+    }
 
-    void connect(const std::string& ip, const Port& port);
+    inline void connect(const std::string& ip, const Port& port) {
+        this->connect(Addr(ip), port);
+    }
 
-    void connect(const char* ip, const Port& port);
+    inline void connect(const char* ip, const Port& port) {
+        this->connect(Addr(ip), port);
+    }
 
-    void bind(const Addr& addr, const Port& port) const;
+    void bind(const Addr& addr, const Port& port);
 
     // close socket
-    void close();    
+    void close();
 
-    int setsockopt(int level, int optname, const void* optval, socklen_t optlen) const;
+    inline bool isClosed() const {
+        return sockfd == -1;
+    }
 
-    int setReceiveTimeout(long seconds, long milliseconds = 0) const;
+    int setSocketOption(int level, int optname, const void* optval, socklen_t optlen);
+
+    int setReceiveTimeout(long seconds, long milliseconds = 0);
 
     // send to remote
     int send(const char* msg, size_t size) const;
@@ -64,7 +74,6 @@ public:
 
     // receive from remote
     int receive(char *buf, size_t buf_size);
-
 
     // get remote addrport
     AddrPort getRemoteAddrPort() const;

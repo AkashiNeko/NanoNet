@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 
-#include "nanonet"
+#include "nanonet.h"
 
 int main() {
     

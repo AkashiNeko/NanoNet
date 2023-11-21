@@ -1,60 +1,38 @@
 // tcp/socket.cpp
 
 #include "nanonet/tcp/socket.h"
+#include "nanonet/exception/nanoerr.h"
 
 namespace nanonet {
 
-
 // default constructor
 Socket::Socket() :sockfd(-1), remote({}) {
-    sockfd = ::socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0) {
-        error << "[tcp] socket: " << strerror(errno) << std::endl;
-        exit(-1);
-    }
     remote.sin_family = AF_INET;
+    sockfd = ::socket(AF_INET, SOCK_STREAM, 0);
+    sockfd < 0 && throwError<TcpSocketError>(
+        "[tcp] create socket: ", strerror(errno));
 }
-
 
 // destructor
 Socket::~Socket() {}
 
-
 // connect to server
 void Socket::connect(const Addr& addr, const Port& port) {
-    if (sockfd < 0) {
-        error << "[tcp] socket is closed" << std::endl;
-        exit(-1);
-    }
+    sockfd < 0 && throwError<TcpSocketClosedError>("[tcp] socket is closed");
     remote.sin_addr.s_addr = addr.hton();
     remote.sin_port = port.hton();
-    int connectResult = ::connect(sockfd, (const struct sockaddr*)&remote, sizeof(remote));
-    if (connectResult < 0) {
-        error << "[tcp] connect: " << strerror(errno) << std::endl;
-        exit(-1);
-    }
+    int ret = ::connect(sockfd, (const struct sockaddr*)&remote, sizeof(remote));
+    ret < 0 && throwError<TcpConnectError>("[tcp] connect: ", strerror(errno));
 }
 
-void Socket::connect(const AddrPort& addrPort) {
-    this->connect(addrPort.getAddr(), addrPort.getPort());
-}
-
-void Socket::connect(const std::string& ip, const Port& port) {
-    this->connect(Addr(ip), port);
-}
-
-void Socket::connect(const char* ip, const Port& port) {
-    this->connect(Addr(ip), port);
-}
-
-void Socket::bind(const Addr& addr, const Port& port) const {
+void Socket::bind(const Addr& addr, const Port& port) {
     sockaddr_in local;
     local.sin_family = AF_INET;
     local.sin_addr.s_addr = addr.hton();
     local.sin_port = port.hton();
     if (::bind(this->sockfd, (const struct sockaddr*)&local, sizeof(local)) < 0) {
-        error << "[tcp] bind: " << strerror(errno) << std::endl;
-        exit(-1);
+        throwError<TcpBindError>("[tcp] bind \'",
+            AddrPort::toString(addr, port), "\': ", strerror(errno));
     }
 }
 
@@ -66,29 +44,22 @@ void Socket::close() {
     }
 }
 
-int Socket::setsockopt(int level, int optname, const void* optval, socklen_t optlen) const {
+int Socket::setSocketOption(int level, int optname, const void* optval, socklen_t optlen) {
     return ::setsockopt(sockfd, level, optname, optval, optlen);
 }
 
-int Socket::setReceiveTimeout(long seconds, long milliseconds) const {
+int Socket::setReceiveTimeout(long seconds, long milliseconds) {
     struct timeval tm = {seconds, milliseconds * 1000};
-    return this->setsockopt(SOL_SOCKET, SO_RCVTIMEO, &tm, sizeof(struct timeval));
+    return this->setSocketOption(SOL_SOCKET, SO_RCVTIMEO, &tm, sizeof(struct timeval));
 }
 
 // send to remote
 int Socket::send(const char* msg, size_t size) const {
-    if (sockfd < 0) {
-        error << "[tcp] socket is closed" << std::endl;
-        exit(-1);
-    }
+    sockfd < 0 && throwError<TcpSocketClosedError>("[tcp] socket is closed");
 
     // send to remote
     int ret = ::send(sockfd, msg, size, 0);
-    if (ret < 0) {
-        warn << "[tcp] send: " << strerror(errno) << std::endl;
-    } else if (ret == 0) {
-        warn << "[tcp] send: no data was sent";
-    }
+    ret < 0 && throwError<TcpError>("[tcp] send:", strerror(errno));
 
     // returns the number of bytes sent
     return ret;
@@ -100,21 +71,18 @@ int Socket::send(std::string msg) const {
 
 // receive from remote
 int Socket::receive(char *buf, size_t buf_size) {
-    if (sockfd < 0) {
-        error << "[tcp] socket is closed" << std::endl;
-        return -1;
-    }
+    sockfd < 0 && throwError<TcpSocketClosedError>("[tcp] socket is closed");
 
     // receive from remote
-    ssize_t ret = ::recv(sockfd, buf, buf_size, 0);
+    ssize_t len = ::recv(sockfd, buf, buf_size, 0);
 
+    len < 0 && throwError<TcpReceiveError>("[tcp] receive: ", strerror(errno));
     // truncate buffer
-    if (ret >= 0 && ret < buf_size) buf[ret] = 0;
+    if (len < buf_size) buf[len] = 0;
 
     // returns the number of bytes receive
-    return (int)ret;
+    return static_cast<int>(len);
 }
-
 
 // get remote addrport
 AddrPort Socket::getRemoteAddrPort() const {

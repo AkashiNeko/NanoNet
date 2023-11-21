@@ -30,6 +30,8 @@ public:
     // to string "xxx.xxx.xxx.xxx:port"
     std::string toString() const;
 
+    static std::string toString(const Addr& addr, const Port& port, char separator = ':');
+
     // getter & setter
     inline void setAddr(const Addr& addr) {
         this->addr = addr;

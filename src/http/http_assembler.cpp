@@ -8,7 +8,17 @@ template <class MsgType>
 bool HttpAssembler<MsgType>::fillHead(HttpRespond& respond, const char* msg) {
     headCache += msg;
     bodyStart = headCache.find("\r\n\r\n", bodyStartCache);
-    // header received in its entirety, decode the header
+    // +------------------------------+
+    // | http respond message example |
+    // +------------------------------+
+    // | HTTP/1.0 200 OK\r\n          |
+    // | Accept: */*\r\n              |
+    // | Host: 127.0.0.1\r\n          |
+    // | Content-Length: 4\r\n        |
+    // | \r\n                         |
+    // | text                         |
+    // +------------------------------+
+    // if header received in its entirety
     if (bodyStart != std::string::npos) {
         bodyStart += 4;
         // separate the head (line, headders)
@@ -62,20 +72,44 @@ template <class MsgType>
 bool HttpAssembler<MsgType>::fillHead(HttpRequest& request, const char* msg) {
     headCache += msg;
     bodyStart = headCache.find("\r\n\r\n", bodyStartCache);
-    // header received in its entirety, decode the header
+    // +------------------------------+
+    // | http request message example |
+    // +------------------------------+
+    // | POST / HTTP/1.0\r\n          |
+    // | Accept: */*\r\n              |
+    // | Host: 127.0.0.1\r\n          |
+    // | User-Agent: Mozilla/5.0\r\n  |
+    // | Content-Length: 4\r\n        |
+    // | \r\n                         |
+    // | text                         |
+    // +------------------------------+
+    // if header received in its entirety
     if (bodyStart != std::string::npos) {
+
+        // set pos of body start
         bodyStart += 4;
+
         // separate the head (line, headders)
         bodyCache += headCache.substr(bodyStart);
         headCache.resize(bodyStart - 2);
-        // get line
+
+        // get line 'METHOD PATH VERSION\r\n'
         size_t pos = headCache.find("\r\n");
+
+        // get METHOD: GET/POST/PUT...
         size_t methodEnd = headCache.find(' ', 0);
         request.setMethod(headCache.substr(0, methodEnd));
+
+        // get PATH: /...
         size_t pathEnd = headCache.find(' ', methodEnd + 1);
         request.setPath(headCache.substr(methodEnd + 1, pathEnd - methodEnd - 1));
+
+        // get VERSION: HTTP/1.0, HTTP/1.1...
         request.setVersion(headCache.substr(pathEnd + 1, pos - pathEnd - 1));
+
+        // next line
         pos += 2;
+
         // get headers
         while (pos < headCache.size()) {
             size_t beginLine = pos;

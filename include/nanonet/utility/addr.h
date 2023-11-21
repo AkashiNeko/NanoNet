@@ -33,7 +33,7 @@ public:
 
     Addr(const char* host);
 
-    Addr(const std::string& ip);
+    inline Addr(const std::string& ip) :Addr(ip.c_str()) {}
 
     // to string "xx.xx.xx.xx"
     std::string toString() const;
@@ -42,9 +42,11 @@ public:
     static bool isValid(const std::string& ip);
 
     // DNS query
-    static Addr getAddrByName(const char* domain, bool useTCP = true);
+    static Addr getAddrByName(const char* domain, bool useTcp = true);
 
-    static Addr getAddrByName(const std::string& domain, bool useTCP = true);
+    inline static Addr getAddrByName(const std::string& domain, bool useTcp) {
+        return getAddrByName(domain.c_str(), useTcp);
+    }
 
     inline Addr& operator=(in_addr_t val) {
         this->setVal(val);

@@ -44,30 +44,45 @@ public:
     // bind (addr : port)
     void bind(const Addr& addr, const Port& port);
 
-    void bind(const AddrPort& addrPort);
+    inline void bind(const AddrPort& addrPort) {
+        this->bind(addrPort.getAddr(), addrPort.getPort());
+    }
 
-    void bind(const std::string& ip, const Port& port);
+    inline void bind(const std::string& ip, const Port& port) {
+        this->bind(Addr(ip), port);
+    }
 
-    void bind(const char* ip, const Port& port);
+    inline void bind(const char* ip, const Port& port) {
+        this->bind(Addr(ip), port);
+    }
 
-    void bind(const Port& port);
-
+    inline void bind(const Port& port) {
+        this->bind(Addr(INADDR_ANY), port);
+    }
 
     // set remote address & port
     void setRemote(const Addr& addr, const Port& port);
 
-    void setRemote(const AddrPort& addrPort);
+    inline void setRemote(const AddrPort& addrPort) {
+        this->setRemote(addrPort.getAddr(), addrPort.getPort());
+    }
 
-    void setRemote(const std::string& ip, const Port& port);
+    inline void setRemote(const std::string& ip, const Port& port) {
+        this->setRemote(Addr(ip), port);
+    }
 
-    void setRemote(const char* ip, const Port& port);
+    inline void setRemote(const char* ip, const Port& port) {
+        this->setRemote(Addr(ip), port);
+    }
 
     int setReceiveTimeout(long seconds, long milliseconds = 0);
 
     // send data
     int send(const char* data, size_t datalen) const;
 
-    int send(const std::string& str) const;
+    inline int send(const std::string& str) const {
+        return this->send(str.c_str(), str.size());
+    }
 
     // waiting to receive data from others
     AddrPort receive(char* buffer, size_t bufSize) const;

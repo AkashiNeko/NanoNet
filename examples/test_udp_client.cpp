@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
-#include "udp/udp_socket.hpp"
+
+#include "nanonet.h"
 
 int main() {
     // create a socket
