@@ -13,6 +13,9 @@
 // linux
 #include <netinet/in.h>
 
+// nanonet
+#include "nanonet/exception/nanoerr.h"
+
 namespace nanonet {
 
 class Port {
@@ -25,8 +28,28 @@ public:
     // constructor
     Port(in_port_t val = 0U);
 
+    Port(const std::string& port);
+
     // to string
     std::string toString() const;
+
+    static Port parsePort(const std::string& str);
+
+    inline bool operator==(const Port& port) const {
+        return this->val == port.val;
+    }
+
+    inline bool operator==(in_port_t val) const {
+        return this->val == val;
+    }
+
+    inline bool operator!=(const Port& port) const {
+        return this->val != port.val;
+    }
+
+    inline bool operator!=(in_port_t val) const {
+        return this->val != val;
+    }
 
     inline Port& operator=(in_port_t val) {
         this->setVal(val);

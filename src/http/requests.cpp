@@ -34,27 +34,22 @@ HttpRespond Requests::send(HttpRequest request, int timeout) {
     // send
     socket.send(request.toString());
 
-    debug << "[http] send http request to \'"
-        << host << '\'' << std::endl;
-
-    const int BUF_SIZE = 4096;
+    constexpr int BUF_SIZE = 4096;
     char buffer[BUF_SIZE]{};
     socket.setReceiveTimeout(timeout, 0);
 
     // receive
-    int receiveLength = socket.receive(buffer, BUF_SIZE - 1);
+    int receiveLength = 0;
+    try {
+        receiveLength = socket.receive(buffer, BUF_SIZE - 1);
+    } catch (const TcpReceiveError& e) {
+        // timeout
+        throwError<HttpReceiveError>("[http] receive timeout");
+    }
 
-    if (receiveLength < 0) {
-        // receive failed
-        warn << "[http] receive from \'"
-            << host << "\' timeout" << std::endl;
-        socket.close();
-        return {};
-    } else if (receiveLength == 0) {
+    if (receiveLength == 0) {
         // server not responding
-        warn << "[http] server not responding" << std::endl;
-        socket.close();
-        return {};
+        throwError<HttpReceiveError>("[http] server closed");
     }
     buffer[receiveLength] = '\0';
 
@@ -69,9 +64,6 @@ HttpRespond Requests::send(HttpRequest request, int timeout) {
             buffer[receiveLength] = '\0';
         receiveDone = assembler.append(buffer);
     }
-
-    debug << "[http] receive from \'" << host
-        << "\', text length = " << respond.size() << std::endl;
     socket.close();
     return respond;
 }

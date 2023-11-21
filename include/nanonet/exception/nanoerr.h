@@ -32,15 +32,34 @@ public:
     }
 };
 
+// .-------.    .----------------.
+// | Error | -> | std::exception |
+// '-------'    '----------------'
+//     A
+//     |
+// + - - - - - - - - - - - - - - +
+// | .-----------.  .----------. |
+// | | AddrError |  | TcpError | |
+// | '-----------'  '----------' |
+// | .-----------.  .----------. |
+// | | PortError |  | UdpError | |
+// | '-----------'  '----------' |
+// | .-----------.  .----------. |
+// | | HttpError |  | UrlError | |
+// | '-----------'  '----------' |
+// + - - - - - - - - - - - - - - +
+
 // Addr
 DEFINE_NANOERR_CLASS(AddrError, Error)
 DEFINE_NANOERR_CLASS(AddrNTOPError, AddrError)
 DEFINE_NANOERR_CLASS(GetAddrInfoError, AddrError)
 
+// Port
+DEFINE_NANOERR_CLASS(PortError, Error)
+DEFINE_NANOERR_CLASS(ParsePortError, PortError)
 
 // TCP
 DEFINE_NANOERR_CLASS(TcpError, Error)
-
 DEFINE_NANOERR_CLASS(TcpSocketError, TcpError)
 DEFINE_NANOERR_CLASS(TcpServerSocketError, TcpError)
 DEFINE_NANOERR_CLASS(TcpBindError, TcpError)
@@ -51,20 +70,21 @@ DEFINE_NANOERR_CLASS(TcpSendError, TcpError)
 DEFINE_NANOERR_CLASS(TcpReceiveError, TcpError)
 DEFINE_NANOERR_CLASS(TcpSocketClosedError, TcpError)
 
-
 // UDP
 DEFINE_NANOERR_CLASS(UdpError, Error)
-
 DEFINE_NANOERR_CLASS(UdpSocketError, UdpError)
 DEFINE_NANOERR_CLASS(UdpBindError, UdpError)
 DEFINE_NANOERR_CLASS(UdpSendError, UdpError)
 DEFINE_NANOERR_CLASS(UdpReceiveError, UdpError)
 DEFINE_NANOERR_CLASS(UdpSocketClosedError, UdpError)
 
+// URL
+DEFINE_NANOERR_CLASS(UrlError, Error)
+DEFINE_NANOERR_CLASS(ParseUrlError, UrlError)
 
 // HTTP
 DEFINE_NANOERR_CLASS(HttpError, Error)
-
+DEFINE_NANOERR_CLASS(HttpReceiveError, HttpError)
 
 #if __cplusplus >= 201703L
 

@@ -29,8 +29,7 @@ void HttpRequest::separateHostPath(const std::string& url, std::string& host, st
             path = "/";
         }
     } else {
-        error << "[http] invalid URL: \'" << url << '\'' << std::endl;
-        exit(-1);
+        throwError<UrlError>("[url] invalid url: \'", url, '\'');
     }
 }
 

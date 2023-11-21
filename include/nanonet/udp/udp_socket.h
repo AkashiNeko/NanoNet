@@ -6,6 +6,7 @@
 
 // nanonet
 #include "nanonet/utility/addr_port.h"
+#include "nanonet/exception/nanoerr.h"
 
 // linux
 #include <sys/socket.h>

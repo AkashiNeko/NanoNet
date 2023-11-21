@@ -9,6 +9,7 @@
 #include <string>
 
 #include "nanonet/utility/log.h"
+#include "nanonet/exception/nanoerr.h"
 
 namespace nanonet {
 

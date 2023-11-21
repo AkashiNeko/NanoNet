@@ -1,7 +1,6 @@
 // tcp/socket.cpp
 
 #include "nanonet/tcp/socket.h"
-#include "nanonet/exception/nanoerr.h"
 
 namespace nanonet {
 
@@ -50,7 +49,8 @@ int Socket::setSocketOption(int level, int optname, const void* optval, socklen_
 
 int Socket::setReceiveTimeout(long seconds, long milliseconds) {
     struct timeval tm = {seconds, milliseconds * 1000};
-    return this->setSocketOption(SOL_SOCKET, SO_RCVTIMEO, &tm, sizeof(struct timeval));
+    return this->setSocketOption(SOL_SOCKET,
+        SO_RCVTIMEO, &tm, sizeof(struct timeval));
 }
 
 // send to remote
@@ -59,7 +59,7 @@ int Socket::send(const char* msg, size_t size) const {
 
     // send to remote
     int ret = ::send(sockfd, msg, size, 0);
-    ret < 0 && throwError<TcpError>("[tcp] send:", strerror(errno));
+    ret < 0 && throwError<TcpSendError>("[tcp] send:", strerror(errno));
 
     // returns the number of bytes sent
     return ret;

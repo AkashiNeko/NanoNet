@@ -1,7 +1,6 @@
 // tcp/server_socket.cpp
 
 #include "nanonet/tcp/server_socket.h"
-#include "nanonet/exception/nanoerr.h"
 
 namespace nanonet {
 

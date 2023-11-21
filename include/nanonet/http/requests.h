@@ -12,6 +12,7 @@
 #include "nanonet/http/http_request.h"
 #include "nanonet/http/http_respond.h"
 #include "nanonet/utility/addr_port.h"
+#include "nanonet/exception/nanoerr.h"
 
 namespace nanonet {
 

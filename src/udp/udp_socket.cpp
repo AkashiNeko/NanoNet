@@ -1,7 +1,6 @@
 // udp/udp_socket.cpp
 
 #include "nanonet/udp/udp_socket.h"
-#include "nanonet/exception/nanoerr.h"
 
 namespace nanonet {
 

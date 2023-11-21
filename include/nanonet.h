@@ -13,6 +13,7 @@
 #include "nanonet/utility/addr.h"
 #include "nanonet/utility/port.h"
 #include "nanonet/utility/addr_port.h"
+#include "nanonet/utility/url.h"
 
 // tcp
 #include "nanonet/tcp/socket.h"

@@ -15,6 +15,7 @@
 
 // nanonet
 #include "nanonet/utility/addr_port.h"
+#include "nanonet/exception/nanoerr.h"
 
 namespace nanonet {
 
