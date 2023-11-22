@@ -192,35 +192,98 @@ class Url {
         }
     }
 
+    inline static char _toHex(const char c) {
+        int mask = c & 0xF;
+        return (mask > 9 ? 'A' - 10 : '0') + mask;
+    }
+
 public:
 
     Url(const std::string& url) {
         parseUrl(url);
     }
 
+    static void encode(std::string& result, const std::string& str, const char* ignore) {
+        
+        for (char c : str) {
+            switch (c) {
+            case '.': case '-': case '*': case '_':
+                result += c;
+            default:
+                if (isalnum(c)) {
+                    result += c;
+                } else {
+                    result += '%';
+                    result += _toHex(c >> 4);
+                    result += _toHex(c);
+                }
+            }
+        }
+    }
+
+    static std::string decode(std::string result, const std::string& str) {
+        
+    }
+
     inline static Port getDefaultPort(const std::string& scheme) {
         static std::unordered_map<std::string, Port> defaultPortMap = {
-            {"http", 80},
-            {"https", 443},
-            {"ftp", 21},
-            {"telnet", 23},
-            {"ssh", 22},
-            {"smtp", 25},
-            {"imap", 143},
-            {"pop3", 110},
-            {"dns", 53},
-            {"sftp", 22},
-            {"ldap", 389},
-            {"rdp", 3389},
-            {"mysql", 3306},
-            {"postgresql", 5432},
-            {"mongodb", 27017},
-            {"redis", 6379},
-            {"mqtt", 1883},
-            {"ntp", 123},
-            {"rtmp", 1935},
-            {"vnc", 5900},
-            {"irc", 6667}
+            { "ftp", 21 },
+            { "ssh", 22 },
+            { "sftp", 22 },
+            { "telnet", 23 },
+            { "smtp", 25 },
+            { "dns", 53 },
+            { "gopher", 70 },
+            { "http", 80 },
+            { "pop3", 110 },
+            { "nntp", 119 },
+            { "ntp", 123 },
+            { "imap", 143 },
+            { "snmp", 161 },
+            { "snmp-trap", 162 },
+            { "ldap", 389 },
+            { "https", 443 },
+            { "smb", 445 },
+            { "smtps", 465 },
+            { "afp", 548 },
+            { "ldapssl", 636 },
+            { "ldaps", 636 },
+            { "rsync", 873 },
+            { "imaps", 993 },
+            { "pop3s", 995 },
+            { "mssql", 1433 },
+            { "oracle", 1521 },
+            { "mqtt", 1883 },
+            { "rtmp", 1935 },
+            { "nfs", 2049 },
+            { "zookeeper", 2181 },
+            { "etcd", 2379 },
+            { "mysql", 3306 },
+            { "rdp", 3389 },
+            { "svn", 3690 },
+            { "sybase", 5000 },
+            { "xmpp", 5222 },
+            { "xmpps", 5223 },
+            { "postgresql", 5432 },
+            { "rabbitmq", 5672 },
+            { "vnc", 5900 },
+            { "couchdb", 5984 },
+            { "redis", 6379 },
+            { "irc", 6667 },
+            { "redis-cluster", 7000 },
+            { "neo4j", 7687 },
+            { "consul", 8500 },
+            { "hadoop", 9000 },
+            { "cassandra", 9042 },
+            { "kafka", 9092 },
+            { "elasticsearch", 9200 },
+            { "git", 9418 },
+            { "hive", 10000 },
+            { "memcached", 11211 },
+            { "minecraft", 25565 },
+            { "redis-sentinel", 26379 },
+            { "mongodb", 27017 },
+            { "db2", 50000 },
         };
         auto it = defaultPortMap.find(scheme);
         if (it == defaultPortMap.end())
