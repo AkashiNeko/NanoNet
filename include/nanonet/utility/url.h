@@ -61,7 +61,33 @@ class Url {
     //                        |
     //                    authority
 
-    void parseUserInfo(std::string&& userInfo) {
+    inline static Port _getDefaultPort(const std::string& scheme) {
+        const static std::unordered_map<std::string, Port> defaultPortMap = {
+            { "ftp", 21 }, { "ssh", 22 }, { "sftp", 22 }, { "telnet", 23 },
+            { "smtp", 25 }, { "dns", 53 }, { "gopher", 70 }, { "http", 80 },
+            { "pop3", 110 }, { "nntp", 119 }, { "ntp", 123 }, { "imap", 143 },
+            { "snmp", 161 }, { "snmp-trap", 162 }, { "ldap", 389 }, { "https", 443 },
+            { "smb", 445 }, { "smtps", 465 }, { "afp", 548 }, { "ldapssl", 636 },
+            { "ldaps", 636 }, { "rsync", 873 }, { "imaps", 993 }, { "pop3s", 995 },
+            { "mssql", 1433 }, { "oracle", 1521 }, { "mqtt", 1883 },
+            { "rtmp", 1935 }, { "nfs", 2049 }, { "zookeeper", 2181 }, { "etcd", 2379 },
+            { "mysql", 3306 }, { "rdp", 3389 }, { "svn", 3690 }, { "sybase", 5000 },
+            { "xmpp", 5222 }, { "xmpps", 5223 }, { "postgresql", 5432 },
+            { "rabbitmq", 5672 }, { "vnc", 5900 }, { "couchdb", 5984 }, { "redis", 6379 },
+            { "irc", 6667 }, { "redis-cluster", 7000 }, { "neo4j", 7687 },
+            { "consul", 8500 }, { "hadoop", 9000 }, { "cassandra", 9042 },
+            { "kafka", 9092 }, { "elasticsearch", 9200 }, { "git", 9418 },
+            { "hive", 10000 }, { "memcached", 11211 }, { "minecraft", 25565 },
+            { "redis-sentinel", 26379 }, { "mongodb", 27017 }, { "db2", 50000 },
+        };
+        auto it = defaultPortMap.find(scheme);
+        if (it == defaultPortMap.end())
+            return 0;
+        else
+            return it->second;
+    }
+
+    void _parseUserInfo(std::string&& userInfo) {
         // http://user:password@example.com:8080/abc/def?a=1&b=2#section
         //        \___________/
         //              |
@@ -76,7 +102,7 @@ class Url {
         }
     }
 
-    void parseAuthority(std::string&& authority) {
+    void _parseAuthority(std::string&& authority) {
         // http://user:password@example.com:8080/abc/def?a=1&b=2#section
         //        \____________________________/
         //                      |
@@ -86,7 +112,7 @@ class Url {
         size_t pos = 0;
         if (posAt != std::string::npos) {
             pos = posAt + 1;
-            parseUserInfo(authority.substr(0, posAt));
+            _parseUserInfo(authority.substr(0, posAt));
         }
         // parse host port
         size_t posPort = authority.find_first_of(':', pos);
@@ -95,21 +121,22 @@ class Url {
             pos = posPort + 1;
             std::string strPort = authority.substr(posPort + 1);
             if (strPort.empty()) {
-                
+                this->port = _getDefaultPort(this->scheme);
+            } else {
+                Port p;
+                try {
+                    p = Port::parsePort(strPort);
+                } catch (const ParsePortError&) {
+                    throwError<ParseUrlError>("[url] port \'", strPort, "\' is invalid");
+                }
+                this->port = p;
             }
-            Port p;
-            try {
-                p = Port::parsePort(strPort);
-            } catch (const ParsePortError&) {
-                throwError<ParseUrlError>("[url] port \'", strPort, "\' is invalid");
-            }
-            this->port = p;
         } else {
             this->host = authority.substr(pos);
         }
     }
 
-    void parseAuthorityAfter(std::string&& str) {
+    void _parseAuthorityAfter(std::string&& str) {
         // /abc/def?a=1&b=2#section
         // \______________________/
         //            |
@@ -157,7 +184,7 @@ class Url {
         }
     }
 
-    void parseUrl(const std::string& str) {
+    void _parseUrl(const std::string& str) {
         // http://user:password@example.com:8080/abc/def?a=1&b=2#section
         // \__/
         //   |
@@ -186,9 +213,9 @@ class Url {
         //                     \/                          \/
         //                parseAuthority           parseAuthorityAfter
 
-        parseAuthority(str.substr(pos, authorityEnd - pos));
+        _parseAuthority(str.substr(pos, authorityEnd - pos));
         if (authorityEnd != std::string::npos) {
-            parseAuthorityAfter(str.substr(authorityEnd));
+            _parseAuthorityAfter(str.substr(authorityEnd));
         }
     }
 
@@ -197,99 +224,42 @@ class Url {
         return (mask > 9 ? 'A' - 10 : '0') + mask;
     }
 
+    inline static bool _inIgnore(const char c, const char* ignore) {
+        if (c == '\0') return false;
+        for (const char* p = ignore; *p; ++p)
+            if (c == *p) return true;
+        return false;
+    }
+
+    static void _encodeString(std::string& str, const char* ignore = "") {
+        std::string result;
+        for (char c : str) {
+            if (c == ' ') {
+                result += '+';
+            } else if (_inIgnore(c, ignore) || isalnum(c)
+                || c == '.' || c == '_' || c == '*' || c == '-') {
+                result += c;
+            } else {
+                result += '%';
+                result += _toHex(c >> 4);
+                result += _toHex(c);
+            }
+        }
+        str = std::move(result);
+    }
+
 public:
 
     Url(const std::string& url) {
-        parseUrl(url);
+        _parseUrl(url);
     }
 
-    static void encode(std::string& result, const std::string& str, const char* ignore) {
-        
-        for (char c : str) {
-            switch (c) {
-            case '.': case '-': case '*': case '_':
-                result += c;
-            default:
-                if (isalnum(c)) {
-                    result += c;
-                } else {
-                    result += '%';
-                    result += _toHex(c >> 4);
-                    result += _toHex(c);
-                }
-            }
-        }
-    }
-
-    static std::string decode(std::string result, const std::string& str) {
-        
-    }
-
-    inline static Port getDefaultPort(const std::string& scheme) {
-        static std::unordered_map<std::string, Port> defaultPortMap = {
-            { "ftp", 21 },
-            { "ssh", 22 },
-            { "sftp", 22 },
-            { "telnet", 23 },
-            { "smtp", 25 },
-            { "dns", 53 },
-            { "gopher", 70 },
-            { "http", 80 },
-            { "pop3", 110 },
-            { "nntp", 119 },
-            { "ntp", 123 },
-            { "imap", 143 },
-            { "snmp", 161 },
-            { "snmp-trap", 162 },
-            { "ldap", 389 },
-            { "https", 443 },
-            { "smb", 445 },
-            { "smtps", 465 },
-            { "afp", 548 },
-            { "ldapssl", 636 },
-            { "ldaps", 636 },
-            { "rsync", 873 },
-            { "imaps", 993 },
-            { "pop3s", 995 },
-            { "mssql", 1433 },
-            { "oracle", 1521 },
-            { "mqtt", 1883 },
-            { "rtmp", 1935 },
-            { "nfs", 2049 },
-            { "zookeeper", 2181 },
-            { "etcd", 2379 },
-            { "mysql", 3306 },
-            { "rdp", 3389 },
-            { "svn", 3690 },
-            { "sybase", 5000 },
-            { "xmpp", 5222 },
-            { "xmpps", 5223 },
-            { "postgresql", 5432 },
-            { "rabbitmq", 5672 },
-            { "vnc", 5900 },
-            { "couchdb", 5984 },
-            { "redis", 6379 },
-            { "irc", 6667 },
-            { "redis-cluster", 7000 },
-            { "neo4j", 7687 },
-            { "consul", 8500 },
-            { "hadoop", 9000 },
-            { "cassandra", 9042 },
-            { "kafka", 9092 },
-            { "elasticsearch", 9200 },
-            { "git", 9418 },
-            { "hive", 10000 },
-            { "memcached", 11211 },
-            { "minecraft", 25565 },
-            { "redis-sentinel", 26379 },
-            { "mongodb", 27017 },
-            { "db2", 50000 },
-        };
-        auto it = defaultPortMap.find(scheme);
-        if (it == defaultPortMap.end())
-            return 0;
-        else
-            return it->second;
+    static Url parse(const std::string& url) {
+        Url urlObj(url);
+        _encodeString(urlObj.fragment);
+        _encodeString(urlObj.query, "=&?");
+        _encodeString(urlObj.path, "/");
+        return std::move(urlObj);
     }
 
     inline std::string getScheme() const {
@@ -324,7 +294,7 @@ public:
         return this->fragment;
     }
 
-    std::string test() const {
+    std::string toString() const {
         std::string result = getScheme() + "://";
         if (!user.empty()) {
             if (!password.empty()) {

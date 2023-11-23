@@ -13,7 +13,7 @@ Port::Port(const std::string& str) {
 
 Port Port::parsePort(const std::string& str) {
     unsigned long port = 0;
-    if (!str.empty()) return 0;
+    if (str.empty()) return 0;
     try {
         port = std::stoul(str);
     } catch (const std::exception& e) {
