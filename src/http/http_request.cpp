@@ -4,40 +4,15 @@
 
 namespace nanonet {
 
-void HttpRequest::separateHostPath(const std::string& url, std::string& host, std::string& path) {
-    // find the position of the double slash after the protocol
-    size_t doubleSlashPos = url.find("//");
-    if (doubleSlashPos != std::string::npos) {
-        std::string protocol = url.substr(0, doubleSlashPos - 1);
-        if (protocol == "https") {
-            this->useSSL = true;
-        } else if (protocol != "http") {
-            error << "[http] Unsupported protocols: \'"
-                << protocol << '\'' << std::endl;
-            exit(-1);
-        }
-        // find the position of the first slash after the double slash
-        size_t slashPos = url.find('/', doubleSlashPos + 2);
-        if (slashPos != std::string::npos) {
-            // fxtract the host
-            host = url.substr(doubleSlashPos + 2, slashPos - doubleSlashPos - 2);
-            // fxtract the path
-            path = url.substr(slashPos);
-        } else {
-            // No path found, use root path
-            host = url.substr(doubleSlashPos + 2);
-            path = "/";
-        }
-    } else {
-        throwError<UrlError>("[url] invalid url: \'", url, '\'');
-    }
-}
+HttpRequest::HttpRequest() :path("/"), version("HTTP/1.0") {}
 
-HttpRequest::HttpRequest() {}
-
-HttpRequest::HttpRequest(const std::string& method, const std::string& url) {
+HttpRequest::HttpRequest(const std::string& method,
+    const Url& url, const std::string& version) :version(version) {
     // set request-URI
-    separateHostPath(url, this->host, this->path);
+    this->host = url.getHost();
+    this->path = url.getAuthorityAfter();
+    this->port = url.getPort();
+    this->useSSL = url.getScheme() == "https";
 
     // set request method
     for (auto& ch : method) {

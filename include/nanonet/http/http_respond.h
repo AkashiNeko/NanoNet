@@ -48,7 +48,6 @@ public:
         this->version = newVersion;
     }
 
-
     // status code
     inline const std::string& getStatusCode() const {
         return statusCode;
@@ -67,7 +66,7 @@ public:
     inline void setStatusMessage(const std::string& newStatusMessage) {
         this->statusMessage = newStatusMessage;
     }
-    
+
     // body
     inline const std::string& getText() const {
         return body;

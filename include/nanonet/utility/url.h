@@ -65,10 +65,15 @@ public:
     Url(std::string&& url);
     Url(const std::string& url);
     Url(Url&& url);
+    Url(const char* url) :Url(std::string(url)) {}
     virtual ~Url() = default;
 
     void parse(std::string&& url);
     void parse(const std::string& url);
+
+    std::string getAuthorityAfter() const;
+    void setAuthorityAfter(const std::string& authority);
+    void setAuthorityAfter(std::string&& authority);
 
     inline std::string getScheme() const {
         return this->scheme;

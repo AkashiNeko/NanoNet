@@ -5,7 +5,7 @@
 namespace nanonet {
 
 // send method
-HttpRespond Requests::methods(const char* method, const std::string& url, const std::string& body) {
+HttpRespond Requests::methods(const char* method, const Url& url, const std::string& body) {
     HttpRequest httpRequest(method, url);
     if (!body.empty())
         httpRequest.setBody(body);
@@ -24,12 +24,9 @@ AddrPort Requests::getAddrPortFromHost(const std::string& host, bool useSSL) {
 
 // send request
 HttpRespond Requests::send(HttpRequest request, int timeout) {
-    std::string host = request.getHost();
-    AddrPort addrPort = getAddrPortFromHost(host, request.usingSSL());
-
     // connnect to server
     Socket socket;
-    socket.connect(addrPort);
+    socket.connect(Addr(request.getHost()), Port(request.getPort()));
 
     // send
     socket.send(request.toString());

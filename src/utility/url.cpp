@@ -206,40 +206,12 @@ Url::Url(const std::string& url) :raw(url) {
     _parseUrl();
 }
 
-
-// std::string raw;
-
-// // scheme
-// std::string scheme;
-
-// // authority
-
-// // userinfo
-// std::string user;
-// std::string password;
-
-// // host
-// std::string host;
-
-// // path
-// std::string path = "/";
-
-// // query
-// std::string query;
-
-// // fragment
-// std::string fragment;
-
-Url::Url(Url&& url) {
-    this->raw = std::move(url.raw);
-    this->scheme = std::move(url.scheme);
-    this->user = std::move(url.user);
-    this->password = std::move(url.password);
-    this->host = std::move(url.host);
-    this->path = std::move(url.path);
-    this->query = std::move(url.query);
-    this->fragment = std::move(url.fragment);
-    this->port = url.port;
+Url::Url(Url&& url)
+    : raw(std::move(url.raw)), scheme(std::move(url.scheme)),
+    user(std::move(url.user)), password(std::move(url.password)),
+    host(std::move(url.host)), path(std::move(url.path)),
+    query(std::move(url.query)), fragment(std::move(url.fragment)),
+    port(url.port) {
     url.port = 0;
 }
 
@@ -251,6 +223,24 @@ void Url::parse(const std::string& url) {
 void Url::parse(std::string&& url) {
     this->raw = std::move(url);
     _parseUrl();
+}
+
+std::string Url::getAuthorityAfter() const {
+    std::string result;
+    result += this->path;
+    if (!this->query.empty())
+        result += '?' + this->query;
+    if (!this->fragment.empty())
+        result += '#' + this->fragment;
+    return result;
+}
+
+void Url::setAuthorityAfter(const std::string& authority) {
+    _parseAuthorityAfter(std::string(authority));
+}
+
+void Url::setAuthorityAfter(std::string&& authority) {
+    _parseAuthorityAfter(std::move(authority));
 }
 
 std::string Url::toString() const {
@@ -267,11 +257,7 @@ std::string Url::toString() const {
     if (this->port != 0 && this->port != _getDefaultPort(this->scheme)) {
         result += ":" + this->port.toString();
     }
-    result += this->path;
-    if (!this->query.empty())
-        result += '?' + this->query;
-    if (!this->fragment.empty())
-        result += '#' + this->fragment;
+    result += this->getAuthorityAfter();
     return result;
 }
 

@@ -9,6 +9,7 @@
 #include <string>
 
 #include "nanonet/utility/log.h"
+#include "nanonet/utility/url.h"
 #include "nanonet/exception/nanoerr.h"
 
 namespace nanonet {
@@ -17,7 +18,7 @@ class HttpRequest {
     // request line
     std::string method;
     std::string path;
-    std::string version = "HTTP/1.0";
+    std::string version;
 
     // request headers
     std::map<const std::string, std::string> headers;
@@ -29,13 +30,15 @@ class HttpRequest {
     // https
     bool useSSL = false;
 
-    void separateHostPath(const std::string& url, std::string& host, std::string& path);
+    // port
+    Port port;
 
 public:
 
     HttpRequest();
 
-    HttpRequest(const std::string& method, const std::string& url);
+    HttpRequest(const std::string& method,
+        const Url& url, const std::string& version = "HTTP/1.0");
 
     inline size_t size() const {
         return body.size();
@@ -78,12 +81,20 @@ public:
         }
     }
 
+    inline void setPort(const Port& port) {
+        this->port = port;
+    }
+
     inline bool usingSSL() const {
         return useSSL;
     }
 
     inline std::string getHost() const {
         return this->host;
+    }
+
+    inline Port getPort() const {
+        return this->port;
     }
 
     inline const std::map<const std::string, std::string>& getHeaders() const {

@@ -12,6 +12,7 @@
 #include "nanonet/http/http_request.h"
 #include "nanonet/http/http_respond.h"
 #include "nanonet/utility/addr_port.h"
+#include "nanonet/utility/url.h"
 #include "nanonet/exception/nanoerr.h"
 
 namespace nanonet {
@@ -19,7 +20,7 @@ namespace nanonet {
 class Requests {
 
     // send method
-    static HttpRespond methods(const char* method, const std::string& url, const std::string& body);
+    static HttpRespond methods(const char* method, const Url& url, const std::string& body);
 
 public:
 
@@ -30,31 +31,31 @@ public:
     static HttpRespond send(HttpRequest request, int timeout = 10);
 
     // methods
-    inline static HttpRespond GET(const std::string& url, const std::string& body = "") {
+    inline static HttpRespond GET(const Url& url, const std::string& body = "") {
         return methods("GET", url, body);
     }
-    inline static HttpRespond HEAD(const std::string& url, const std::string& body = "") {
+    inline static HttpRespond HEAD(const Url& url, const std::string& body = "") {
         return methods("HEAD", url, body);
     }
-    inline static HttpRespond POST(const std::string& url, const std::string& body = "") {
+    inline static HttpRespond POST(const Url& url, const std::string& body = "") {
         return methods("POST", url, body);
     }
-    inline static HttpRespond PUT(const std::string& url, const std::string& body = "") {
+    inline static HttpRespond PUT(const Url& url, const std::string& body = "") {
         return methods("PUT", url, body);
     }
-    inline static HttpRespond DELETE(const std::string& url, const std::string& body = "") {
+    inline static HttpRespond DELETE(const Url& url, const std::string& body = "") {
         return methods("DELETE", url, body);
     }
-    inline static HttpRespond CONNECT(const std::string& url, const std::string& body = "") {
+    inline static HttpRespond CONNECT(const Url& url, const std::string& body = "") {
         return methods("CONNECT", url, body);
     }
-    inline static HttpRespond OPTIONS(const std::string& url, const std::string& body = "") {
+    inline static HttpRespond OPTIONS(const Url& url, const std::string& body = "") {
         return methods("OPTIONS", url, body);
     }
-    inline static HttpRespond TRACE(const std::string& url, const std::string& body = "") {
+    inline static HttpRespond TRACE(const Url& url, const std::string& body = "") {
         return methods("TRACE", url, body);
     }
-    inline static HttpRespond PATCH(const std::string& url, const std::string& body = "") {
+    inline static HttpRespond PATCH(const Url& url, const std::string& body = "") {
         return methods("PATCH", url, body);
     }
 
