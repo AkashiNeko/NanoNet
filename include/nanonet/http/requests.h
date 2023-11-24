@@ -20,7 +20,7 @@ namespace nanonet {
 class Requests {
 
     // send method
-    static HttpRespond methods(const char* method, const Url& url, const std::string& body);
+    static HttpRespond _methods(const char* method, const Url& url, const std::string& body);
 
 public:
 
@@ -32,31 +32,31 @@ public:
 
     // methods
     inline static HttpRespond GET(const Url& url, const std::string& body = "") {
-        return methods("GET", url, body);
+        return _methods("GET", url, body);
     }
     inline static HttpRespond HEAD(const Url& url, const std::string& body = "") {
-        return methods("HEAD", url, body);
+        return _methods("HEAD", url, body);
     }
     inline static HttpRespond POST(const Url& url, const std::string& body = "") {
-        return methods("POST", url, body);
+        return _methods("POST", url, body);
     }
     inline static HttpRespond PUT(const Url& url, const std::string& body = "") {
-        return methods("PUT", url, body);
+        return _methods("PUT", url, body);
     }
     inline static HttpRespond DELETE(const Url& url, const std::string& body = "") {
-        return methods("DELETE", url, body);
+        return _methods("DELETE", url, body);
     }
     inline static HttpRespond CONNECT(const Url& url, const std::string& body = "") {
-        return methods("CONNECT", url, body);
+        return _methods("CONNECT", url, body);
     }
     inline static HttpRespond OPTIONS(const Url& url, const std::string& body = "") {
-        return methods("OPTIONS", url, body);
+        return _methods("OPTIONS", url, body);
     }
     inline static HttpRespond TRACE(const Url& url, const std::string& body = "") {
-        return methods("TRACE", url, body);
+        return _methods("TRACE", url, body);
     }
     inline static HttpRespond PATCH(const Url& url, const std::string& body = "") {
-        return methods("PATCH", url, body);
+        return _methods("PATCH", url, body);
     }
 
 };  // class Requests

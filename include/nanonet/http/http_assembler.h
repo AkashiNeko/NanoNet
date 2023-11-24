@@ -33,27 +33,18 @@ class HttpAssembler {
     bool isOK = false;
     bool headDone = false;
 
-    bool fillHead(HttpRespond& respond, const char* msg);
-    bool fillHead(HttpRequest& request, const char* msg);
+private:
 
-    // converts hex text to digit, on error, -1 is returned
-    static size_t hex2digit(const std::string& hexStr) {
-        try {
-            return (size_t)std::stol(hexStr, nullptr, 16);
-        } catch (const std::exception& e) {
-            return (size_t)std::string::npos;
-        }
-    }
+    bool _fillHead(HttpRespond& respond, const char* msg);
+    bool _fillHead(HttpRequest& request, const char* msg);
 
     // append chunks when 'Transfer-Encoding' is 'chunked'
-    bool appendChunk(const char* msg);
-
-    bool appendBody(const char* msg);
+    bool _appendChunk(const char* msg);
+    bool _appendBody(const char* msg);
 
 public:
 
     HttpAssembler(MsgType& httpmsg);
-
     bool append(const char* msg);
 
 };  // class HttpAssembler

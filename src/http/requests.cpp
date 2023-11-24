@@ -5,7 +5,7 @@
 namespace nanonet {
 
 // send method
-HttpRespond Requests::methods(const char* method, const Url& url, const std::string& body) {
+HttpRespond Requests::_methods(const char* method, const Url& url, const std::string& body) {
     HttpRequest httpRequest(method, url);
     if (!body.empty())
         httpRequest.setBody(body);

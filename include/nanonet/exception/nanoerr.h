@@ -98,18 +98,18 @@ inline bool throwError(const Args&... args) {
 
 #else // __cplusplus < 201703L
 
-inline void _append_string(std::string& s) {}
+inline void _appendString(std::string& s) {}
 
 template <class T, class ...Args>
-inline void _append_string(std::string& s, const T& arg, const Args&... args) {
+inline void _appendString(std::string& s, const T& arg, const Args&... args) {
     s += arg;
-    _append_string(s, args...);
+    _appendString(s, args...);
 }
 
 template <class ErrType, class ...Args>
 inline bool throwError(const Args&... args) {
     std::string s;
-    _append_string(s, args...);
+    _appendString(s, args...);
     throw ErrType(std::move(s));
     return false;
 }

@@ -33,8 +33,6 @@ class Url {
     // scheme
     std::string scheme;
     
-    // authority
-
     // userinfo
     std::string user;
     std::string password;
@@ -54,6 +52,8 @@ class Url {
     // port
     Port port = 0;
 
+private:
+
     void _parseUserInfo(std::string&& userInfo);
     void _parseAuthority(std::string&& authority);
     void _parseAuthorityAfter(std::string&& str);
@@ -65,7 +65,9 @@ public:
     Url(std::string&& url);
     Url(const std::string& url);
     Url(Url&& url);
-    Url(const char* url) :Url(std::string(url)) {}
+
+    inline Url(const char* url) :Url(std::string(url)) {}
+
     virtual ~Url() = default;
 
     void parse(std::string&& url);

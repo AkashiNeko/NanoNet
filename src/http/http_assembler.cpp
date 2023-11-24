@@ -4,8 +4,17 @@
 
 namespace nanonet {
 
+// converts hex text to digit, on error, -1 is returned
+static size_t hex2digit(const std::string& hexStr) {
+    try {
+        return (size_t)std::stol(hexStr, nullptr, 16);
+    } catch (const std::exception& e) {
+        return (size_t)std::string::npos;
+    }
+}
+
 template <class MsgType>
-bool HttpAssembler<MsgType>::fillHead(HttpRespond& respond, const char* msg) {
+bool HttpAssembler<MsgType>::_fillHead(HttpRespond& respond, const char* msg) {
     headCache += msg;
     bodyStart = headCache.find("\r\n\r\n", bodyStartCache);
     // +------------------------------+
@@ -57,7 +66,7 @@ bool HttpAssembler<MsgType>::fillHead(HttpRespond& respond, const char* msg) {
         // OK
         this->headDone = true;
         // fill body
-        bool ret = appendBody(bodyCache.c_str());
+        bool ret = _appendBody(bodyCache.c_str());
         bodyCache.clear();
         return ret;
     }
@@ -69,7 +78,7 @@ bool HttpAssembler<MsgType>::fillHead(HttpRespond& respond, const char* msg) {
 }
 
 template <class MsgType>
-bool HttpAssembler<MsgType>::fillHead(HttpRequest& request, const char* msg) {
+bool HttpAssembler<MsgType>::_fillHead(HttpRequest& request, const char* msg) {
     headCache += msg;
     bodyStart = headCache.find("\r\n\r\n", bodyStartCache);
     // +------------------------------+
@@ -135,7 +144,7 @@ bool HttpAssembler<MsgType>::fillHead(HttpRequest& request, const char* msg) {
         // OK
         this->headDone = true;
         // fill body
-        bool ret = appendBody(bodyCache.c_str());
+        bool ret = _appendBody(bodyCache.c_str());
         bodyCache.clear();
         if (request.getMethod() == "GET")
             return isOK = true;
@@ -150,7 +159,7 @@ bool HttpAssembler<MsgType>::fillHead(HttpRequest& request, const char* msg) {
 
 // append chunks when 'Transfer-Encoding' is 'chunked'
 template <class MsgType>
-bool HttpAssembler<MsgType>::appendChunk(const char* msg) {
+bool HttpAssembler<MsgType>::_appendChunk(const char* msg) {
     chunkCache += msg;
     size_t length = chunkCache.size();
     while (chunkBase < length) {
@@ -192,10 +201,10 @@ bool HttpAssembler<MsgType>::appendChunk(const char* msg) {
 }
 
 template <class MsgType>
-bool HttpAssembler<MsgType>::appendBody(const char* msg) {
+bool HttpAssembler<MsgType>::_appendBody(const char* msg) {
     // when 'Transfer-Encoding' is 'chunked'
     if (chunkedTransferEncoding)
-        return appendChunk(msg);
+        return _appendChunk(msg);
     // append to body
     httpmsg.appendText(msg);
     // when 'Content-Length' is set
@@ -221,9 +230,9 @@ bool HttpAssembler<MsgType>::append(const char* msg) {
         return true;
 
     if (headDone) {
-        return appendBody(msg);
+        return _appendBody(msg);
     } else {
-        return fillHead(httpmsg, msg);
+        return _fillHead(httpmsg, msg);
     }
 }
 
