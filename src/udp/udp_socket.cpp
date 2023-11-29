@@ -60,8 +60,13 @@ AddrPort UdpSocket::receive(char* buffer, size_t bufSize) const {
     ssize_t len = ::recvfrom(sockfd, buffer, bufSize,
         0, (struct sockaddr*)&remote, &socklen);
 
-    // received successfully
-    len < 0 && throwError<UdpReceiveError>("[udp] receive: ", strerror(errno));
+    if (len < 0) {
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            throwError<UdpReceiveTimeoutError>("[udp] receive timeout");
+        } else {
+            throwError<UdpReceiveError>("[udp] receive: ", strerror(errno));
+        }
+    }
 
     // truncate buffer
     if (len < bufSize) buffer[len] = 0;

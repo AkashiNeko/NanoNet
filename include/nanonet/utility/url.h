@@ -162,7 +162,6 @@ public:
         this->fragment = std::move(fragment);
     }
 
-    // to string
     std::string toString() const;
 
 }; // class Url

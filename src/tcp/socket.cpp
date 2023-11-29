@@ -9,7 +9,7 @@ Socket::Socket() :sockfd(-1), remote({}) {
     remote.sin_family = AF_INET;
     sockfd = ::socket(AF_INET, SOCK_STREAM, 0);
     sockfd < 0 && throwError<TcpSocketError>(
-        "[tcp] create socket: ", strerror(errno));
+        "[tcp] create socket: ", std::strerror(errno));
 }
 
 // destructor
@@ -21,7 +21,7 @@ void Socket::connect(const Addr& addr, const Port& port) {
     remote.sin_addr.s_addr = addr.hton();
     remote.sin_port = port.hton();
     int ret = ::connect(sockfd, (const struct sockaddr*)&remote, sizeof(remote));
-    ret < 0 && throwError<TcpConnectError>("[tcp] connect: ", strerror(errno));
+    ret < 0 && throwError<TcpConnectError>("[tcp] connect: ", std::strerror(errno));
 }
 
 void Socket::bind(const Addr& addr, const Port& port) {
@@ -31,7 +31,7 @@ void Socket::bind(const Addr& addr, const Port& port) {
     local.sin_port = port.hton();
     if (::bind(this->sockfd, (const struct sockaddr*)&local, sizeof(local)) < 0) {
         throwError<TcpBindError>("[tcp] bind \'",
-            AddrPort::toString(addr, port), "\': ", strerror(errno));
+            AddrPort::toString(addr, port), "\': ", std::strerror(errno));
     }
 }
 
@@ -59,7 +59,7 @@ int Socket::send(const char* msg, size_t size) const {
 
     // send to remote
     int ret = ::send(sockfd, msg, size, 0);
-    ret < 0 && throwError<TcpSendError>("[tcp] send:", strerror(errno));
+    ret < 0 && throwError<TcpSendError>("[tcp] send:", std::strerror(errno));
 
     // returns the number of bytes sent
     return ret;
@@ -76,7 +76,14 @@ int Socket::receive(char *buf, size_t buf_size) {
     // receive from remote
     ssize_t len = ::recv(sockfd, buf, buf_size, 0);
 
-    len < 0 && throwError<TcpReceiveError>("[tcp] receive: ", strerror(errno));
+    if (len < 0) {
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            throwError<TcpReceiveTimeoutError>("[tcp] receive timeout");
+        } else {
+            throwError<TcpReceiveError>("[tcp] receive: ", std::strerror(errno));
+        }
+    }
+
     // truncate buffer
     if (len < buf_size) buf[len] = 0;
 

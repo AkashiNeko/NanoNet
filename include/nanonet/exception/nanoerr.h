@@ -68,6 +68,7 @@ DEFINE_NANOERR_CLASS(TcpAcceptError, TcpError)
 DEFINE_NANOERR_CLASS(TcpConnectError, TcpError)
 DEFINE_NANOERR_CLASS(TcpSendError, TcpError)
 DEFINE_NANOERR_CLASS(TcpReceiveError, TcpError)
+DEFINE_NANOERR_CLASS(TcpReceiveTimeoutError, TcpError)
 DEFINE_NANOERR_CLASS(TcpSocketClosedError, TcpError)
 
 // UDP
@@ -76,6 +77,7 @@ DEFINE_NANOERR_CLASS(UdpSocketError, UdpError)
 DEFINE_NANOERR_CLASS(UdpBindError, UdpError)
 DEFINE_NANOERR_CLASS(UdpSendError, UdpError)
 DEFINE_NANOERR_CLASS(UdpReceiveError, UdpError)
+DEFINE_NANOERR_CLASS(UdpReceiveTimeoutError, UdpError)
 DEFINE_NANOERR_CLASS(UdpSocketClosedError, UdpError)
 
 // URL
