@@ -20,13 +20,13 @@ in_port_t Port::parse_(const std::string& str) {
 }
 
 // constructor
-Port::Port(in_port_t val) :val(val) {}
+Port::Port(in_port_t val) :val_(val) {}
 
 Port::Port(const std::string& str) {
-    this->val = parsePort(str).val;
+    this->val_ = parse_(str);
 }
 
 // to string
-std::string Port::toString() const { return std::to_string(this->val); }
+std::string Port::toString() const { return std::to_string(this->val_); }
 
 } // namespace nanonet

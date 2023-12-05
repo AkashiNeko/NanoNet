@@ -105,7 +105,7 @@ void Url::_parseAuthority(std::string&& authority) {
             this->port = _getDefaultPort(this->scheme);
         } else {
             try {
-                this->port = Port::parsePort(strPort);
+                this->port.parse(strPort);
             } catch (const ParsePortError&) {
                 throwError<ParseUrlError>("[url] port \'", strPort, "\' is invalid");
             }
