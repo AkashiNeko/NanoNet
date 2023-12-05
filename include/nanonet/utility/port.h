@@ -23,6 +23,8 @@ class Port {
     // host byte order port
     in_port_t val;
 
+    static in_port_t parse_(const std::string& port);
+
 public:
 
     // constructor

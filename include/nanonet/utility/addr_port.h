@@ -24,6 +24,8 @@ class AddrPort {
 
 public:
 
+    AddrPort() = default;
+
     // construct from address and port (host byte order)
     AddrPort(const Addr& addr, const Port& port);
 

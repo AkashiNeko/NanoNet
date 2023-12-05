@@ -5,21 +5,25 @@
 
 namespace nanonet {
 
-// constructor
-Addr::Addr(in_addr_t val) : val(val) {}
-
-Addr::Addr(const char* host) {
-    if (isValid(host)) {
-        this->val = ::ntohl(inet_addr(host));
+in_addr_t Addr::parse_(const char* addr) {
+    if (isValid(addr)) {
+        return ::ntohl(inet_addr(addr));
     } else {
-        this->val = getAddrByName(host).val;
+        return getAddrByName(addr).val_;
     }
 }
+
+// constructor
+Addr::Addr(in_addr_t val)
+    : val_(val) {}
+
+Addr::Addr(const char* addr)
+    :val_(parse_(addr)) {}
 
 // to string "xx.xx.xx.xx"
 std::string Addr::toString() const {
     struct in_addr inAddr;
-    inAddr.s_addr = ::htonl(this->val);
+    inAddr.s_addr = ::htonl(this->val_);
     char strAddr[INET_ADDRSTRLEN];
     const char* result = ::inet_ntop(AF_INET, &(inAddr.s_addr), strAddr, sizeof(strAddr));
     !result && throwError<AddrNTOPError>("[addr] inet_ntop: ", strerror(errno));
