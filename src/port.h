@@ -10,7 +10,7 @@
 // C++
 #include <string>
 
-// linux
+// Linux
 #include <netinet/in.h>
 
 // nanonet
@@ -23,55 +23,33 @@ class Port {
     // host byte order port
     in_port_t val_;
 
-    static in_port_t parse_(const std::string& port);
-
 public:
 
-    // constructor
-    Port(in_port_t val = 0U);
-
+    Port(in_port_t val = 0);
+    Port(const char* port);
     Port(const std::string& port);
+    virtual ~Port() = default;
 
-    // to string
-    std::string toString() const;
+    Port& operator=(in_port_t other);
+    Port& operator=(const char* other);
+    Port& operator=(const std::string& other);
 
-    inline bool operator==(const Port& port) const {
-        return this->val_ == port.val_;
-    }
+    bool operator==(in_port_t other) const;
+    bool operator!=(in_port_t other) const;
+    bool operator==(const char* other) const;
+    bool operator!=(const char* other) const;
+    bool operator==(const std::string& other) const;
+    bool operator!=(const std::string& other) const;
 
-    inline bool operator==(in_port_t val) const {
-        return this->val_ == val;
-    }
-
-    inline bool operator!=(const Port& port) const {
-        return this->val_ != port.val_;
-    }
-
-    inline bool operator!=(in_port_t val) const {
-        return this->val_ != val;
-    }
-
-    inline Port& operator=(in_port_t val) {
-        this->setVal(val);
-        return *this;
-    }
-
-    void parse(const std::string& val) {
-        this->val_ = parse_(val);
-    }
-
-    // host byte order -> network byte order
-    inline uint16_t hton() const {
-        return ::htons(this->val_);
-    }
+    // to network byte order
+    in_port_t net_order() const;
 
     // getter & setter
-    inline in_addr_t getVal() const {
-        return this->val_;
-    }
-    inline void setVal(in_addr_t val) {
-        this->val_ = val;
-    }
+    in_addr_t get() const;
+    void set(in_addr_t val);
+
+    // to string
+    std::string to_string() const;
 
 }; // class Port
 

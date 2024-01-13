@@ -4,29 +4,92 @@
 
 namespace nano {
 
-in_port_t Port::parse_(const std::string& str) {
-    int port = 0;
-    if (str.empty()) return 0;
+static in_port_t parse_(const char* port) {
+    unsigned result = 0;
+    for (const char* p = port; *p; ++p) {
+        if (*p < '0' || *p > '9')
+            throwError<ParsePortError>("[port] port ", port, " is invalied");
+        result = result * 10 + (*p & 0xF);
+        if (result > 0xFFFF)
+            throwError<ParsePortError>("[port] port ", port, " is out of range");
+    }
+    return static_cast<in_port_t>(result);
+}
+
+inline bool equal(const in_port_t& port, const char* other) {
     try {
-        port = std::stoi(str);
-    } catch (const std::exception& e) {
-        throwError<ParsePortError>("[port] string \'",
-            str, "\' to port: ", e.what());
+        return port == parse_(other);
+    } catch (...) {
+        return false;
     }
-    if (port > 65535 || port < 0) {
-        throwError<ParsePortError>("[port] port ", str, " is invalied");
-    }
-    return port;
 }
 
 // constructor
-Port::Port(in_port_t val) :val_(val) {}
+Port::Port(in_port_t port)
+    : val_(port) {}
 
-Port::Port(const std::string& str) {
-    this->val_ = parse_(str);
+Port::Port(const char* port)
+    : val_(parse_(port)) {}
+
+Port::Port(const std::string& port)
+    : val_(parse_(port.c_str())) {}
+
+Port& Port::operator=(in_port_t other) {
+    this->val_ = other;
+    return *this;
+}
+
+Port& Port::operator=(const char* other) {
+    this->val_ = parse_(other);
+    return *this;
+}
+
+Port& Port::operator=(const std::string& other) {
+    this->val_ = parse_(other.c_str());
+    return *this;
+}
+
+bool Port::operator==(in_port_t other) const {
+    return this->val_ == other;
+}
+
+bool Port::operator!=(in_port_t other) const {
+    return this->val_ != other;
+}
+
+bool Port::operator==(const char* other) const {
+    return equal(this->val_, other);
+}
+
+bool Port::operator!=(const char* other) const {
+    return !equal(this->val_, other);
+}
+
+bool Port::operator==(const std::string& other) const {
+    return equal(this->val_, other.c_str());
+}
+
+bool Port::operator!=(const std::string& other) const {
+    return !equal(this->val_, other.c_str());
+}
+
+// to network byte order
+in_port_t Port::net_order() const {
+    return ::htons(this->val_);
+}
+
+// getter & setter
+in_addr_t Port::get() const {
+    return this->val_;
+}
+
+void Port::set(in_addr_t val) {
+    this->val_ = val;
 }
 
 // to string
-std::string Port::toString() const { return std::to_string(this->val_); }
+std::string Port::to_string() const {
+    return std::to_string(this->val_);
+}
 
 } // namespace nano

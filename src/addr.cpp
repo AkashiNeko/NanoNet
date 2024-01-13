@@ -1,7 +1,6 @@
 // addr.cpp
 
 #include "addr.h"
-#include "except.h"
 
 namespace nano {
 
@@ -13,6 +12,14 @@ static in_addr_t parse_(const char* addr) {
     }
 }
 
+inline bool equal(const in_addr_t& addr, const char* other) {
+    try {
+        return addr == parse_(other);
+    } catch (...) {
+        return false;
+    }
+}
+
 // constructor
 Addr::Addr(in_addr_t val) : val_(val) {}
 
@@ -20,46 +27,43 @@ Addr::Addr(const char* addr) : val_(parse_(addr)) {}
 
 Addr::Addr(const std::string& addr) : Addr(addr.c_str()) {}
 
-Addr& Addr::operator=(in_addr_t val) {
-    this->val_ = val;
+Addr& Addr::operator=(in_addr_t other) {
+    this->val_ = other;
     return *this;
 }
 
-Addr& Addr::operator=(const char* val) {
-    this->val_ = parse_(val);
+Addr& Addr::operator=(const char* other) {
+    this->val_ = parse_(other);
     return *this;
 }
 
-Addr& Addr::operator=(const std::string& val) {
-    this->val_ = parse_(val.c_str());
+Addr& Addr::operator=(const std::string& other) {
+    this->val_ = parse_(other.c_str());
     return *this;
 }
 
-bool Addr::operator==(in_addr_t val) {
-    return this->val_ == val;
+bool Addr::operator==(in_addr_t other) const {
+    return this->val_ == other;
 }
-bool Addr::operator!=(in_addr_t val) {
-    return this->val_ != val;
+
+bool Addr::operator!=(in_addr_t other) const {
+    return this->val_ != other;
 }
-bool Addr::operator==(const char* val) {
-    try {
-        return this->val_ == parse_(val);
-    } catch (...) {
-        return false;
-    }
+
+bool Addr::operator==(const char* other) const {
+    return equal(this->val_, other);
 }
-bool Addr::operator!=(const char* val) {
-    return !((*this) == val);
+
+bool Addr::operator!=(const char* other) const {
+    return !equal(this->val_, other);
 }
-bool Addr::operator==(const std::string& val) {
-    try {
-        return this->val_ == parse_(val.c_str());
-    } catch (...) {
-        return false;
-    }
+
+bool Addr::operator==(const std::string& other) const {
+    return equal(this->val_, other.c_str());
 }
-bool Addr::operator!=(const std::string& val) {
-    return !((*this) == val);
+
+bool Addr::operator!=(const std::string& other) const {
+    return !equal(this->val_, other.c_str());
 }
 
 // to network byte order
@@ -68,12 +72,12 @@ in_addr_t Addr::net_order() const {
 }
 
 // setter & getter
-void Addr::set(in_addr_t val) {
-    this->val_ = val;
-}
-
 in_addr_t Addr::get() const {
     return this->val_;
+}
+
+void Addr::set(in_addr_t val) {
+    this->val_ = val;
 }
 
 // to string
@@ -87,9 +91,23 @@ std::string Addr::to_string() const {
 }
 
 // is valid ipv4 address
-bool Addr::is_valid(const std::string& ip) {
-    std::regex pattern("^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$");
-    return std::regex_match(ip, pattern);
+bool Addr::is_valid(const std::string& addr) {
+    int count = 0, value = 0;
+    for (const char& c : addr) {
+        int num = 0;
+        if (c == '.') {
+            if (value > 255 || count == 3)
+                return false;
+            value = 0;
+            ++count;
+        } else if (c >= '0' && c <= '9') {
+            num = num * 10 + (c & 0xF);
+            value = value * 10 + (c & 0xF);
+        } else {
+            return false;
+        }
+    }
+    return (value <= 255) && (count == 3);
 }
 
 // DNS query
@@ -113,6 +131,7 @@ Addr Addr::dns_query(const char* domain, bool use_tcp) {
     freeaddrinfo(result);
     return Addr(::htonl(addr));
 }
+
 Addr Addr::dns_query(const std::string& domain, bool use_tcp) {
     return dns_query(domain.c_str(), use_tcp);
 }

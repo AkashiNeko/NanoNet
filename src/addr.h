@@ -17,6 +17,9 @@
 #include <netdb.h>
 #include <netinet/in.h>
 
+// nanonet
+#include "except.h"
+
 namespace nano {
 
 class Addr {
@@ -32,22 +35,23 @@ public:
     virtual ~Addr() = default;
 
     // assignment
-    Addr& operator=(in_addr_t val);
-    Addr& operator=(const char* val);
-    Addr& operator=(const std::string& val);
-    bool operator==(in_addr_t val);
-    bool operator!=(in_addr_t val);
-    bool operator==(const char* val);
-    bool operator!=(const char* val);
-    bool operator==(const std::string& val);
-    bool operator!=(const std::string& val);
+    Addr& operator=(in_addr_t other);
+    Addr& operator=(const char* other);
+    Addr& operator=(const std::string& other);
+
+    bool operator==(in_addr_t other) const;
+    bool operator!=(in_addr_t other) const;
+    bool operator==(const char* other) const;
+    bool operator!=(const char* other) const;
+    bool operator==(const std::string& other) const;
+    bool operator!=(const std::string& other) const;
 
     // to network byte order
     in_addr_t net_order() const;
 
     // setter & getter
-    void set(in_addr_t val);
     in_addr_t get() const;
+    void set(in_addr_t val);
 
     // to string
     std::string to_string() const;
