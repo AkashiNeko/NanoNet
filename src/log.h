@@ -38,7 +38,7 @@
 #define COLOR_LIGHT_CYAN       "\033[36;1m"
 #define COLOR_LIGHT_WHITE      "\033[37;1m"
 
-namespace nanonet {
+namespace nano {
 
 class Log {
 public:
@@ -77,6 +77,6 @@ extern Log warn;
 extern Log error;
 
 
-} // namespace nanonet
+} // namespace nano
 
 #endif // __LOG_H__

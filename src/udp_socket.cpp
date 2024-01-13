@@ -1,8 +1,8 @@
 // udp/udp_socket.cpp
 
-#include "nanonet/udp/udp_socket.h"
+#include "udp_socket.h"
 
-namespace nanonet {
+namespace nano {
 
 
 // default constructor
@@ -20,7 +20,7 @@ UdpSocket::~UdpSocket() {}
 
 // bind (addr : port)
 void UdpSocket::bind(const Addr& addr, const Port& port) {
-    local.sin_addr.s_addr = addr.hton();
+    local.sin_addr.s_addr = addr.net_order();
     local.sin_port = port.hton();
     if (::bind(sockfd, (const sockaddr*)&local, sizeof(local)) < 0) {
         throwError<UdpBindError>("[udp] bind \'",
@@ -33,7 +33,7 @@ void UdpSocket::setRemote(const Addr& addr, const Port& port) {
     assert(sockfd >= 0);
     remote.sin_family = AF_INET;
     remote.sin_port = port.hton();
-    remote.sin_addr.s_addr = addr.hton();
+    remote.sin_addr.s_addr = addr.net_order();
 }
 
 int UdpSocket::setReceiveTimeout(long seconds, long milliseconds) {
@@ -88,4 +88,4 @@ int UdpSocket::setsockopt(int level, int optname, const void* optval, socklen_t 
     return ::setsockopt(sockfd, level, optname, optval, optlen);
 }
 
-} // namespace nanonet
+} // namespace nano

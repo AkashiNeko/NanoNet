@@ -14,9 +14,9 @@
 #include <netinet/in.h>
 
 // nanonet
-#include "nanonet/exception/nanoerr.h"
+#include "except.h"
 
-namespace nanonet {
+namespace nano {
 
 class Port {
 
@@ -75,6 +75,6 @@ public:
 
 }; // class Port
 
-} // namespace nanonet
+} // namespace nano
 
 #endif // __PORT_H__

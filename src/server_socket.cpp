@@ -1,8 +1,8 @@
-// tcp/server_socket.cpp
+// server_socket.cpp
 
-#include "nanonet/tcp/server_socket.h"
+#include "server_socket.h"
 
-namespace nanonet {
+namespace nano {
 
 // default constructor
 ServerSocket::ServerSocket() {
@@ -35,7 +35,7 @@ void ServerSocket::setReuseAddr(bool reuseAddr) {
 // bind
 void ServerSocket::bind(const Addr& addr, const Port& port) {
     local.sin_family = AF_INET;
-    local.sin_addr.s_addr = addr.hton();
+    local.sin_addr.s_addr = addr.net_order();
     local.sin_port = port.hton();
     if (::bind(serverfd, (const struct sockaddr*)&local, sizeof(local)) < 0)
         throwError<TcpBindError>("[tcp] bind: ", strerror(errno));
@@ -67,4 +67,4 @@ void ServerSocket::close() {
     }
 }
 
-} // namespace nanonet
+} // namespace nano

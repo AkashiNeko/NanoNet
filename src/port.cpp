@@ -1,8 +1,8 @@
-// utility/port.cpp
+// port.cpp
 
-#include "nanonet/utility/port.h"
+#include "port.h"
 
-namespace nanonet {
+namespace nano {
 
 in_port_t Port::parse_(const std::string& str) {
     int port = 0;
@@ -29,4 +29,4 @@ Port::Port(const std::string& str) {
 // to string
 std::string Port::toString() const { return std::to_string(this->val_); }
 
-} // namespace nanonet
+} // namespace nano

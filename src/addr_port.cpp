@@ -1,19 +1,19 @@
-// utility/addr_port.cpp
+// addr_port.cpp
 
-#include "nanonet/utility/addr_port.h"
+#include "addr_port.h"
 
-namespace nanonet {
+namespace nano {
 
 // construct from address and port (host byte order)
 AddrPort::AddrPort(const Addr& addr, const Port& port) :addr(addr), port(port) {}
 
 // to string "xxx.xxx.xxx.xxx:port"
 std::string AddrPort::toString() const {
-    return this->addr.toString() + ":" + this->port.toString();
+    return this->addr.to_string() + ":" + this->port.toString();
 }
 
 std::string AddrPort::toString(const Addr& addr, const Port& port, char separator) {
-    return addr.toString() + separator + port.toString();
+    return addr.to_string() + separator + port.toString();
 }
 
-} // namespace nanonet
+} // namespace nano

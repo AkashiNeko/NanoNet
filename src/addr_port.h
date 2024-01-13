@@ -5,8 +5,8 @@
 #define __ADDR_PORT_H__
 
 // nanonet
-#include "nanonet/utility/addr.h"
-#include "nanonet/utility/port.h"
+#include "addr.h"
+#include "port.h"
 
 // C
 #include <cassert>
@@ -15,7 +15,7 @@
 // C++
 #include <string>
 
-namespace nanonet {
+namespace nano {
 
 class AddrPort {
 
@@ -51,6 +51,6 @@ public:
 
 }; // class addrPort
 
-} // namespace nanonet
+} // namespace nano
 
 #endif // __ADDR_PORT_H__

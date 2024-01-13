@@ -5,31 +5,25 @@
 #define __NANONET_H__
 
 #if __cplusplus < 201103L
-    #error "Sorry, nanonet requires at least C++11"
+    #error "Nanonet requires at least C++11"
 #endif
 
-// utility
-#include "nanonet/utility/log.h"
-#include "nanonet/utility/addr.h"
-#include "nanonet/utility/port.h"
-#include "nanonet/utility/addr_port.h"
-#include "nanonet/utility/url.h"
+// C
+#include <cstdint>
 
-// tcp
-#include "nanonet/tcp/socket.h"
-#include "nanonet/tcp/server_socket.h"
+// C++
+#include <regex>
+#include <string>
 
-// udp
-#include "nanonet/udp/udp_socket.h"
+// Linux
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <netinet/in.h>
 
-// http
-#include "nanonet/http/http_request.h"
-#include "nanonet/http/http_respond.h"
-#include "nanonet/http/http_assembler.h"
-#include "nanonet/http/requests.h"
-#include "nanonet/http/server/web_server.h"
+namespace nano {
 
-// exception
-#include "nanonet/exception/nanoerr.h"
+// TODO
+
+} // namespace nano
 
 #endif // __NANONET_H__

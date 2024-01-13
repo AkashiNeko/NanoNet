@@ -14,10 +14,10 @@
 #include <string>
 
 // nanonet
-#include "nanonet/utility/addr_port.h"
-#include "nanonet/exception/nanoerr.h"
+#include "addr_port.h"
+#include "except.h"
 
-namespace nanonet {
+namespace nano {
 
 class Socket {
     
@@ -81,6 +81,6 @@ public:
 
 }; // class Socket
 
-} // namespace nanonet
+} // namespace nano
 
 #endif // __SOCKET_H__

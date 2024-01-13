@@ -5,9 +5,9 @@
 #define __SERVER_SOCKET_H__
 
 // nanonet
-#include "nanonet/utility/addr_port.h"
-#include "nanonet/tcp/socket.h"
-#include "nanonet/exception/nanoerr.h"
+#include "addr_port.h"
+#include "socket.h"
+#include "except.h"
 
 // linux
 #include <unistd.h>
@@ -18,7 +18,7 @@
 // C++
 #include <string>
 
-namespace nanonet {
+namespace nano {
 
 const int BACKLOG_QUEUE_SIZE = 20;
 
@@ -76,6 +76,6 @@ public:
 
 };  // class ServerSocket
 
-}  // namespace nanonet
+}  // namespace nano
 
 #endif  // __SERVER_SOCKET_H__

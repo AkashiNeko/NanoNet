@@ -1,8 +1,8 @@
-// utility/log.cpp
+// log.cpp
 
-#include "nanonet/utility/log.h"
+#include "log.h"
 
-namespace nanonet {
+namespace nano {
 
 Log::Log(Levels level, std::ostream& out) :level(level), out(out) {}
 
@@ -36,4 +36,4 @@ Log warn(Log::Levels::WARN);
 Log error(Log::Levels::ERROR);
 
 
-} // namespace nanonet
+} // namespace nano

@@ -1,8 +1,8 @@
-// nanoerr.h
+// except.h
 
 #pragma once
-#ifndef __NANOERR_H__
-#define __NANOERR_H__
+#ifndef __EXCEPT_H__
+#define __EXCEPT_H__
 
 #include <string>
 #include <exception>
@@ -16,7 +16,7 @@ public:                                                                     \
     virtual ~DerivedClass() override = default;                             \
 };                                                                          \
 
-namespace nanonet {
+namespace nano {
 
 class Error : public std::exception {
     std::string errmsg;
@@ -43,9 +43,6 @@ public:
 // | '-----------'  '----------' |
 // | .-----------.  .----------. |
 // | | PortError |  | UdpError | |
-// | '-----------'  '----------' |
-// | .-----------.  .----------. |
-// | | HttpError |  | UrlError | |
 // | '-----------'  '----------' |
 // + - - - - - - - - - - - - - - +
 
@@ -80,14 +77,6 @@ DEFINE_NANOERR_CLASS(UdpReceiveError, UdpError)
 DEFINE_NANOERR_CLASS(UdpReceiveTimeoutError, UdpError)
 DEFINE_NANOERR_CLASS(UdpSocketClosedError, UdpError)
 
-// URL
-DEFINE_NANOERR_CLASS(UrlError, Error)
-DEFINE_NANOERR_CLASS(ParseUrlError, UrlError)
-
-// HTTP
-DEFINE_NANOERR_CLASS(HttpError, Error)
-DEFINE_NANOERR_CLASS(HttpReceiveError, HttpError)
-
 #if __cplusplus >= 201703L
 
 template <class ErrType, class ...Args>
@@ -118,6 +107,6 @@ inline bool throwError(const Args&... args) {
 
 #endif // __cplusplus
 
-} // namespace nanonet
+} // namespace nano
 
-#endif // __NANOERR_H__
+#endif // __EXCEPT_H__

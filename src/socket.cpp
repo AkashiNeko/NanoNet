@@ -1,8 +1,8 @@
-// tcp/socket.cpp
+// socket.cpp
 
-#include "nanonet/tcp/socket.h"
+#include "socket.h"
 
-namespace nanonet {
+namespace nano {
 
 // default constructor
 Socket::Socket() :sockfd(-1), remote({}) {
@@ -18,7 +18,7 @@ Socket::~Socket() {}
 // connect to server
 void Socket::connect(const Addr& addr, const Port& port) {
     sockfd < 0 && throwError<TcpSocketClosedError>("[tcp] socket is closed");
-    remote.sin_addr.s_addr = addr.hton();
+    remote.sin_addr.s_addr = addr.net_order();
     remote.sin_port = port.hton();
     int ret = ::connect(sockfd, (const struct sockaddr*)&remote, sizeof(remote));
     ret < 0 && throwError<TcpConnectError>("[tcp] connect: ", std::strerror(errno));
@@ -27,7 +27,7 @@ void Socket::connect(const Addr& addr, const Port& port) {
 void Socket::bind(const Addr& addr, const Port& port) {
     sockaddr_in local;
     local.sin_family = AF_INET;
-    local.sin_addr.s_addr = addr.hton();
+    local.sin_addr.s_addr = addr.net_order();
     local.sin_port = port.hton();
     if (::bind(this->sockfd, (const struct sockaddr*)&local, sizeof(local)) < 0) {
         throwError<TcpBindError>("[tcp] bind \'",
@@ -96,4 +96,4 @@ AddrPort Socket::getRemoteAddrPort() const {
     return AddrPort(::ntohl(remote.sin_addr.s_addr), ::ntohs(remote.sin_port));
 }
 
-} // namespace nanonet
+} // namespace nano
