@@ -21,7 +21,7 @@ UdpSocket::~UdpSocket() {}
 // bind (addr : port)
 void UdpSocket::bind(const Addr& addr, const Port& port) {
     local.sin_addr.s_addr = addr.net_order();
-    local.sin_port = port.hton();
+    local.sin_port = port.net_order();
     if (::bind(sockfd, (const sockaddr*)&local, sizeof(local)) < 0) {
         throwError<UdpBindError>("[udp] bind \'",
             AddrPort::toString(addr, port), "\': ", strerror(errno));
@@ -32,7 +32,7 @@ void UdpSocket::bind(const Addr& addr, const Port& port) {
 void UdpSocket::setRemote(const Addr& addr, const Port& port) {
     assert(sockfd >= 0);
     remote.sin_family = AF_INET;
-    remote.sin_port = port.hton();
+    remote.sin_port = port.net_order();
     remote.sin_addr.s_addr = addr.net_order();
 }
 

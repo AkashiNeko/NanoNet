@@ -36,7 +36,7 @@ void ServerSocket::setReuseAddr(bool reuseAddr) {
 void ServerSocket::bind(const Addr& addr, const Port& port) {
     local.sin_family = AF_INET;
     local.sin_addr.s_addr = addr.net_order();
-    local.sin_port = port.hton();
+    local.sin_port = port.net_order();
     if (::bind(serverfd, (const struct sockaddr*)&local, sizeof(local)) < 0)
         throwError<TcpBindError>("[tcp] bind: ", strerror(errno));
 }

@@ -19,7 +19,7 @@ Socket::~Socket() {}
 void Socket::connect(const Addr& addr, const Port& port) {
     sockfd < 0 && throwError<TcpSocketClosedError>("[tcp] socket is closed");
     remote.sin_addr.s_addr = addr.net_order();
-    remote.sin_port = port.hton();
+    remote.sin_port = port.net_order();
     int ret = ::connect(sockfd, (const struct sockaddr*)&remote, sizeof(remote));
     ret < 0 && throwError<TcpConnectError>("[tcp] connect: ", std::strerror(errno));
 }
@@ -28,7 +28,7 @@ void Socket::bind(const Addr& addr, const Port& port) {
     sockaddr_in local;
     local.sin_family = AF_INET;
     local.sin_addr.s_addr = addr.net_order();
-    local.sin_port = port.hton();
+    local.sin_port = port.net_order();
     if (::bind(this->sockfd, (const struct sockaddr*)&local, sizeof(local)) < 0) {
         throwError<TcpBindError>("[tcp] bind \'",
             AddrPort::toString(addr, port), "\': ", std::strerror(errno));
