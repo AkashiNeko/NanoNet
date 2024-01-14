@@ -1,8 +1,8 @@
 // addr.h
 
 #pragma once
-#ifndef __ADDR_H__
-#define __ADDR_H__
+#ifndef __NANONET__ADDR_H__
+#define __NANONET__ADDR_H__
 
 // C
 #include <cstdint>
@@ -29,12 +29,14 @@ class Addr {
 
 public:
 
+    // ctor & dtor
     Addr(in_addr_t val = 0);
     Addr(const char* addr);
     Addr(const std::string& addr);
     virtual ~Addr() = default;
 
-    // assignment
+    // assign
+    Addr& operator=(const Addr&) = default;
     Addr& operator=(in_addr_t other);
     Addr& operator=(const char* other);
     Addr& operator=(const std::string& other);
@@ -67,4 +69,4 @@ public:
 
 }  // namespace nano
 
-#endif  // __ADDR_H__
+#endif  // __NANONET__ADDR_H__

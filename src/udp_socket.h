@@ -46,7 +46,7 @@ public:
     void bind(const Addr& addr, const Port& port);
 
     inline void bind(const AddrPort& addrPort) {
-        this->bind(addrPort.getAddr(), addrPort.getPort());
+        this->bind(addrPort.get_addr(), addrPort.get_port());
     }
 
     inline void bind(const std::string& ip, const Port& port) {
@@ -65,7 +65,7 @@ public:
     void setRemote(const Addr& addr, const Port& port);
 
     inline void setRemote(const AddrPort& addrPort) {
-        this->setRemote(addrPort.getAddr(), addrPort.getPort());
+        this->setRemote(addrPort.get_addr(), addrPort.get_port());
     }
 
     inline void setRemote(const std::string& ip, const Port& port) {

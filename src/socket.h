@@ -44,7 +44,7 @@ public:
     void connect(const Addr& addr, const Port& port);
 
     inline void connect(const AddrPort& addrPort) {
-        this->connect(addrPort.getAddr(), addrPort.getPort());
+        this->connect(addrPort.get_addr(), addrPort.get_port());
     }
 
     inline void connect(const std::string& ip, const Port& port) {

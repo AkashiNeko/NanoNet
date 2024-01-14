@@ -4,6 +4,7 @@
 
 namespace nano {
 
+// convert C string to in_port_t
 static in_port_t parse_(const char* port) {
     unsigned result = 0;
     for (const char* p = port; *p; ++p) {
@@ -16,6 +17,7 @@ static in_port_t parse_(const char* port) {
     return static_cast<in_port_t>(result);
 }
 
+// compare in_port_t and C string
 inline bool equal(const in_port_t& port, const char* other) {
     try {
         return port == parse_(other);
@@ -34,6 +36,7 @@ Port::Port(const char* port)
 Port::Port(const std::string& port)
     : val_(parse_(port.c_str())) {}
 
+// assign
 Port& Port::operator=(in_port_t other) {
     this->val_ = other;
     return *this;

@@ -1,19 +1,12 @@
 // addr_port.h
 
 #pragma once
-#ifndef __ADDR_PORT_H__
-#define __ADDR_PORT_H__
+#ifndef __NANONET__ADDR_PORT_H__
+#define __NANONET__ADDR_PORT_H__
 
 // nanonet
 #include "addr.h"
 #include "port.h"
-
-// C
-#include <cassert>
-#include <cstdint>
-
-// C++
-#include <string>
 
 namespace nano {
 
@@ -24,33 +17,23 @@ class AddrPort {
 
 public:
 
+    // ctor & dtor
     AddrPort() = default;
-
-    // construct from address and port (host byte order)
     AddrPort(const Addr& addr, const Port& port);
-
-    // to string "xxx.xxx.xxx.xxx:port"
-    std::string toString() const;
-
-    static std::string toString(const Addr& addr, const Port& port, char separator = ':');
+    virtual ~AddrPort() = default;
 
     // getter & setter
-    inline void setAddr(const Addr& addr) {
-        this->addr = addr;
-    }
-    inline void setPort(const Port& port) {
-        this->port = port;
-    }
+    Addr get_addr() const;
+    Port get_port() const;
+    void set_addr(const Addr& addr);
+    void set_port(const Port& port);
 
-    inline Addr getAddr() const {
-        return this->addr;
-    }
-    inline Port getPort() const {
-        return this->port;
-    }
+    // to string
+    std::string to_string() const;
+    static std::string to_string(const Addr& addr, const Port& port, char separator = ':');
 
 }; // class addrPort
 
 } // namespace nano
 
-#endif // __ADDR_PORT_H__
+#endif // __NANONET__ADDR_PORT_H__

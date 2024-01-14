@@ -24,7 +24,7 @@ void UdpSocket::bind(const Addr& addr, const Port& port) {
     local.sin_port = port.net_order();
     if (::bind(sockfd, (const sockaddr*)&local, sizeof(local)) < 0) {
         throwError<UdpBindError>("[udp] bind \'",
-            AddrPort::toString(addr, port), "\': ", strerror(errno));
+            AddrPort::to_string(addr, port), "\': ", strerror(errno));
     }
 }
 

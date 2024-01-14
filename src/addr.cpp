@@ -4,6 +4,7 @@
 
 namespace nano {
 
+// convert C string to in_addr_t
 static in_addr_t parse_(const char* addr) {
     if (Addr::is_valid(addr)) {
         return ::ntohl(inet_addr(addr));
@@ -12,6 +13,7 @@ static in_addr_t parse_(const char* addr) {
     }
 }
 
+// compare in_addr_t and C string
 inline bool equal(const in_addr_t& addr, const char* other) {
     try {
         return addr == parse_(other);
@@ -32,6 +34,7 @@ Addr& Addr::operator=(in_addr_t other) {
     return *this;
 }
 
+// assign
 Addr& Addr::operator=(const char* other) {
     this->val_ = parse_(other);
     return *this;

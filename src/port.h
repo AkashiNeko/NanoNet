@@ -1,8 +1,8 @@
 // port.h
 
 #pragma once
-#ifndef __PORT_H__
-#define __PORT_H__
+#ifndef __NANONET__PORT_H__
+#define __NANONET__PORT_H__
 
 // C
 #include <cstdint>
@@ -25,11 +25,13 @@ class Port {
 
 public:
 
+    // ctor & dtor
     Port(in_port_t val = 0);
     Port(const char* port);
     Port(const std::string& port);
     virtual ~Port() = default;
 
+    // assign
     Port& operator=(in_port_t other);
     Port& operator=(const char* other);
     Port& operator=(const std::string& other);
@@ -55,4 +57,4 @@ public:
 
 } // namespace nano
 
-#endif // __PORT_H__
+#endif // __NANONET__PORT_H__

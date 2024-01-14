@@ -31,7 +31,7 @@ void Socket::bind(const Addr& addr, const Port& port) {
     local.sin_port = port.net_order();
     if (::bind(this->sockfd, (const struct sockaddr*)&local, sizeof(local)) < 0) {
         throwError<TcpBindError>("[tcp] bind \'",
-            AddrPort::toString(addr, port), "\': ", std::strerror(errno));
+            AddrPort::to_string(addr, port), "\': ", std::strerror(errno));
     }
 }
 
