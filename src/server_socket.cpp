@@ -8,8 +8,8 @@ namespace nano {
 ServerSocket::ServerSocket() {
     serverfd = ::socket(AF_INET, SOCK_STREAM, 0);
     if (serverfd < 0) {
-        throwError<TcpServerSocketError>(
-            "[tcp] create socket: ", strerror(errno));
+        throw_except<TcpServerSocketError>(
+                "[tcp] create socket: ", strerror(errno));
     }
     this->setReuseAddr(true);
 }
@@ -38,12 +38,12 @@ void ServerSocket::bind(const Addr& addr, const Port& port) {
     local.sin_addr.s_addr = addr.net_order();
     local.sin_port = port.net_order();
     if (::bind(serverfd, (const struct sockaddr*)&local, sizeof(local)) < 0)
-        throwError<TcpBindError>("[tcp] bind: ", strerror(errno));
+        throw_except<TcpBindError>("[tcp] bind: ", strerror(errno));
 }
 
 void ServerSocket::listen(int backlog) {
     if (::listen(serverfd, backlog) < 0)
-        throwError<TcpListenError>("[tcp] listen: ", strerror(errno));
+        throw_except<TcpListenError>("[tcp] listen: ", strerror(errno));
     this->listening = true;
 }
 
@@ -53,7 +53,7 @@ Socket ServerSocket::accept() {
     // accept
     socklen_t socklen = sizeof(socket.remote);
     int fd = ::accept(serverfd, (struct sockaddr*)&socket.remote, &socklen);
-    fd < 0 && throwError<TcpAcceptError>("[tcp] accept: ", strerror(errno));
+    fd < 0 && throw_except<TcpAcceptError>("[tcp] accept: ", strerror(errno));
     socket.sockfd = fd;
     return socket;
 }

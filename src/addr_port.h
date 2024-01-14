@@ -1,8 +1,8 @@
 // addr_port.h
 
 #pragma once
-#ifndef __NANONET__ADDR_PORT_H__
-#define __NANONET__ADDR_PORT_H__
+#ifndef NANONET_ADDR_PORT_H_
+#define NANONET_ADDR_PORT_H_
 
 // nanonet
 #include "addr.h"
@@ -36,4 +36,4 @@ public:
 
 } // namespace nano
 
-#endif // __NANONET__ADDR_PORT_H__
+#endif // NANONET_ADDR_PORT_H_

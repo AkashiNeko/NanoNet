@@ -1,8 +1,8 @@
 // addr.h
 
 #pragma once
-#ifndef __NANONET__ADDR_H__
-#define __NANONET__ADDR_H__
+#ifndef NANONET_ADDR_H_
+#define NANONET_ADDR_H_
 
 // C
 #include <cstdint>
@@ -12,7 +12,7 @@
 #include <regex>
 #include <string>
 
-// linux
+// Linux
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -69,4 +69,4 @@ public:
 
 }  // namespace nano
 
-#endif  // __NANONET__ADDR_H__
+#endif  // NANONET_ADDR_H_

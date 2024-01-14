@@ -9,10 +9,10 @@ static in_port_t parse_(const char* port) {
     unsigned result = 0;
     for (const char* p = port; *p; ++p) {
         if (*p < '0' || *p > '9')
-            throwError<ParsePortError>("[port] port ", port, " is invalied");
+            throw_except<ParsePortError>("[port] port ", port, " is invalied");
         result = result * 10 + (*p & 0xF);
         if (result > 0xFFFF)
-            throwError<ParsePortError>("[port] port ", port, " is out of range");
+            throw_except<ParsePortError>("[port] port ", port, " is out of range");
     }
     return static_cast<in_port_t>(result);
 }

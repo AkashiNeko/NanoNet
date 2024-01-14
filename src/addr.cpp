@@ -89,7 +89,7 @@ std::string Addr::to_string() const {
     inAddr.s_addr = ::htonl(this->val_);
     char strAddr[INET_ADDRSTRLEN];
     const char* result = ::inet_ntop(AF_INET, &(inAddr.s_addr), strAddr, sizeof(strAddr));
-    !result && throwError<AddrNTOPError>("[addr] inet_ntop: ", strerror(errno));
+        !result && throw_except<AddrNTOPError>("[addr] inet_ntop: ", strerror(errno));
     return strAddr;
 }
 
@@ -97,14 +97,12 @@ std::string Addr::to_string() const {
 bool Addr::is_valid(const std::string& addr) {
     int count = 0, value = 0;
     for (const char& c : addr) {
-        int num = 0;
         if (c == '.') {
             if (value > 255 || count == 3)
                 return false;
             value = 0;
             ++count;
         } else if (c >= '0' && c <= '9') {
-            num = num * 10 + (c & 0xF);
             value = value * 10 + (c & 0xF);
         } else {
             return false;
@@ -121,8 +119,8 @@ Addr Addr::dns_query(const char* domain, bool use_tcp) {
     hints.ai_socktype = use_tcp ? SOCK_STREAM : SOCK_DGRAM;
     struct addrinfo* result;
     int status = getaddrinfo(domain, NULL, &hints, &result);
-    status != 0 && throwError<GetAddrInfoError>(
-        "[addr] getaddrinfo: ", gai_strerror(status));
+    status != 0 && throw_except<GetAddrInfoError>(
+            "[addr] getaddrinfo: ", gai_strerror(status));
     in_addr_t addr = INADDR_ANY;
     for (struct addrinfo* p = result; p; p = p->ai_next) {
         if (p->ai_family == AF_INET) {

@@ -1,8 +1,8 @@
 // port.h
 
 #pragma once
-#ifndef __NANONET__PORT_H__
-#define __NANONET__PORT_H__
+#ifndef NANONET_PORT_H_
+#define NANONET_PORT_H_
 
 // C
 #include <cstdint>
@@ -57,4 +57,4 @@ public:
 
 } // namespace nano
 
-#endif // __NANONET__PORT_H__
+#endif // NANONET_PORT_H_

@@ -1,14 +1,14 @@
 // except.h
 
 #pragma once
-#ifndef __EXCEPT_H__
-#define __EXCEPT_H__
+#ifndef NANONET_EXCEPT_H_
+#define NANONET_EXCEPT_H_
 
 #include <string>
 #include <exception>
 
 // define exception classes
-#define DEFINE_NANOERR_CLASS(DerivedClass, BaseClass)                       \
+#define DEFINE_NANOEXCEPT_CLASS(DerivedClass, BaseClass)                       \
 class DerivedClass : public BaseClass {                                     \
 public:                                                                     \
     explicit DerivedClass(const std::string& msg) : BaseClass(msg) {}       \
@@ -18,23 +18,20 @@ public:                                                                     \
 
 namespace nano {
 
-class Error : public std::exception {
-    std::string errmsg;
+class NanoExcept : public std::exception {
+    std::string except_msg_;
 public:
-    explicit Error(const std::string& msg) : errmsg(msg) {}
-    explicit Error(std::string&& msg) : errmsg(std::move(msg)) {}
-    // template <class T>
-    // explicit Error(T&& msg) :errmsg(std::forward<T>(msg)) {}
-    virtual ~Error() override = default;
-
+    explicit NanoExcept(const std::string& msg) : except_msg_(msg) {}
+    explicit NanoExcept(std::string&& msg) : except_msg_(std::move(msg)) {}
+    virtual ~NanoExcept() override = default;
     virtual const char* what() const noexcept override {
-        return errmsg.c_str();
+        return except_msg_.c_str();
     }
 };
 
-// .-------.    .----------------.
-// | Error | -> | std::exception |
-// '-------'    '----------------'
+// .------------.    .----------------.
+// | NanoExcept | -> | std::exception |
+// '------------'    '----------------'
 //     A
 //     |
 // + - - - - - - - - - - - - - - +
@@ -47,66 +44,65 @@ public:
 // + - - - - - - - - - - - - - - +
 
 // Addr
-DEFINE_NANOERR_CLASS(AddrError, Error)
-DEFINE_NANOERR_CLASS(AddrNTOPError, AddrError)
-DEFINE_NANOERR_CLASS(GetAddrInfoError, AddrError)
+DEFINE_NANOEXCEPT_CLASS(AddrError, NanoExcept)
+DEFINE_NANOEXCEPT_CLASS(AddrNTOPError, AddrError)
+DEFINE_NANOEXCEPT_CLASS(GetAddrInfoError, AddrError)
 
 // Port
-DEFINE_NANOERR_CLASS(PortError, Error)
-DEFINE_NANOERR_CLASS(ParsePortError, PortError)
+DEFINE_NANOEXCEPT_CLASS(PortError, NanoExcept)
+DEFINE_NANOEXCEPT_CLASS(ParsePortError, PortError)
 
 // TCP
-DEFINE_NANOERR_CLASS(TcpError, Error)
-DEFINE_NANOERR_CLASS(TcpSocketError, TcpError)
-DEFINE_NANOERR_CLASS(TcpServerSocketError, TcpError)
-DEFINE_NANOERR_CLASS(TcpBindError, TcpError)
-DEFINE_NANOERR_CLASS(TcpListenError, TcpError)
-DEFINE_NANOERR_CLASS(TcpAcceptError, TcpError)
-DEFINE_NANOERR_CLASS(TcpConnectError, TcpError)
-DEFINE_NANOERR_CLASS(TcpSendError, TcpError)
-DEFINE_NANOERR_CLASS(TcpReceiveError, TcpError)
-DEFINE_NANOERR_CLASS(TcpReceiveTimeoutError, TcpError)
-DEFINE_NANOERR_CLASS(TcpSocketClosedError, TcpError)
+DEFINE_NANOEXCEPT_CLASS(TcpError, NanoExcept)
+DEFINE_NANOEXCEPT_CLASS(TcpSocketError, TcpError)
+DEFINE_NANOEXCEPT_CLASS(TcpServerSocketError, TcpError)
+DEFINE_NANOEXCEPT_CLASS(TcpBindError, TcpError)
+DEFINE_NANOEXCEPT_CLASS(TcpListenError, TcpError)
+DEFINE_NANOEXCEPT_CLASS(TcpAcceptError, TcpError)
+DEFINE_NANOEXCEPT_CLASS(TcpConnectError, TcpError)
+DEFINE_NANOEXCEPT_CLASS(TcpSendError, TcpError)
+DEFINE_NANOEXCEPT_CLASS(TcpReceiveError, TcpError)
+DEFINE_NANOEXCEPT_CLASS(TcpReceiveTimeoutError, TcpError)
+DEFINE_NANOEXCEPT_CLASS(TcpSocketClosedError, TcpError)
 
 // UDP
-DEFINE_NANOERR_CLASS(UdpError, Error)
-DEFINE_NANOERR_CLASS(UdpSocketError, UdpError)
-DEFINE_NANOERR_CLASS(UdpBindError, UdpError)
-DEFINE_NANOERR_CLASS(UdpSendError, UdpError)
-DEFINE_NANOERR_CLASS(UdpReceiveError, UdpError)
-DEFINE_NANOERR_CLASS(UdpReceiveTimeoutError, UdpError)
-DEFINE_NANOERR_CLASS(UdpSocketClosedError, UdpError)
+DEFINE_NANOEXCEPT_CLASS(UdpError, NanoExcept)
+DEFINE_NANOEXCEPT_CLASS(UdpSocketError, UdpError)
+DEFINE_NANOEXCEPT_CLASS(UdpBindError, UdpError)
+DEFINE_NANOEXCEPT_CLASS(UdpSendError, UdpError)
+DEFINE_NANOEXCEPT_CLASS(UdpReceiveError, UdpError)
+DEFINE_NANOEXCEPT_CLASS(UdpReceiveTimeoutError, UdpError)
+DEFINE_NANOEXCEPT_CLASS(UdpSocketClosedError, UdpError)
 
 #if __cplusplus >= 201703L
 
-template <class ErrType, class ...Args>
-inline bool throwError(const Args&... args) {
+template <class ExceptType, class ...Args>
+inline bool throw_except(const Args&... args) {
     std::string s;
     ((s += args), ...);
-    throw ErrType(std::move(s));
+    throw ExceptType(std::move(s));
     return false;
 }
 
 #else // __cplusplus < 201703L
 
-inline void _appendString(std::string& s) {}
+inline static void append_string_(std::string&) {}
 
 template <class T, class ...Args>
-inline void _appendString(std::string& s, const T& arg, const Args&... args) {
+inline static void append_string_(std::string& s, const T& arg, const Args&... args) {
     s += arg;
-    _appendString(s, args...);
+    append_string_(s, args...);
 }
 
-template <class ErrType, class ...Args>
-inline bool throwError(const Args&... args) {
+template <class ExceptType, class ...Args>
+inline bool throw_except(const Args&... args) {
     std::string s;
-    _appendString(s, args...);
-    throw ErrType(std::move(s));
-    return false;
+    append_string_(s, args...);
+    throw ExceptType(std::move(s));
 }
 
 #endif // __cplusplus
 
 } // namespace nano
 
-#endif // __EXCEPT_H__
+#endif // NANONET_EXCEPT_H_
