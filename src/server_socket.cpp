@@ -29,12 +29,13 @@ Socket ServerSocket::accept() {
     int new_fd = ::accept(sock_fd_, (struct sockaddr*)&socket.remote_, &socklen);
     assert_throw(new_fd >= 0, "[tcp] accept: ", strerror(errno));
     socket.sock_fd_ = new_fd;
+    socket.local_ = this->local_;
     return socket;
 }
 
 // set addr reuse
-void ServerSocket::reuse_addr(bool enable) {
-    this->set_option(SOL_SOCKET, SO_REUSEADDR, enable);
+bool ServerSocket::reuse_addr(bool enable) {
+    return this->set_option(SOL_SOCKET, SO_REUSEADDR, (int)enable);
 }
 
 } // namespace nano

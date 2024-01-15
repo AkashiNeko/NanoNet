@@ -35,6 +35,7 @@ void SocketBase::bind(const Addr& addr, const Port& port) {
 
 // get local
 AddrPort SocketBase::get_local() const {
+    assert_throw(sock_fd_ >= 0, "[socket] get_local: socket is closed");
     return AddrPort::to_addrport(local_);
 }
 

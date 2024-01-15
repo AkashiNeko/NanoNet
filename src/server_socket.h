@@ -24,7 +24,7 @@ public:
     Socket accept();
 
     // set address reuse
-    void reuse_addr(bool reuseAddr);
+    bool reuse_addr(bool reuseAddr);
 
 }; // class ServerSocket
 
