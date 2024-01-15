@@ -4,67 +4,103 @@
 
 namespace nano {
 
-
-// default constructor
-UdpSocket::UdpSocket() : remote_({}) {
-    local_.sin_family = AF_INET;
+// constructor
+UdpSocket::UdpSocket() : remote_({}), connected_(false) {
+    remote_.sin_family = AF_INET;
     sock_fd_ = ::socket(AF_INET, SOCK_DGRAM, 0);
     assert_throw(sock_fd_ >= 0,
         "[udp] create socket: ", strerror(errno));
 }
 
-
-// destructor
-UdpSocket::~UdpSocket() {}
-
-// bind (addr : port)
-void UdpSocket::bind(const Addr& addr, const Port& port) {
-    local_.sin_addr.s_addr = addr.net_order();
-    local_.sin_port = port.net_order();
-    int ret = ::bind(sock_fd_, (const sockaddr*)&local_, sizeof(local_));
-    assert_throw(ret >= 0, "[udp] bind \'",
-        AddrPort::to_string(addr, port), "\': ", strerror(errno));
-}
-
-// set remote address & port
-void UdpSocket::setRemote(const Addr& addr, const Port& port) {
+// send to the specified remote
+int UdpSocket::send_to(const char* msg, size_t length, const AddrPort& remote) const {
     assert_throw(sock_fd_ >= 0, "[udp] socket is closed");
-    remote_.sin_family = AF_INET;
-    remote_.sin_port = port.net_order();
-    remote_.sin_addr.s_addr = addr.net_order();
-}
-
-// send data
-int UdpSocket::send(const char* data, size_t datalen) const {
-    assert_throw(sock_fd_ >= 0, "[udp] socket is closed");
-    ssize_t ret = ::sendto(sock_fd_, data, datalen, 0,
-        (const struct sockaddr*)&remote_, sizeof(remote_));
-    assert_throw(ret >= 0, "[udp] send: ", strerror(errno));
+    sockaddr_in remote_addr;
+    remote_addr.sin_family = AF_INET;
+    remote_addr.sin_addr.s_addr = remote.get_addr().net_order();
+    remote_addr.sin_port = remote.get_port().net_order();
+    ssize_t ret = ::sendto(sock_fd_, msg, length, 0,
+        (const sockaddr*)&remote_addr, sizeof(remote_addr));
+    assert_throw(ret >= 0, "[udp] send_to: ", strerror(errno));
     return static_cast<int>(ret);
 }
 
-// waiting to receive data from others
-AddrPort UdpSocket::receive(char* buffer, size_t bufSize) const {
+int UdpSocket::send_to(const std::string& msg, const AddrPort& remote) const {
+    return send_to(msg.c_str(), msg.size(), remote);
+}
+
+// receive from the specified remote
+int UdpSocket::receive_from(char* buffer, size_t bufSize, AddrPort& addrport) {
     assert_throw(sock_fd_ >= 0, "[udp] socket is closed");
-
-    // receive data & write to buffer
-    socklen_t socklen = sizeof(remote_);
-    ssize_t len = ::recvfrom(sock_fd_, buffer, bufSize,
-        0, (struct sockaddr*)&remote_, &socklen);
-
-    if (len < 0) {
-        if (errno == EAGAIN || errno == EWOULDBLOCK) {
-            assert_throw(false, "[udp] receive timeout");
-        } else {
-            assert_throw(false, "[udp] receive: ", strerror(errno));
-        }
+    sockaddr_in remote_addr;
+    socklen_t socklen = sizeof(remote_addr);
+    ssize_t len = ::recvfrom(sock_fd_, buffer, bufSize, 0, (sockaddr*)&remote_addr, &socklen);
+    if (len == -1) {
+        assert_throw(errno == EAGAIN || errno == EWOULDBLOCK,
+            "[udp] receive_from: ", std::strerror(errno));
+        return -1;
     }
-
     // truncate buffer
     if (len < bufSize) buffer[len] = 0;
+    return len;
+}
 
-    // return ip and port
-    return AddrPort(::ntohl(remote_.sin_addr.s_addr), ::ntohs(remote_.sin_port));
+// connect to remote
+void UdpSocket::connect(const Addr& addr, const Port& port) {
+    assert_throw(sock_fd_ >= 0, "[udp] socket is closed");
+    assert_throw(!connected_, "[udp] socket is connected");
+    remote_.sin_addr.s_addr = addr.net_order();
+    remote_.sin_port = port.net_order();
+    // connect
+    int ret = ::connect(sock_fd_, (const struct sockaddr*)&remote_, sizeof(remote_));
+    assert_throw(ret >= 0, "[udp] connect: ", std::strerror(errno));
+    connected_ = true;
+
+    socklen_t addr_len = sizeof(local_);
+    getsockname(sock_fd_, (struct sockaddr *)&local_, &addr_len);
+}
+
+// send to remote
+int UdpSocket::send(const char* msg, size_t size) const {
+    assert_throw(sock_fd_ >= 0, "[udp] socket is closed");
+    assert_throw(connected_, "[udp] socket is not connected");
+
+    // send
+    int len = ::send(sock_fd_, msg, size, 0);
+    assert_throw(len >= 0, "[udp] send:", std::strerror(errno));
+
+    // returns the number of bytes sent
+    return len;
+}
+
+int UdpSocket::send(const std::string& msg) const {
+    return this->send(msg.c_str(), msg.size());
+}
+
+// receive from remote
+int UdpSocket::receive(char* buf, size_t buf_size) const {
+    assert_throw(sock_fd_ >= 0, "[udp] socket is closed");
+    ssize_t len = ::recv(sock_fd_, buf, buf_size, 0);
+    if (len == -1) {
+        assert_throw(errno == EAGAIN || errno == EWOULDBLOCK,
+            "[udp] receive: ", std::strerror(errno));
+        return -1;
+    }
+    // truncate buffer
+    if (len < buf_size) buf[len] = 0;
+    return static_cast<int>(len);
+}
+
+// set receive timeout
+bool UdpSocket::recv_timeout(long ms) const {
+    struct timeval tm = {ms / 1000, ms % 1000 * 1000};
+    return set_option(SOL_SOCKET, SO_RCVTIMEO, tm);
+}
+
+// getter
+AddrPort UdpSocket::get_remote() const {
+    assert_throw(connected_, "[udp] socket is not connected");
+    return AddrPort::to_addrport(remote_);
 }
 
 } // namespace nano

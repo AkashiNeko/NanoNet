@@ -1,8 +1,8 @@
 // nanonet.h
 
 #pragma once
-#ifndef __NANONET_H__
-#define __NANONET_H__
+#ifndef NANONET_H
+#define NANONET_H
 
 #if __cplusplus < 201103L
     #error "Nanonet requires at least C++11"
@@ -147,8 +147,8 @@ public:
 
 class AddrPort {
 
-    Addr addr;
-    Port port;
+    Addr addr_;
+    Port port_;
 
 public:
 
@@ -177,9 +177,6 @@ protected:
 
     // local address
     struct sockaddr_in local_;
-    
-    // sockaddr_in -> AddrPort
-    static AddrPort to_addrport_(sockaddr_in address);
 
 public:
 
@@ -230,7 +227,7 @@ public:
 
     // send to remote
     int send(const char* msg, size_t length) const;
-    int send(std::string msg) const;
+    int send(const std::string msg) const;
 
     // receive from remote
     int receive(char *buf, size_t buf_size) const;
@@ -262,6 +259,41 @@ public:
 
 }; // class ServerSocket
 
+class UdpSocket : public SocketBase {
+
+    // remote address
+    struct sockaddr_in remote_;
+
+    // is connected
+    bool connected_;
+
+public:
+
+    // ctor & dtor
+    UdpSocket();
+    virtual ~UdpSocket() = default;
+
+    // send to the specified remote & receive from the specified remote
+    int send_to(const char* msg, size_t length, const AddrPort& remote) const;
+    int send_to(const std::string& msg, const AddrPort& remote) const;
+    int receive_from(char* buf, size_t buf_size, AddrPort& addrport);
+
+    // connect to remote
+    void connect(const Addr& addr, const Port& port);
+
+    // send & receive
+    int send(const char* msg, size_t length) const;
+    int send(const std::string& msg) const;
+    int receive(char* buf, size_t buf_size) const;
+
+    // set receive timeout
+    bool recv_timeout(long ms) const;
+
+    // getter
+    AddrPort get_remote() const;
+
+}; // class UdpSocket
+
 } // namespace nano
 
-#endif // __NANONET_H__
+#endif // NANONET_H

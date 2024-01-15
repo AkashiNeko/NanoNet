@@ -1,22 +1,8 @@
 // udp_socket.h
 
 #pragma once
-#ifndef __UDP_SOCKET_H__
-#define __UDP_SOCKET_H__
-
-// nanonet
-#include "addr_port.h"
-#include "except.h"
-
-// C
-#include <cassert>
-
-// C++
-#include <string>
-
-// Linux
-#include <sys/socket.h>
-#include <unistd.h>
+#ifndef NANONET_UDP_SOCKET_H
+#define NANONET_UDP_SOCKET_H
 
 // nanonet
 #include "socket_base.h"
@@ -28,62 +14,36 @@ class UdpSocket : public SocketBase {
     // remote address
     struct sockaddr_in remote_;
 
+    // is connected
+    bool connected_;
+
 public:
 
-    // default constructor
+    // ctor & dtor
     UdpSocket();
+    virtual ~UdpSocket() = default;
 
-    // destructor
-    ~UdpSocket();
+    // send to the specified remote & receive from the specified remote
+    int send_to(const char* msg, size_t length, const AddrPort& remote) const;
+    int send_to(const std::string& msg, const AddrPort& remote) const;
+    int receive_from(char* buf, size_t buf_size, AddrPort& addrport);
 
-    // bind (addr : port)
-    void bind(const Addr& addr, const Port& port);
+    // connect to remote
+    void connect(const Addr& addr, const Port& port);
 
-    inline void bind(const AddrPort& addrPort) {
-        this->bind(addrPort.get_addr(), addrPort.get_port());
-    }
+    // send & receive
+    int send(const char* msg, size_t length) const;
+    int send(const std::string& msg) const;
+    int receive(char* buf, size_t buf_size) const;
 
-    inline void bind(const std::string& ip, const Port& port) {
-        this->bind(Addr(ip), port);
-    }
+    // set receive timeout
+    bool recv_timeout(long ms) const;
 
-    inline void bind(const char* ip, const Port& port) {
-        this->bind(Addr(ip), port);
-    }
-
-    inline void bind(const Port& port) {
-        this->bind(Addr(INADDR_ANY), port);
-    }
-
-    // set remote address & port
-    void setRemote(const Addr& addr, const Port& port);
-
-    inline void setRemote(const AddrPort& addrPort) {
-        this->setRemote(addrPort.get_addr(), addrPort.get_port());
-    }
-
-    inline void setRemote(const std::string& ip, const Port& port) {
-        this->setRemote(Addr(ip), port);
-    }
-
-    inline void setRemote(const char* ip, const Port& port) {
-        this->setRemote(Addr(ip), port);
-    }
-
-    int setReceiveTimeout(long seconds, long milliseconds = 0);
-
-    // send data
-    int send(const char* data, size_t datalen) const;
-
-    inline int send(const std::string& str) const {
-        return this->send(str.c_str(), str.size());
-    }
-
-    // waiting to receive data from others
-    AddrPort receive(char* buffer, size_t bufSize) const;
+    // getter
+    AddrPort get_remote() const;
 
 }; // class UdpSocket
 
 } // namespace nano
 
-#endif // __UDP_SOCKET_H__
+#endif // NANONET_UDP_SOCKET_H

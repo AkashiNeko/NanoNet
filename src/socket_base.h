@@ -20,9 +20,6 @@ protected:
 
     // local address
     struct sockaddr_in local_;
-    
-    // sockaddr_in -> AddrPort
-    static AddrPort to_addrport_(sockaddr_in address);
 
 public:
 

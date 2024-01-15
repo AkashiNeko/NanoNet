@@ -35,12 +35,7 @@ void SocketBase::bind(const Addr& addr, const Port& port) {
 
 // get local
 AddrPort SocketBase::get_local() const {
-    return to_addrport_(local_);
-}
-
-// sockaddr_in -> AddrPort (static)
-AddrPort SocketBase::to_addrport_(sockaddr_in address) {
-    return AddrPort(::ntohl(address.sin_addr.s_addr), ::ntohs(address.sin_port));
+    return AddrPort::to_addrport(local_);
 }
 
 } // namespace nano

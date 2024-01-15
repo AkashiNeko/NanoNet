@@ -12,7 +12,7 @@ Socket::Socket() : remote_() {
         "[tcp] create socket: ", std::strerror(errno));
 }
 
-// connect to server
+// connect to remote
 void Socket::connect(const Addr& addr, const Port& port) {
     // set remote
     assert_throw(sock_fd_ >= 0, "[tcp] socket is closed");
@@ -31,14 +31,14 @@ int Socket::send(const char* msg, size_t size) const {
     assert_throw(sock_fd_ >= 0, "[tcp] socket is closed");
 
     // send to remote
-    int ret = ::send(sock_fd_, msg, size, 0);
-    assert_throw(ret >= 0, "[tcp] send:", std::strerror(errno));
+    int len = ::send(sock_fd_, msg, size, 0);
+    assert_throw(len >= 0, "[tcp] send:", std::strerror(errno));
 
     // returns the number of bytes sent
-    return ret;
+    return len;
 }
 
-int Socket::send(std::string msg) const {
+int Socket::send(const std::string msg) const {
     return this->send(msg.c_str(), msg.size());
 }
 
@@ -63,7 +63,7 @@ bool Socket::recv_timeout(long ms) const {
 
 // get remote
 AddrPort Socket::get_remote() const {
-    return to_addrport_(remote_);
+    return AddrPort::to_addrport(remote_);
 }
 
 } // namespace nano

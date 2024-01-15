@@ -12,8 +12,8 @@ namespace nano {
 
 class AddrPort {
 
-    Addr addr;
-    Port port;
+    Addr addr_;
+    Port port_;
 
 public:
 
@@ -31,6 +31,9 @@ public:
     // to string
     std::string to_string() const;
     static std::string to_string(const Addr& addr, const Port& port, char separator = ':');
+
+    // sockaddr_in -> AddrPort
+    static AddrPort to_addrport(sockaddr_in address);
 
 }; // class AddrPort
 

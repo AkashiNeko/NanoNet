@@ -1,8 +1,8 @@
 // socket.h
 
 #pragma once
-#ifndef __SOCKET_H__
-#define __SOCKET_H__
+#ifndef NANONET_SOCKET_H_
+#define NANONET_SOCKET_H_
 
 // nanonet
 #include "socket_base.h"
@@ -28,7 +28,7 @@ public:
 
     // send to remote
     int send(const char* msg, size_t length) const;
-    int send(std::string msg) const;
+    int send(const std::string msg) const;
 
     // receive from remote
     int receive(char *buf, size_t buf_size) const;
@@ -43,4 +43,4 @@ public:
 
 } // namespace nano
 
-#endif // __SOCKET_H__
+#endif // NANONET_SOCKET_H_
