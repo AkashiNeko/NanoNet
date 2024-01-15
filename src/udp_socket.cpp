@@ -30,7 +30,7 @@ int UdpSocket::send_to(const std::string& msg, const AddrPort& remote) const {
 }
 
 // receive from the specified remote
-int UdpSocket::receive_from(char* buffer, size_t bufSize, AddrPort& addrport) {
+int UdpSocket::receive_from(char* buffer, size_t bufSize, AddrPort& addrport) const {
     assert_throw(sock_fd_ >= 0, "[udp] socket is closed");
     sockaddr_in remote_addr;
     socklen_t socklen = sizeof(remote_addr);
@@ -51,6 +51,7 @@ void UdpSocket::connect(const Addr& addr, const Port& port) {
     assert_throw(!connected_, "[udp] socket is connected");
     remote_.sin_addr.s_addr = addr.net_order();
     remote_.sin_port = port.net_order();
+
     // connect
     int ret = ::connect(sock_fd_, (const struct sockaddr*)&remote_, sizeof(remote_));
     assert_throw(ret >= 0, "[udp] connect: ", std::strerror(errno));
@@ -80,6 +81,8 @@ int UdpSocket::send(const std::string& msg) const {
 // receive from remote
 int UdpSocket::receive(char* buf, size_t buf_size) const {
     assert_throw(sock_fd_ >= 0, "[udp] socket is closed");
+    assert_throw(connected_, "[udp] socket is not connected");
+
     ssize_t len = ::recv(sock_fd_, buf, buf_size, 0);
     if (len == -1) {
         assert_throw(errno == EAGAIN || errno == EWOULDBLOCK,

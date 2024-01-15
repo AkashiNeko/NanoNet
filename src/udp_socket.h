@@ -26,7 +26,7 @@ public:
     // send to the specified remote & receive from the specified remote
     int send_to(const char* msg, size_t length, const AddrPort& remote) const;
     int send_to(const std::string& msg, const AddrPort& remote) const;
-    int receive_from(char* buf, size_t buf_size, AddrPort& addrport);
+    int receive_from(char* buf, size_t buf_size, AddrPort& addrport) const;
 
     // connect to remote
     void connect(const Addr& addr, const Port& port);
