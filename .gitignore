@@ -4,6 +4,7 @@
 wwwroot/
 
 build*/
+cmake-build-nanonet/
 lib/
 bin/
 test/
