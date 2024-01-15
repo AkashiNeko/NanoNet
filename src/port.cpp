@@ -4,8 +4,10 @@
 
 namespace nano {
 
+namespace {
+
 // convert C string to in_port_t
-static in_port_t parse_(const char* port) {
+inline in_port_t parse_(const char* port) {
     unsigned result = 0;
     for (const char* p = port; *p; ++p) {
         assert_throw(*p >= '0' && *p <= '9',
@@ -18,13 +20,15 @@ static in_port_t parse_(const char* port) {
 }
 
 // compare in_port_t and C string
-inline bool equal(const in_port_t& port, const char* other) {
+inline bool equal_(const in_port_t& port, const char* other) {
     try {
         return port == parse_(other);
     } catch (...) {
         return false;
     }
 }
+
+} // anonymous namespace
 
 // constructor
 Port::Port(in_port_t port)
@@ -61,19 +65,19 @@ bool Port::operator!=(in_port_t other) const {
 }
 
 bool Port::operator==(const char* other) const {
-    return equal(this->val_, other);
+    return equal_(this->val_, other);
 }
 
 bool Port::operator!=(const char* other) const {
-    return !equal(this->val_, other);
+    return !equal_(this->val_, other);
 }
 
 bool Port::operator==(const std::string& other) const {
-    return equal(this->val_, other.c_str());
+    return equal_(this->val_, other.c_str());
 }
 
 bool Port::operator!=(const std::string& other) const {
-    return !equal(this->val_, other.c_str());
+    return !equal_(this->val_, other.c_str());
 }
 
 // to network byte order

@@ -15,7 +15,7 @@ class UdpSocket : public SocketBase {
     struct sockaddr_in remote_;
 
     // is connected
-    bool connected_;
+    bool is_connected_;
 
 public:
 
@@ -23,10 +23,13 @@ public:
     UdpSocket();
     virtual ~UdpSocket() = default;
 
-    // send to the specified remote & receive from the specified remote
+    // send to the specified remote
     int send_to(const char* msg, size_t length, const AddrPort& remote) const;
     int send_to(const std::string& msg, const AddrPort& remote) const;
+
+    // receive from the specified remote
     int receive_from(char* buf, size_t buf_size, AddrPort& addrport) const;
+    int receive_from(char* buf, size_t buf_size) const;
 
     // connect to remote
     void connect(const Addr& addr, const Port& port);

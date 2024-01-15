@@ -4,8 +4,10 @@
 
 namespace nano {
 
+namespace {
+
 // convert C string to in_addr_t
-static in_addr_t parse_(const char* addr) {
+inline in_addr_t parse_(const char* addr) {
     if (Addr::is_valid(addr)) {
         return ::ntohl(inet_addr(addr));
     } else {
@@ -14,13 +16,15 @@ static in_addr_t parse_(const char* addr) {
 }
 
 // compare in_addr_t and C string
-inline bool equal(const in_addr_t& addr, const char* other) {
+inline bool equal_(const in_addr_t& addr, const char* other) {
     try {
         return addr == parse_(other);
     } catch (...) {
         return false;
     }
 }
+
+} // anonymous namespace
 
 // constructor
 Addr::Addr(in_addr_t val) : val_(val) {}
@@ -54,19 +58,19 @@ bool Addr::operator!=(in_addr_t other) const {
 }
 
 bool Addr::operator==(const char* other) const {
-    return equal(this->val_, other);
+    return equal_(this->val_, other);
 }
 
 bool Addr::operator!=(const char* other) const {
-    return !equal(this->val_, other);
+    return !equal_(this->val_, other);
 }
 
 bool Addr::operator==(const std::string& other) const {
-    return equal(this->val_, other.c_str());
+    return equal_(this->val_, other.c_str());
 }
 
 bool Addr::operator!=(const std::string& other) const {
-    return !equal(this->val_, other.c_str());
+    return !equal_(this->val_, other.c_str());
 }
 
 // to network byte order
