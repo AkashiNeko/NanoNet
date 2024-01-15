@@ -11,9 +11,6 @@ namespace nano {
 
 class Socket : public SocketBase {
 
-    // local address
-    struct sockaddr_in local_;
-
     // remote address
     struct sockaddr_in remote_;
 
@@ -26,9 +23,6 @@ public:
     Socket();
     virtual ~Socket() = default;
 
-    // bind local
-    void bind(const Addr& addr, const Port& port);
-
     // connect to remote
     void connect(const Addr& addr, const Port& port);
 
@@ -37,13 +31,10 @@ public:
     int send(std::string msg) const;
 
     // receive from remote
-    int receive(char *buf, size_t buf_size);
+    int receive(char *buf, size_t buf_size) const;
 
     // set receive timeout
-    bool recv_timeout(long ms);
-
-    // get local
-    AddrPort get_local() const;
+    bool recv_timeout(long ms) const;
 
     // get remote
     AddrPort get_remote() const;

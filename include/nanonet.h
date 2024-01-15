@@ -22,6 +22,47 @@
 
 namespace nano {
 
+class NanoExcept : public std::exception {
+    std::string except_msg_;
+public:
+    explicit NanoExcept(const std::string& msg) : except_msg_(msg) {}
+    explicit NanoExcept(std::string&& msg) : except_msg_(std::move(msg)) {}
+    virtual ~NanoExcept() override = default;
+    virtual const char* what() const noexcept override {
+        return except_msg_.c_str();
+    }
+};
+
+// throw exceptions
+#if __cplusplus >= 201703L
+
+template <class ExceptType = NanoExcept, class ...Args>
+inline void throw_except(bool condition, const Args&... args) {
+    if (condition) return;
+    std::string s;
+    ((s += args), ...);
+    throw ExceptType(std::move(s));
+}
+
+#else // 201103L <= __cplusplus < 201703L
+
+inline void append_string_(std::string&) {}
+
+template <class T, class ...Args>
+inline void append_string_(std::string& s, const T& arg, const Args&... args) {
+    s += arg;
+    append_string_(s, args...);
+}
+
+template <class ExceptType = NanoExcept, class ...Args>
+inline void assert_throw(bool condition, const Args&... args) {
+    if (condition) return;
+    std::string s;
+    append_string_(s, args...);
+    throw ExceptType(std::move(s));
+}
+
+#endif // __cplusplus
 class Addr {
 
     // host byte order addr (ipv4)
@@ -127,6 +168,99 @@ public:
     static std::string to_string(const Addr& addr, const Port& port, char separator = ':');
 
 }; // class AddrPort
+
+class SocketBase {
+protected:
+
+    // fd of socket
+    int sock_fd_;
+
+    // local address
+    struct sockaddr_in local_;
+    
+    // sockaddr_in -> AddrPort
+    static AddrPort to_addrport_(sockaddr_in address);
+
+public:
+
+    // ctor & dtor
+    SocketBase(int fd = -1);
+    virtual ~SocketBase() = default;
+
+    // file descriptor
+    virtual void close();
+    virtual bool is_open() const;
+    virtual int get_fd() const;
+
+    // bind local
+    void bind(const Addr& addr, const Port& port);
+
+    // get local
+    AddrPort get_local() const;
+
+    // set socket option
+    template <class OptionType>
+    inline bool set_option(int level, int optname, const OptionType& optval) const {
+        return ::setsockopt(sock_fd_, level, optname, &optval, sizeof(optval)) == 0;
+    }
+
+    template <class OptionType>
+    inline bool get_option(int level, int optname, OptionType& optval) const {
+        return ::getsockopt(sock_fd_, level, optname, &optval, sizeof(optval)) == 0;
+    }
+
+}; // class SocketBase
+
+class Socket : public SocketBase {
+
+    // remote address
+    struct sockaddr_in remote_;
+
+    // server socket
+    friend class ServerSocket;
+
+public:
+
+    // ctor & dtor
+    Socket();
+    virtual ~Socket() = default;
+
+    // connect to remote
+    void connect(const Addr& addr, const Port& port);
+
+    // send to remote
+    int send(const char* msg, size_t length) const;
+    int send(std::string msg) const;
+
+    // receive from remote
+    int receive(char *buf, size_t buf_size) const;
+
+    // set receive timeout
+    bool recv_timeout(long ms) const;
+
+    // get remote
+    AddrPort get_remote() const;
+
+}; // class Socket
+
+class ServerSocket : public SocketBase {
+public:
+
+    // ctor & dtor
+    ServerSocket();
+    ServerSocket(const Addr& addr, const Port& port);
+    virtual ~ServerSocket() = default;
+
+    // listen
+    void listen(int backlog = 20);
+
+    // accept from client
+    Socket accept();
+
+    // set address reuse
+    void reuse_addr(bool reuseAddr);
+
+}; // class ServerSocket
 
 } // namespace nano
 

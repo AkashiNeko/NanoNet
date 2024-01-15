@@ -4,53 +4,30 @@
 #ifndef __SERVER_SOCKET_H__
 #define __SERVER_SOCKET_H__
 
-// C
-#include <cassert>
-
-// C++
-#include <string>
-
-// Linux
-#include <unistd.h>
-
 // nanonet
-#include "addr_port.h"
 #include "socket.h"
-#include "socket_base.h"
-#include "except.h"
 
 namespace nano {
 
-const int BACKLOG_QUEUE_SIZE = 20;
-
 class ServerSocket : public SocketBase {
-
-    // local address
-    struct sockaddr_in local_;
-
-    // is listening
-    bool listening = false;
-
 public:
-    // constructor (addr, port)
+
+    // ctor & dtor
     ServerSocket();
-
     ServerSocket(const Addr& addr, const Port& port);
+    virtual ~ServerSocket() = default;
 
-    // destructor
-    virtual ~ServerSocket();
-
-    void reuse_addr(bool reuseAddr);
-
-    void bind(const Addr& addr, const Port& port);
-
+    // listen
     void listen(int backlog = 20);
 
     // accept from client
     Socket accept();
 
-};  // class ServerSocket
+    // set address reuse
+    void reuse_addr(bool reuseAddr);
 
-}  // namespace nano
+}; // class ServerSocket
 
-#endif  // __SERVER_SOCKET_H__
+} // namespace nano
+
+#endif // __SERVER_SOCKET_H__

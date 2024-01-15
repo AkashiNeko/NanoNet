@@ -25,11 +25,8 @@ namespace nano {
 
 class UdpSocket : public SocketBase {
 
-    // local address
-    struct sockaddr_in local;
-
     // remote address
-    struct sockaddr_in remote;
+    struct sockaddr_in remote_;
 
 public:
 
@@ -84,11 +81,6 @@ public:
 
     // waiting to receive data from others
     AddrPort receive(char* buffer, size_t bufSize) const;
-
-    // close socket fd
-    void close();
-
-    int setsockopt(int level, int optname, const void* optval, socklen_t optlen) const;
 
 }; // class UdpSocket
 

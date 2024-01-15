@@ -89,7 +89,7 @@ std::string Addr::to_string() const {
     inAddr.s_addr = ::htonl(this->val_);
     char strAddr[INET_ADDRSTRLEN];
     const char* result = ::inet_ntop(AF_INET, &(inAddr.s_addr), strAddr, sizeof(strAddr));
-    throw_except<AddrNTOPExcept>(result != nullptr, "[addr] inet_ntop: ", strerror(errno));
+    assert_throw(result != nullptr, "[addr] inet_ntop: ", strerror(errno));
     return strAddr;
 }
 
@@ -119,7 +119,7 @@ Addr Addr::dns_query(const char* domain, bool use_tcp) {
     hints.ai_socktype = use_tcp ? SOCK_STREAM : SOCK_DGRAM;
     struct addrinfo* result;
     int status = getaddrinfo(domain, NULL, &hints, &result);
-    throw_except<GetAddrInfoExcept>(status == 0,
+    assert_throw(status == 0,
         "[addr] getaddrinfo: ", gai_strerror(status));
     in_addr_t addr = INADDR_ANY;
     for (struct addrinfo* p = result; p; p = p->ai_next) {
