@@ -4,30 +4,29 @@
 #ifndef __SERVER_SOCKET_H__
 #define __SERVER_SOCKET_H__
 
-// nanonet
-#include "addr_port.h"
-#include "socket.h"
-#include "except.h"
-
-// linux
-#include <unistd.h>
-
 // C
 #include <cassert>
 
 // C++
 #include <string>
 
+// Linux
+#include <unistd.h>
+
+// nanonet
+#include "addr_port.h"
+#include "socket.h"
+#include "socket_base.h"
+#include "except.h"
+
 namespace nano {
 
 const int BACKLOG_QUEUE_SIZE = 20;
 
-class ServerSocket {
-    // server socket fd
-    int serverfd = -1;
+class ServerSocket : public SocketBase {
 
     // local address
-    struct sockaddr_in local;
+    struct sockaddr_in local_;
 
     // is listening
     bool listening = false;
@@ -38,41 +37,17 @@ public:
 
     ServerSocket(const Addr& addr, const Port& port);
 
-    inline ServerSocket(const std::string& ip, const Port& port)
-        :ServerSocket(Addr(ip), port) {}
-
-    inline ServerSocket(const char* ip, const Port& port)
-        :ServerSocket(Addr(ip), port) {}
-
-    inline ServerSocket(const Port& port)
-        :ServerSocket(Addr(INADDR_ANY), port) {}
-
     // destructor
     virtual ~ServerSocket();
 
-    void setReuseAddr(bool reuseAddr);
+    void reuse_addr(bool reuseAddr);
 
     void bind(const Addr& addr, const Port& port);
-
-    inline void bind(const std::string& ip, const Port& port) {
-        this->bind(Addr(ip), port);
-    }
-
-    inline void bind(const char* ip, const Port& port) {
-        this->bind(Addr(ip), port);
-    }
-
-    inline void bind(const Port& port) {
-        this->bind(Addr(INADDR_ANY), port);
-    }
 
     void listen(int backlog = 20);
 
     // accept from client
     Socket accept();
-
-    // close server socket
-    void close();
 
 };  // class ServerSocket
 

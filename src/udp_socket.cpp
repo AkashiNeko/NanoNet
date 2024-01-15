@@ -6,11 +6,11 @@ namespace nano {
 
 
 // default constructor
-UdpSocket::UdpSocket() :sockfd(-1), local({}), remote({}) {
+UdpSocket::UdpSocket() : local({}), remote({}) {
     local.sin_family = AF_INET;
-    sockfd = ::socket(AF_INET, SOCK_DGRAM, 0);
-    sockfd < 0 && throw_except<UdpSocketError>(
-            "[udp] create socket: ", strerror(errno));
+    sock_fd_ = ::socket(AF_INET, SOCK_DGRAM, 0);
+    throw_except<UdpSocketExcept>(sock_fd_ >= 0,
+        "[udp] create socket: ", strerror(errno));
 }
 
 
@@ -22,15 +22,14 @@ UdpSocket::~UdpSocket() {}
 void UdpSocket::bind(const Addr& addr, const Port& port) {
     local.sin_addr.s_addr = addr.net_order();
     local.sin_port = port.net_order();
-    if (::bind(sockfd, (const sockaddr*)&local, sizeof(local)) < 0) {
-        throw_except<UdpBindError>("[udp] bind \'",
-                                   AddrPort::to_string(addr, port), "\': ", strerror(errno));
-    }
+    int ret = ::bind(sock_fd_, (const sockaddr*)&local, sizeof(local));
+    throw_except<UdpBindExcept>(ret >= 0, "[udp] bind \'",
+        AddrPort::to_string(addr, port), "\': ", strerror(errno));
 }
 
 // set remote address & port
 void UdpSocket::setRemote(const Addr& addr, const Port& port) {
-    assert(sockfd >= 0);
+    throw_except<UdpSocketClosedExcept>(sock_fd_ >= 0, "[udp] socket is closed");
     remote.sin_family = AF_INET;
     remote.sin_port = port.net_order();
     remote.sin_addr.s_addr = addr.net_order();
@@ -44,27 +43,27 @@ int UdpSocket::setReceiveTimeout(long seconds, long milliseconds) {
 
 // send data
 int UdpSocket::send(const char* data, size_t datalen) const {
-    sockfd < 0 && throw_except<UdpSocketClosedError>("[udp] socket is closed");
-    ssize_t ret = ::sendto(sockfd, data, datalen, 0,
+    throw_except<UdpSocketClosedExcept>(sock_fd_ >= 0, "[udp] socket is closed");
+    ssize_t ret = ::sendto(sock_fd_, data, datalen, 0,
         (const struct sockaddr*)&remote, sizeof(remote));
-    ret < 0 && throw_except<UdpSendError>("[udp] send: ") + strerror(errno);
+    throw_except<UdpSendExcept>(ret >= 0, "[udp] send: ", strerror(errno));
     return static_cast<int>(ret);
 }
 
 // waiting to receive data from others
 AddrPort UdpSocket::receive(char* buffer, size_t bufSize) const {
-    sockfd < 0 && throw_except<UdpSocketClosedError>("[udp] socket is closed");
+    throw_except<UdpSocketClosedExcept>(sock_fd_ >= 0, "[udp] socket is closed");
 
     // receive data & write to buffer
     socklen_t socklen = sizeof(remote);
-    ssize_t len = ::recvfrom(sockfd, buffer, bufSize,
+    ssize_t len = ::recvfrom(sock_fd_, buffer, bufSize,
         0, (struct sockaddr*)&remote, &socklen);
 
     if (len < 0) {
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
-            throw_except<UdpReceiveTimeoutError>("[udp] receive timeout");
+            throw_except<UdpReceiveTimeoutExcept>(false, "[udp] receive timeout");
         } else {
-            throw_except<UdpReceiveError>("[udp] receive: ", strerror(errno));
+            throw_except<UdpReceiveExcept>(false, "[udp] receive: ", strerror(errno));
         }
     }
 
@@ -73,19 +72,6 @@ AddrPort UdpSocket::receive(char* buffer, size_t bufSize) const {
 
     // return ip and port
     return AddrPort(::ntohl(remote.sin_addr.s_addr), ::ntohs(remote.sin_port));
-}
-
-
-// close socket fd
-void UdpSocket::close() {
-    if (sockfd >= 0) {
-        ::close(sockfd);
-        sockfd = -1;
-    }
-}
-
-int UdpSocket::setsockopt(int level, int optname, const void* optval, socklen_t optlen) const {
-    return ::setsockopt(sockfd, level, optname, optval, optlen);
 }
 
 } // namespace nano

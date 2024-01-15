@@ -8,22 +8,22 @@
 #include "addr_port.h"
 #include "except.h"
 
-// linux
-#include <sys/socket.h>
-#include <unistd.h>
-
 // C
 #include <cassert>
 
 // C++
 #include <string>
 
+// Linux
+#include <sys/socket.h>
+#include <unistd.h>
+
+// nanonet
+#include "socket_base.h"
+
 namespace nano {
 
-class UdpSocket {
-
-    // socket fd
-    int sockfd;
+class UdpSocket : public SocketBase {
 
     // local address
     struct sockaddr_in local;
@@ -31,16 +31,13 @@ class UdpSocket {
     // remote address
     struct sockaddr_in remote;
 
-
 public:
 
     // default constructor
     UdpSocket();
 
-
     // destructor
     ~UdpSocket();
-
 
     // bind (addr : port)
     void bind(const Addr& addr, const Port& port);

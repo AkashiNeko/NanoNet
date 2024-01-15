@@ -8,11 +8,11 @@ namespace nano {
 static in_port_t parse_(const char* port) {
     unsigned result = 0;
     for (const char* p = port; *p; ++p) {
-        if (*p < '0' || *p > '9')
-            throw_except<ParsePortError>("[port] port ", port, " is invalied");
+        throw_except<ParsePortExcept>(*p >= '0' && *p <= '9',
+            "[port] port ", port, " is invalied");
         result = result * 10 + (*p & 0xF);
-        if (result > 0xFFFF)
-            throw_except<ParsePortError>("[port] port ", port, " is out of range");
+        throw_except<ParsePortExcept>(result < 65536,
+            "[port] port ", port, " is out of range");
     }
     return static_cast<in_port_t>(result);
 }

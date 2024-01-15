@@ -1,0 +1,50 @@
+// socket_base.h
+
+#pragma once
+#ifndef NANONET_SOCKET_BASE_H
+#define NANONET_SOCKET_BASE_H
+
+// Linux
+#include <unistd.h>
+
+// nanonet
+#include "addr_port.h"
+
+namespace nano {
+
+class SocketBase {
+protected:
+
+    // fd of socket
+    int sock_fd_;
+    
+    // sockaddr_in -> AddrPort
+    static AddrPort to_addrport_(sockaddr_in address);
+
+public:
+
+    // ctor & dtor
+    SocketBase(int fd = -1);
+    virtual ~SocketBase() = default;
+
+    // file descriptor
+    virtual void close();
+    virtual bool is_open() const;
+    virtual int get_fd() const;
+
+    // set socket option
+    template <class OptionType>
+    inline bool set_option(int level, int optname, const OptionType& optval) {
+        return ::setsockopt(sock_fd_, level, optname, &optval, sizeof(optval)) == 0;
+    }
+
+    template <class OptionType>
+    inline bool get_option(int level, int optname, OptionType& optval) {
+        return ::getsockopt(sock_fd_, level, optname, &optval, sizeof(optval)) == 0;
+    }
+
+}; // class SocketBase
+
+} // namespace nano
+
+#endif //NANONET_SOCKET_BASE_H

@@ -32,7 +32,7 @@ public:
     std::string to_string() const;
     static std::string to_string(const Addr& addr, const Port& port, char separator = ':');
 
-}; // class addrPort
+}; // class AddrPort
 
 } // namespace nano
 

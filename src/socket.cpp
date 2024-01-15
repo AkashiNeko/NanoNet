@@ -4,62 +4,44 @@
 
 namespace nano {
 
-// default constructor
-Socket::Socket() :sockfd(-1), remote({}) {
-    remote.sin_family = AF_INET;
-    sockfd = ::socket(AF_INET, SOCK_STREAM, 0);
-    sockfd < 0 && throw_except<TcpSocketError>(
-            "[tcp] create socket: ", std::strerror(errno));
-}
-
-// destructor
-Socket::~Socket() {}
-
-// connect to server
-void Socket::connect(const Addr& addr, const Port& port) {
-    sockfd < 0 && throw_except<TcpSocketClosedError>("[tcp] socket is closed");
-    remote.sin_addr.s_addr = addr.net_order();
-    remote.sin_port = port.net_order();
-    int ret = ::connect(sockfd, (const struct sockaddr*)&remote, sizeof(remote));
-    ret < 0 && throw_except<TcpConnectError>("[tcp] connect: ", std::strerror(errno));
+// constructor
+Socket::Socket() : remote_() {
+    remote_.sin_family = AF_INET;
+    sock_fd_ = ::socket(AF_INET, SOCK_STREAM, 0);
+    throw_except<TcpSocketExcept>(sock_fd_ >= 0,
+        "[tcp] create socket: ", std::strerror(errno));
 }
 
 void Socket::bind(const Addr& addr, const Port& port) {
-    sockaddr_in local;
-    local.sin_family = AF_INET;
-    local.sin_addr.s_addr = addr.net_order();
-    local.sin_port = port.net_order();
-    if (::bind(this->sockfd, (const struct sockaddr*)&local, sizeof(local)) < 0) {
-        throw_except<TcpBindError>("[tcp] bind \'",
-                                   AddrPort::to_string(addr, port), "\': ", std::strerror(errno));
-    }
+    local_.sin_family = AF_INET;
+    local_.sin_addr.s_addr = addr.net_order();
+    local_.sin_port = port.net_order();
+    int ret = ::bind(sock_fd_, (const struct sockaddr*)&local_, sizeof(local_));
+    throw_except<TcpBindExcept>(ret >= 0, "[tcp] bind \'",
+        AddrPort::to_string(addr, port), "\': ", std::strerror(errno));
 }
 
-// close socket
-void Socket::close() {
-    if (sockfd >= 0) {
-        ::close(sockfd);
-        sockfd = -1;
-    }
-}
-
-int Socket::setSocketOption(int level, int optname, const void* optval, socklen_t optlen) {
-    return ::setsockopt(sockfd, level, optname, optval, optlen);
-}
-
-int Socket::setReceiveTimeout(long seconds, long milliseconds) {
-    struct timeval tm = {seconds, milliseconds * 1000};
-    return this->setSocketOption(SOL_SOCKET,
-        SO_RCVTIMEO, &tm, sizeof(struct timeval));
+// connect to server
+void Socket::connect(const Addr& addr, const Port& port) {
+    // set remote
+    throw_except<TcpSocketClosedExcept>(sock_fd_ >= 0, "[tcp] socket is closed");
+    remote_.sin_addr.s_addr = addr.net_order();
+    remote_.sin_port = port.net_order();
+    // connect to remote
+    int ret = ::connect(sock_fd_, (const struct sockaddr*)&remote_, sizeof(remote_));
+    throw_except<TcpConnectExcept>(ret >= 0, "[tcp] connect: ", std::strerror(errno));
+    // get local
+    socklen_t addr_len = sizeof(local_);
+    getsockname(sock_fd_, (struct sockaddr *)&local_, &addr_len);
 }
 
 // send to remote
 int Socket::send(const char* msg, size_t size) const {
-    sockfd < 0 && throw_except<TcpSocketClosedError>("[tcp] socket is closed");
+    throw_except<TcpSocketClosedExcept>(sock_fd_ >= 0, "[tcp] socket is closed");
 
     // send to remote
-    int ret = ::send(sockfd, msg, size, 0);
-    ret < 0 && throw_except<TcpSendError>("[tcp] send:", std::strerror(errno));
+    int ret = ::send(sock_fd_, msg, size, 0);
+    throw_except<TcpSendExcept>(ret >= 0, "[tcp] send:", std::strerror(errno));
 
     // returns the number of bytes sent
     return ret;
@@ -70,30 +52,34 @@ int Socket::send(std::string msg) const {
 }
 
 // receive from remote
-int Socket::receive(char *buf, size_t buf_size) {
-    sockfd < 0 && throw_except<TcpSocketClosedError>("[tcp] socket is closed");
-
-    // receive from remote
-    ssize_t len = ::recv(sockfd, buf, buf_size, 0);
-
-    if (len < 0) {
+int Socket::receive(char* buf, size_t buf_size) {
+    throw_except<TcpSocketClosedExcept>(sock_fd_ >= 0, "[tcp] socket is closed");
+    ssize_t len = ::recv(sock_fd_, buf, buf_size, 0);
+    if (len == -1) {
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
-            throw_except<TcpReceiveTimeoutError>("[tcp] receive timeout");
+            return -1;
         } else {
-            throw_except<TcpReceiveError>("[tcp] receive: ", std::strerror(errno));
+            throw_except<TcpReceiveExcept>(false, "[tcp] receive: ", std::strerror(errno));
         }
     }
-
     // truncate buffer
     if (len < buf_size) buf[len] = 0;
-
-    // returns the number of bytes receive
     return static_cast<int>(len);
 }
 
-// get remote addrport
-AddrPort Socket::getRemoteAddrPort() const {
-    return AddrPort(::ntohl(remote.sin_addr.s_addr), ::ntohs(remote.sin_port));
+bool Socket::recv_timeout(long ms) {
+    struct timeval tm = {ms / 1000, ms % 1000 * 1000};
+    return set_option(SOL_SOCKET, SO_RCVTIMEO, tm);
+}
+
+// get local
+AddrPort Socket::get_local() const {
+    return to_addrport_(local_);
+}
+
+// get remote
+AddrPort Socket::get_remote() const {
+    return to_addrport_(remote_);
 }
 
 } // namespace nano
