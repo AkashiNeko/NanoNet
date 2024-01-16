@@ -26,9 +26,7 @@ int receive_from_(int sock_fd, char* buf, size_t buf_size, AddrPort* addrport) {
 // constructor
 UdpSocket::UdpSocket() : remote_({}), is_connected_(false) {
     remote_.sin_family = AF_INET;
-    socket_ = ::socket(AF_INET, SOCK_DGRAM, 0);
-    assert_throw(this->is_open(),
-        "[udp] create socket: ", strerror(errno));
+    this->create_socket_(SOCK_DGRAM);
 }
 
 // send to the specified remote

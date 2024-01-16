@@ -36,10 +36,16 @@ protected:
     // local address
     sockaddr_in local_;
 
-public:
+protected:
 
-    // ctor & dtor
+    // create a socket
+    void create_socket_(int type);
+
+    // ctor
     SocketBase();
+
+public:
+    // dtor
     virtual ~SocketBase() = default;
 
     // file descriptor

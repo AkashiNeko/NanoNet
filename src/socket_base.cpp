@@ -28,6 +28,14 @@ SocketBase::SocketBase() {
     local_.sin_family = AF_INET;
 }
 
+void SocketBase::create_socket_(int type) {
+    socket_ = ::socket(AF_INET, type, 0);
+#ifdef _WIN32
+    sock_closed_ = socket_ == INVALID_SOCKET;
+#endif
+    assert_throw(is_open(), "[socket] create socket: ", std::strerror(errno));
+}
+
 // file descriptor
 void SocketBase::close() {
 #ifdef __linux__

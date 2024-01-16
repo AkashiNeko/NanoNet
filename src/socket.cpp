@@ -5,11 +5,9 @@
 namespace nano {
 
 // constructor
-Socket::Socket() : remote_() {
+Socket::Socket() : remote_({}) {
     remote_.sin_family = AF_INET;
-    socket_ = ::socket(AF_INET, SOCK_STREAM, 0);
-    assert_throw(this->is_open(),
-        "[tcp] create socket: ", std::strerror(errno));
+    this->create_socket_(SOCK_STREAM);
 }
 
 // connect to remote

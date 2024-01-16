@@ -6,10 +6,7 @@ namespace nano {
 
 // constructor
 ServerSocket::ServerSocket() {
-    socket_ = ::socket(AF_INET, SOCK_STREAM, 0);
-    assert_throw(this->is_open(),
-        "[tcp] create socket: ", strerror(errno));
-    this->reuse_addr(true);
+    this->create_socket_(SOCK_STREAM);
 }
 
 ServerSocket::ServerSocket(const Addr& addr, const Port& port) : ServerSocket() {
