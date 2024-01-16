@@ -89,7 +89,7 @@ void Addr::set(in_addr_t val) {
 
 // to string
 std::string Addr::to_string() const {
-    struct in_addr inAddr;
+    in_addr inAddr;
     inAddr.s_addr = ::htonl(this->val_);
     char strAddr[INET_ADDRSTRLEN];
     const char* result = ::inet_ntop(AF_INET, &(inAddr.s_addr), strAddr, sizeof(strAddr));
@@ -117,18 +117,18 @@ bool Addr::is_valid(const std::string& addr) {
 
 // DNS query
 Addr Addr::dns_query(const char* domain, bool use_tcp) {
-    struct addrinfo hints = {};
+    addrinfo hints = {};
     // use tcp or udp?
     hints.ai_family = AF_INET;
     hints.ai_socktype = use_tcp ? SOCK_STREAM : SOCK_DGRAM;
-    struct addrinfo* result;
+    addrinfo* result;
     int status = getaddrinfo(domain, NULL, &hints, &result);
     assert_throw(status == 0,
         "[addr] getaddrinfo: ", gai_strerror(status));
     in_addr_t addr = INADDR_ANY;
-    for (struct addrinfo* p = result; p; p = p->ai_next) {
+    for (addrinfo* p = result; p; p = p->ai_next) {
         if (p->ai_family == AF_INET) {
-            struct sockaddr_in* ipv4 = (struct sockaddr_in*)p->ai_addr;
+            sockaddr_in* ipv4 = (sockaddr_in*)p->ai_addr;
             addr = ipv4->sin_addr.s_addr;
             break;
         }

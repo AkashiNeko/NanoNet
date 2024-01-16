@@ -4,9 +4,6 @@
 #ifndef NANONET_PORT_H_
 #define NANONET_PORT_H_
 
-// C
-#include <cstdint>
-
 // C++
 #include <string>
 

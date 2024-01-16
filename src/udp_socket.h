@@ -12,7 +12,7 @@ namespace nano {
 class UdpSocket : public SocketBase {
 
     // remote address
-    struct sockaddr_in remote_;
+    sockaddr_in remote_;
 
     // is connected
     bool is_connected_;

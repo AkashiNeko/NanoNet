@@ -65,12 +65,12 @@ void UdpSocket::connect(const Addr& addr, const Port& port) {
     remote_.sin_port = port.net_order();
 
     // connect
-    int ret = ::connect(sock_fd_, (const struct sockaddr*)&remote_, sizeof(remote_));
+    int ret = ::connect(sock_fd_, (const sockaddr*)&remote_, sizeof(remote_));
     assert_throw(ret >= 0, "[udp] connect: ", std::strerror(errno));
     is_connected_ = true;
 
     socklen_t addr_len = sizeof(local_);
-    getsockname(sock_fd_, (struct sockaddr *)&local_, &addr_len);
+    getsockname(sock_fd_, (sockaddr *)&local_, &addr_len);
 }
 
 // send to remote
@@ -108,7 +108,7 @@ int UdpSocket::receive(char* buf, size_t buf_size) const {
 
 // set receive timeout
 bool UdpSocket::recv_timeout(long ms) const {
-    struct timeval tm = {ms / 1000, ms % 1000 * 1000};
+    timeval tm = {ms / 1000, ms % 1000 * 1000};
     return set_option(SOL_SOCKET, SO_RCVTIMEO, tm);
 }
 

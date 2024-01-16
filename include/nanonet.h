@@ -8,19 +8,24 @@
     #error "Nanonet requires at least C++11"
 #endif
 
-// C
-#include <cstdint>
-
 // C++
-#include <regex>
 #include <string>
 
 // Linux
+#include <unistd.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <netinet/in.h>
 
 namespace nano {
+
+#ifdef __WIN32__ // Windows
+    using sock_t = SOCKET;
+#elif __linux__ // Linux
+    using sock_t = int;
+#else // other
+    #error "Unsupported platform. Only Windows and Linux are supported."
+#endif // platform
 
 class NanoExcept : public std::exception {
     std::string except_msg_;
@@ -176,7 +181,7 @@ protected:
     int sock_fd_;
 
     // local address
-    struct sockaddr_in local_;
+    sockaddr_in local_;
 
 public:
 
@@ -211,7 +216,7 @@ public:
 class Socket : public SocketBase {
 
     // remote address
-    struct sockaddr_in remote_;
+    sockaddr_in remote_;
 
     // server socket
     friend class ServerSocket;
@@ -262,7 +267,7 @@ public:
 class UdpSocket : public SocketBase {
 
     // remote address
-    struct sockaddr_in remote_;
+    sockaddr_in remote_;
 
     // is connected
     bool is_connected_;

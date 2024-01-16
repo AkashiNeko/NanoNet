@@ -26,7 +26,7 @@ void ServerSocket::listen(int backlog) {
 Socket ServerSocket::accept() {
     Socket socket;
     socklen_t socklen = sizeof(socket.remote_);
-    int new_fd = ::accept(sock_fd_, (struct sockaddr*)&socket.remote_, &socklen);
+    int new_fd = ::accept(sock_fd_, (sockaddr*)&socket.remote_, &socklen);
     assert_throw(new_fd >= 0, "[tcp] accept: ", strerror(errno));
     socket.sock_fd_ = new_fd;
     socket.local_ = this->local_;

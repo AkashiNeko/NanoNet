@@ -19,11 +19,11 @@ void Socket::connect(const Addr& addr, const Port& port) {
     remote_.sin_addr.s_addr = addr.net_order();
     remote_.sin_port = port.net_order();
     // connect to remote
-    int ret = ::connect(sock_fd_, (const struct sockaddr*)&remote_, sizeof(remote_));
+    int ret = ::connect(sock_fd_, (const sockaddr*)&remote_, sizeof(remote_));
     assert_throw(ret >= 0, "[tcp] connect: ", std::strerror(errno));
     // get local
     socklen_t addr_len = sizeof(local_);
-    getsockname(sock_fd_, (struct sockaddr *)&local_, &addr_len);
+    getsockname(sock_fd_, (sockaddr *)&local_, &addr_len);
 }
 
 // send to remote
@@ -57,7 +57,7 @@ int Socket::receive(char* buf, size_t buf_size) const {
 }
 
 bool Socket::recv_timeout(long ms) const {
-    struct timeval tm = {ms / 1000, ms % 1000 * 1000};
+    timeval tm = {ms / 1000, ms % 1000 * 1000};
     return set_option(SOL_SOCKET, SO_RCVTIMEO, tm);
 }
 

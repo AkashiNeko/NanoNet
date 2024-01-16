@@ -5,11 +5,9 @@
 #define NANONET_ADDR_H_
 
 // C
-#include <cstdint>
 #include <cstring>
 
 // C++
-#include <regex>
 #include <string>
 
 // Linux

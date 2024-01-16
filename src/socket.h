@@ -12,7 +12,7 @@ namespace nano {
 class Socket : public SocketBase {
 
     // remote address
-    struct sockaddr_in remote_;
+    sockaddr_in remote_;
 
     // server socket
     friend class ServerSocket;

@@ -12,14 +12,22 @@
 
 namespace nano {
 
+#ifdef __WIN32__ // Windows
+    using sock_t = SOCKET;
+#elif __linux__ // Linux
+    using sock_t = int;
+#else // other
+    #error "Unsupported platform. Only Windows and Linux are supported."
+#endif // platform
+
 class SocketBase {
 protected:
 
     // fd of socket
-    int sock_fd_;
+    sock_t sock_fd_;
 
     // local address
-    struct sockaddr_in local_;
+    sockaddr_in local_;
 
 public:
 
@@ -30,7 +38,7 @@ public:
     // file descriptor
     virtual void close();
     virtual bool is_open() const;
-    virtual int get_fd() const;
+    virtual sock_t get_sock() const;
 
     // bind local
     void bind(const Addr& addr, const Port& port);
