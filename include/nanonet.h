@@ -84,6 +84,7 @@ inline void assert_throw(bool condition, const Args&... args) {
 }
 
 #endif // __cplusplus
+
 class Addr {
 
     // host byte order addr (ipv4)
@@ -158,8 +159,8 @@ public:
     port_t net_order() const;
 
     // getter & setter
-    addr_t get() const;
-    void set(addr_t val);
+    port_t get() const;
+    void set(port_t val);
 
     // to string
     std::string to_string() const;
@@ -188,13 +189,20 @@ public:
     std::string to_string() const;
     static std::string to_string(const Addr& addr, const Port& port, char separator = ':');
 
+    // sockaddr_in -> AddrPort
+    static AddrPort to_addrport(sockaddr_in address);
+
 }; // class AddrPort
 
 class SocketBase {
 protected:
 
     // fd of socket
-    int socket_;
+    sock_t socket_;
+
+#ifdef _WIN32
+    bool sock_closed_;
+#endif
 
     // local address
     sockaddr_in local_;
@@ -202,13 +210,13 @@ protected:
 public:
 
     // ctor & dtor
-    SocketBase(int fd = -1);
+    SocketBase();
     virtual ~SocketBase() = default;
 
     // file descriptor
     virtual void close();
     virtual bool is_open() const;
-    virtual int get_fd() const;
+    virtual sock_t get_sock() const;
 
     // bind local
     void bind(const Addr& addr, const Port& port);
@@ -219,12 +227,12 @@ public:
     // set socket option
     template <class OptionType>
     inline bool set_option(int level, int optname, const OptionType& optval) const {
-        return ::setsockopt(socket_, level, optname, &optval, sizeof(optval)) == 0;
+        return ::setsockopt(socket_, level, optname, (const char*)&optval, sizeof(optval)) == 0;
     }
 
     template <class OptionType>
     inline bool get_option(int level, int optname, OptionType& optval) const {
-        return ::getsockopt(socket_, level, optname, &optval, sizeof(optval)) == 0;
+        return ::getsockopt(socket_, level, optname, (const char*)&optval, sizeof(optval)) == 0;
     }
 
 }; // class SocketBase
@@ -276,7 +284,7 @@ public:
     Socket accept();
 
     // set address reuse
-    void reuse_addr(bool reuseAddr);
+    bool reuse_addr(bool reuseAddr);
 
 }; // class ServerSocket
 
