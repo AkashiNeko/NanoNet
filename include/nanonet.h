@@ -11,21 +11,37 @@
 // C++
 #include <string>
 
-// Linux
+// platform
+#ifdef __linux__
+
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <netinet/in.h>
 
+#elif _WIN32
+
+#include <WinSock2.h>
+
+#ifdef _MSC_VER
+#pragma comment(lib, "ws2_32.lib")
+#endif
+
+#else
+    #error "Unsupported platform. Only Windows and Linux are supported."
+#endif
+
 namespace nano {
 
-#ifdef __WIN32__ // Windows
-    using sock_t = SOCKET;
-#elif __linux__ // Linux
+#ifdef __linux__
     using sock_t = int;
-#else // other
-    #error "Unsupported platform. Only Windows and Linux are supported."
-#endif // platform
+    using addr_t = in_addr_t;
+    using port_t = in_port_t;
+#elif _WIN32
+    using sock_t = SOCKET;
+    using addr_t = ULONG;
+    using port_t = USHORT;
+#endif
 
 class NanoExcept : public std::exception {
     std::string except_msg_;
@@ -71,35 +87,35 @@ inline void assert_throw(bool condition, const Args&... args) {
 class Addr {
 
     // host byte order addr (ipv4)
-    in_addr_t val_;
+    addr_t val_;
 
 public:
 
     // ctor & dtor
-    Addr(in_addr_t val = 0);
+    Addr(addr_t val = 0);
     Addr(const char* addr);
     Addr(const std::string& addr);
     virtual ~Addr() = default;
 
     // assign
     Addr& operator=(const Addr&) = default;
-    Addr& operator=(in_addr_t other);
+    Addr& operator=(addr_t other);
     Addr& operator=(const char* other);
     Addr& operator=(const std::string& other);
 
-    bool operator==(in_addr_t other) const;
-    bool operator!=(in_addr_t other) const;
+    bool operator==(addr_t other) const;
+    bool operator!=(addr_t other) const;
     bool operator==(const char* other) const;
     bool operator!=(const char* other) const;
     bool operator==(const std::string& other) const;
     bool operator!=(const std::string& other) const;
 
     // to network byte order
-    in_addr_t net_order() const;
+    addr_t net_order() const;
 
     // setter & getter
-    in_addr_t get() const;
-    void set(in_addr_t val);
+    addr_t get() const;
+    void set(addr_t val);
 
     // to string
     std::string to_string() const;
@@ -116,34 +132,34 @@ public:
 class Port {
 
     // host byte order port
-    in_port_t val_;
+    port_t val_;
 
 public:
 
     // ctor & dtor
-    Port(in_port_t val = 0);
+    Port(port_t val = 0);
     Port(const char* port);
     Port(const std::string& port);
     virtual ~Port() = default;
 
     // assign
-    Port& operator=(in_port_t other);
+    Port& operator=(port_t other);
     Port& operator=(const char* other);
     Port& operator=(const std::string& other);
 
-    bool operator==(in_port_t other) const;
-    bool operator!=(in_port_t other) const;
+    bool operator==(port_t other) const;
+    bool operator!=(port_t other) const;
     bool operator==(const char* other) const;
     bool operator!=(const char* other) const;
     bool operator==(const std::string& other) const;
     bool operator!=(const std::string& other) const;
 
     // to network byte order
-    in_port_t net_order() const;
+    port_t net_order() const;
 
     // getter & setter
-    in_addr_t get() const;
-    void set(in_addr_t val);
+    addr_t get() const;
+    void set(addr_t val);
 
     // to string
     std::string to_string() const;
@@ -178,7 +194,7 @@ class SocketBase {
 protected:
 
     // fd of socket
-    int sock_fd_;
+    int socket_;
 
     // local address
     sockaddr_in local_;
@@ -203,12 +219,12 @@ public:
     // set socket option
     template <class OptionType>
     inline bool set_option(int level, int optname, const OptionType& optval) const {
-        return ::setsockopt(sock_fd_, level, optname, &optval, sizeof(optval)) == 0;
+        return ::setsockopt(socket_, level, optname, &optval, sizeof(optval)) == 0;
     }
 
     template <class OptionType>
     inline bool get_option(int level, int optname, OptionType& optval) const {
-        return ::getsockopt(sock_fd_, level, optname, &optval, sizeof(optval)) == 0;
+        return ::getsockopt(socket_, level, optname, &optval, sizeof(optval)) == 0;
     }
 
 }; // class SocketBase

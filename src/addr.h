@@ -10,48 +10,67 @@
 // C++
 #include <string>
 
-// Linux
+#ifdef __linux__
+
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <netinet/in.h>
+
+#elif _WIN32
+
+#include <WinSock2.h>
+#include <ws2ipdef.h>
+#include <ws2tcpip.h>
+
+#ifdef _MSC_VER
+#pragma comment(lib, "ws2_32.lib")
+#endif
+
+#endif
 
 // nanonet
 #include "except.h"
 
 namespace nano {
 
+#ifdef __linux__
+    using addr_t = in_addr_t;
+#elif _WIN32
+    using addr_t = ULONG;
+#endif
+
 class Addr {
 
     // host byte order addr (ipv4)
-    in_addr_t val_;
+    addr_t val_;
 
 public:
 
     // ctor & dtor
-    Addr(in_addr_t val = 0);
+    Addr(addr_t val = 0);
     Addr(const char* addr);
     Addr(const std::string& addr);
     virtual ~Addr() = default;
 
     // assign
     Addr& operator=(const Addr&) = default;
-    Addr& operator=(in_addr_t other);
+    Addr& operator=(addr_t other);
     Addr& operator=(const char* other);
     Addr& operator=(const std::string& other);
 
-    bool operator==(in_addr_t other) const;
-    bool operator!=(in_addr_t other) const;
+    bool operator==(addr_t other) const;
+    bool operator!=(addr_t other) const;
     bool operator==(const char* other) const;
     bool operator!=(const char* other) const;
     bool operator==(const std::string& other) const;
     bool operator!=(const std::string& other) const;
 
     // to network byte order
-    in_addr_t net_order() const;
+    addr_t net_order() const;
 
     // setter & getter
-    in_addr_t get() const;
-    void set(in_addr_t val);
+    addr_t get() const;
+    void set(addr_t val);
 
     // to string
     std::string to_string() const;

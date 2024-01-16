@@ -6,8 +6,8 @@ namespace nano {
 
 // constructor
 ServerSocket::ServerSocket() {
-    sock_fd_ = ::socket(AF_INET, SOCK_STREAM, 0);
-    assert_throw(sock_fd_ >= 0,
+    socket_ = ::socket(AF_INET, SOCK_STREAM, 0);
+    assert_throw(this->is_open(),
         "[tcp] create socket: ", strerror(errno));
     this->reuse_addr(true);
 }
@@ -18,7 +18,7 @@ ServerSocket::ServerSocket(const Addr& addr, const Port& port) : SocketBase() {
 
 // listen
 void ServerSocket::listen(int backlog) {
-    int ret = ::listen(sock_fd_, backlog);
+    int ret = ::listen(socket_, backlog);
     assert_throw(ret >= 0, "[tcp] listen: ", strerror(errno));
 }
 
@@ -26,9 +26,9 @@ void ServerSocket::listen(int backlog) {
 Socket ServerSocket::accept() {
     Socket socket;
     socklen_t socklen = sizeof(socket.remote_);
-    int new_fd = ::accept(sock_fd_, (sockaddr*)&socket.remote_, &socklen);
+    int new_fd = ::accept(socket_, (sockaddr*)&socket.remote_, &socklen);
     assert_throw(new_fd >= 0, "[tcp] accept: ", strerror(errno));
-    socket.sock_fd_ = new_fd;
+    socket.socket_ = new_fd;
     socket.local_ = this->local_;
     return socket;
 }

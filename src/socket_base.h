@@ -4,27 +4,34 @@
 #ifndef NANONET_SOCKET_BASE_H
 #define NANONET_SOCKET_BASE_H
 
-// Linux
+#ifdef __linux__
+
 #include <unistd.h>
+
+#endif
 
 // nanonet
 #include "addr_port.h"
 
 namespace nano {
 
-#ifdef __WIN32__ // Windows
-    using sock_t = SOCKET;
-#elif __linux__ // Linux
+#ifdef __linux__
     using sock_t = int;
-#else // other
+#elif _WIN32
+    using sock_t = SOCKET;
+#else
     #error "Unsupported platform. Only Windows and Linux are supported."
-#endif // platform
+#endif
 
 class SocketBase {
 protected:
 
     // fd of socket
-    sock_t sock_fd_;
+    sock_t socket_;
+
+#ifdef _WIN32
+    bool sock_closed_;
+#endif
 
     // local address
     sockaddr_in local_;
@@ -32,7 +39,7 @@ protected:
 public:
 
     // ctor & dtor
-    SocketBase(int fd = -1);
+    SocketBase();
     virtual ~SocketBase() = default;
 
     // file descriptor
@@ -49,12 +56,12 @@ public:
     // set socket option
     template <class OptionType>
     inline bool set_option(int level, int optname, const OptionType& optval) const {
-        return ::setsockopt(sock_fd_, level, optname, &optval, sizeof(optval)) == 0;
+        return ::setsockopt(socket_, level, optname, (const char*)&optval, sizeof(optval)) == 0;
     }
 
     template <class OptionType>
     inline bool get_option(int level, int optname, OptionType& optval) const {
-        return ::getsockopt(sock_fd_, level, optname, &optval, sizeof(optval)) == 0;
+        return ::getsockopt(socket_, level, optname, (const char*)&optval, sizeof(optval)) == 0;
     }
 
 }; // class SocketBase

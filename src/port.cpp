@@ -6,8 +6,8 @@ namespace nano {
 
 namespace {
 
-// convert C string to in_port_t
-inline in_port_t parse_(const char* port) {
+// convert C string to port_t
+inline port_t parse_(const char* port) {
     unsigned result = 0;
     for (const char* p = port; *p; ++p) {
         assert_throw(*p >= '0' && *p <= '9',
@@ -16,11 +16,11 @@ inline in_port_t parse_(const char* port) {
         assert_throw(result < 65536,
             "[port] port ", port, " is out of range");
     }
-    return static_cast<in_port_t>(result);
+    return static_cast<port_t>(result);
 }
 
-// compare in_port_t and C string
-inline bool equal_(const in_port_t& port, const char* other) {
+// compare port_t and C string
+inline bool equal_(const port_t& port, const char* other) {
     try {
         return port == parse_(other);
     } catch (...) {
@@ -31,7 +31,7 @@ inline bool equal_(const in_port_t& port, const char* other) {
 } // anonymous namespace
 
 // constructor
-Port::Port(in_port_t port)
+Port::Port(port_t port)
     : val_(port) {}
 
 Port::Port(const char* port)
@@ -41,7 +41,7 @@ Port::Port(const std::string& port)
     : val_(parse_(port.c_str())) {}
 
 // assign
-Port& Port::operator=(in_port_t other) {
+Port& Port::operator=(port_t other) {
     this->val_ = other;
     return *this;
 }
@@ -56,11 +56,11 @@ Port& Port::operator=(const std::string& other) {
     return *this;
 }
 
-bool Port::operator==(in_port_t other) const {
+bool Port::operator==(port_t other) const {
     return this->val_ == other;
 }
 
-bool Port::operator!=(in_port_t other) const {
+bool Port::operator!=(port_t other) const {
     return this->val_ != other;
 }
 
@@ -81,16 +81,16 @@ bool Port::operator!=(const std::string& other) const {
 }
 
 // to network byte order
-in_port_t Port::net_order() const {
+port_t Port::net_order() const {
     return ::htons(this->val_);
 }
 
 // getter & setter
-in_addr_t Port::get() const {
+port_t Port::get() const {
     return this->val_;
 }
 
-void Port::set(in_addr_t val) {
+void Port::set(port_t val) {
     this->val_ = val;
 }
 

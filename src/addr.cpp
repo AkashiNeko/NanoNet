@@ -6,8 +6,8 @@ namespace nano {
 
 namespace {
 
-// convert C string to in_addr_t
-inline in_addr_t parse_(const char* addr) {
+// convert C string to addr_t
+inline addr_t parse_(const char* addr) {
     if (Addr::is_valid(addr)) {
         return ::ntohl(inet_addr(addr));
     } else {
@@ -15,8 +15,8 @@ inline in_addr_t parse_(const char* addr) {
     }
 }
 
-// compare in_addr_t and C string
-inline bool equal_(const in_addr_t& addr, const char* other) {
+// compare addr_t and C string
+inline bool equal_(const addr_t& addr, const char* other) {
     try {
         return addr == parse_(other);
     } catch (...) {
@@ -27,13 +27,13 @@ inline bool equal_(const in_addr_t& addr, const char* other) {
 } // anonymous namespace
 
 // constructor
-Addr::Addr(in_addr_t val) : val_(val) {}
+Addr::Addr(addr_t val) : val_(val) {}
 
 Addr::Addr(const char* addr) : val_(parse_(addr)) {}
 
 Addr::Addr(const std::string& addr) : Addr(addr.c_str()) {}
 
-Addr& Addr::operator=(in_addr_t other) {
+Addr& Addr::operator=(addr_t other) {
     this->val_ = other;
     return *this;
 }
@@ -49,11 +49,11 @@ Addr& Addr::operator=(const std::string& other) {
     return *this;
 }
 
-bool Addr::operator==(in_addr_t other) const {
+bool Addr::operator==(addr_t other) const {
     return this->val_ == other;
 }
 
-bool Addr::operator!=(in_addr_t other) const {
+bool Addr::operator!=(addr_t other) const {
     return this->val_ != other;
 }
 
@@ -74,27 +74,24 @@ bool Addr::operator!=(const std::string& other) const {
 }
 
 // to network byte order
-in_addr_t Addr::net_order() const {
+addr_t Addr::net_order() const {
     return ::htonl(this->val_);
 }
 
 // setter & getter
-in_addr_t Addr::get() const {
+addr_t Addr::get() const {
     return this->val_;
 }
 
-void Addr::set(in_addr_t val) {
+void Addr::set(addr_t val) {
     this->val_ = val;
 }
 
 // to string
 std::string Addr::to_string() const {
-    in_addr inAddr;
-    inAddr.s_addr = ::htonl(this->val_);
-    char strAddr[INET_ADDRSTRLEN];
-    const char* result = ::inet_ntop(AF_INET, &(inAddr.s_addr), strAddr, sizeof(strAddr));
-    assert_throw(result != nullptr, "[addr] inet_ntop: ", strerror(errno));
-    return strAddr;
+    uint32_t val = static_cast<uint32_t>(::htonl(this->val_));
+    return std::to_string((val) & 0xFF) + '.' + std::to_string((val >> 8) & 0xFF) + '.'
+        + std::to_string((val >> 16) & 0xFF) + '.' + std::to_string((val >> 24) & 0xFF);
 }
 
 // is valid ipv4 address
@@ -125,7 +122,7 @@ Addr Addr::dns_query(const char* domain, bool use_tcp) {
     int status = getaddrinfo(domain, NULL, &hints, &result);
     assert_throw(status == 0,
         "[addr] getaddrinfo: ", gai_strerror(status));
-    in_addr_t addr = INADDR_ANY;
+    addr_t addr = INADDR_ANY;
     for (addrinfo* p = result; p; p = p->ai_next) {
         if (p->ai_family == AF_INET) {
             sockaddr_in* ipv4 = (sockaddr_in*)p->ai_addr;
