@@ -22,6 +22,9 @@ namespace nano {
 
 // constructor
 SocketBase::SocketBase() {
+#ifdef _WIN32
+    sock_closed_ = false;
+#endif
     local_.sin_family = AF_INET;
 }
 
@@ -57,7 +60,7 @@ void SocketBase::bind(const Addr& addr, const Port& port) {
     local_.sin_port = port.net_order();
     int ret = ::bind(socket_, (const sockaddr*)&local_, sizeof(local_));
     assert_throw(ret >= 0, "[socket] bind \'",
-        AddrPort::to_string(addr, port), "\': ", std::strerror(errno));
+        AddrPort::to_string(addr, port), "\': ", strerror(errno));
 }
 
 // get local

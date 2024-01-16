@@ -12,7 +12,7 @@ ServerSocket::ServerSocket() {
     this->reuse_addr(true);
 }
 
-ServerSocket::ServerSocket(const Addr& addr, const Port& port) : SocketBase() {
+ServerSocket::ServerSocket(const Addr& addr, const Port& port) : ServerSocket() {
     this->bind(addr, port);
 }
 
