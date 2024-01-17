@@ -26,11 +26,11 @@ namespace nano {
 class SocketBase {
 protected:
 
-    // fd of socket
+    // linux: fd, windows: SOCKET
     sock_t socket_;
 
 #ifdef _WIN32
-    bool sock_closed_;
+    bool sock_open_;
 #endif
 
     // local address
@@ -48,7 +48,7 @@ public:
     // dtor
     virtual ~SocketBase() = default;
 
-    // file descriptor
+    // socket
     virtual void close();
     virtual bool is_open() const;
     virtual sock_t get_sock() const;

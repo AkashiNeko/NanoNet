@@ -22,18 +22,20 @@ namespace nano {
 
 // constructor
 SocketBase::SocketBase() {
-#ifdef _WIN32
-    sock_closed_ = false;
+#ifdef __linux__
+    socket_ = -1;
+#elif _WIN32
+    sock_open_ = false;
 #endif
     local_.sin_family = AF_INET;
 }
 
 void SocketBase::create_socket_(int type) {
     socket_ = ::socket(AF_INET, type, 0);
-#ifdef _WIN32
-    sock_closed_ = socket_ == INVALID_SOCKET;
+#if _WIN32
+    sock_open_ = socket_ != INVALID_SOCKET;
 #endif
-    assert_throw(is_open(), "[socket] create socket: ", std::strerror(errno));
+    assert_throw(is_open(), "[socket] create socket faild");
 }
 
 // file descriptor
@@ -44,9 +46,9 @@ void SocketBase::close() {
         socket_ = -1;
     }
 #elif _WIN32
-    if (!sock_closed_) {
+    if (sock_open_) {
         closesocket(socket_);
-        sock_closed_ = true;
+        sock_open_ = false;
     }
 #endif
 }
@@ -55,7 +57,7 @@ bool SocketBase::is_open() const {
 #ifdef __linux__
     return socket_ != -1;
 #elif _WIN32
-    return !sock_closed_;
+    return sock_open_;
 #endif
 }
 
