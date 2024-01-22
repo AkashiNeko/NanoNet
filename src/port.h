@@ -46,6 +46,7 @@ public:
     virtual ~Port() = default;
 
     // assign
+    Port& operator=(const Port&) = default;
     Port& operator=(port_t other);
     Port& operator=(const char* other);
     Port& operator=(const std::string& other);

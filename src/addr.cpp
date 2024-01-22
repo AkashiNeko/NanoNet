@@ -29,16 +29,14 @@ inline bool equal_(const addr_t& addr, const char* other) {
 // constructor
 Addr::Addr(addr_t val) : val_(val) {}
 
-Addr::Addr(const char* addr) : val_(parse_(addr)) {}
-
 Addr::Addr(const std::string& addr) : Addr(addr.c_str()) {}
 
+// assign
 Addr& Addr::operator=(addr_t other) {
     this->val_ = other;
     return *this;
 }
 
-// assign
 Addr& Addr::operator=(const char* other) {
     this->val_ = parse_(other);
     return *this;
@@ -90,15 +88,17 @@ void Addr::set(addr_t val) {
 // to string
 std::string Addr::to_string() const {
     uint32_t val = static_cast<uint32_t>(::htonl(this->val_));
-    return std::to_string((val) & 0xFF) + '.' + std::to_string((val >> 8) & 0xFF) + '.'
+    return std::to_string(val & 0xFF) + '.' + std::to_string((val >> 8) & 0xFF) + '.'
         + std::to_string((val >> 16) & 0xFF) + '.' + std::to_string((val >> 24) & 0xFF);
 }
 
 // is valid ipv4 address
 bool Addr::is_valid(const std::string& addr) {
     int count = 0, value = 0;
+    char prev = '.';
     for (const char& c : addr) {
         if (c == '.') {
+            if (prev == '.') return false;
             if (value > 255 || count == 3)
                 return false;
             value = 0;
@@ -108,6 +108,7 @@ bool Addr::is_valid(const std::string& addr) {
         } else {
             return false;
         }
+        prev = c;
     }
     return (value <= 255) && (count == 3);
 }
