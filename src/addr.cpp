@@ -29,6 +29,8 @@ inline bool equal_(const addr_t& addr, const char* other) {
 // constructor
 Addr::Addr(addr_t val) : val_(val) {}
 
+Addr::Addr(const char* addr) : val_(parse_(addr)) {}
+
 Addr::Addr(const std::string& addr) : Addr(addr.c_str()) {}
 
 // assign
