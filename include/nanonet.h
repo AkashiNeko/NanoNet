@@ -58,7 +58,7 @@ public:
 #if __cplusplus >= 201703L
 
 template <class ExceptType = NanoExcept, class ...Args>
-inline void throw_except(bool condition, const Args&... args) {
+inline void assert_throw(bool condition, const Args&... args) {
     if (condition) return;
     std::string s;
     ((s += args), ...);
