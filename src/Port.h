@@ -1,4 +1,4 @@
-// File:     src/except.h
+// File:     src/Port.h
 // Author:   AkashiNeko
 // Project:  NanoNet
 // Github:   https://github.com/AkashiNeko/NanoNet/
@@ -25,56 +25,75 @@
  */
 
 #pragma once
-#ifndef NANONET_EXCEPT_H
-#define NANONET_EXCEPT_H
+#ifndef NANONET_PORT_H
+#define NANONET_PORT_H
 
+// C++
 #include <string>
-#include <exception>
+
+#ifdef __linux__
+
+#include <netinet/in.h>
+
+#elif _WIN32
+
+#include <WinSock2.h>
+
+#ifdef _MSC_VER
+#pragma comment(lib, "ws2_32.lib")
+#endif
+
+#endif
+
+// NanoNet
+#include "except.h"
 
 namespace nano {
 
-class NanoExcept : public std::exception {
-    std::string except_msg_;
+#ifdef __linux__
+    using port_t = in_port_t;
+#elif _WIN32
+    using port_t = USHORT;
+#endif
+
+class Port {
+
+    // host byte order port
+    port_t val_;
+
 public:
-    explicit NanoExcept(const std::string& msg) : except_msg_(msg) {}
-    explicit NanoExcept(std::string&& msg) : except_msg_(std::move(msg)) {}
-    virtual ~NanoExcept() override = default;
-    virtual const char* what() const noexcept override {
-        return except_msg_.c_str();
-    }
-};
 
-// throw exceptions
-#if __cplusplus >= 201703L
+    // ctor & dtor
+    Port(port_t val = 0);
+    Port(const char* port);
+    Port(const std::string& port);
+    virtual ~Port() = default;
 
-template <class ExceptType = NanoExcept, class ...Args>
-inline void assert_throw(bool condition, const Args&... args) {
-    if (condition) return;
-    std::string s;
-    ((s += args), ...);
-    throw ExceptType(std::move(s));
-}
+    // assign
+    Port& operator=(const Port&) = default;
+    Port& operator=(port_t other);
+    Port& operator=(const char* other);
+    Port& operator=(const std::string& other);
 
-#else // 201103L <= __cplusplus < 201703L
+    bool operator==(port_t other) const;
+    bool operator!=(port_t other) const;
+    bool operator==(const char* other) const;
+    bool operator!=(const char* other) const;
+    bool operator==(const std::string& other) const;
+    bool operator!=(const std::string& other) const;
 
-inline void append_string_(std::string&) {}
+    // to network byte order
+    port_t net_order() const;
 
-template <class T, class ...Args>
-inline void append_string_(std::string& s, const T& arg, const Args&... args) {
-    s += arg;
-    append_string_(s, args...);
-}
+    // getter & setter
+    port_t get() const;
+    void set(port_t val);
 
-template <class ExceptType = NanoExcept, class ...Args>
-inline void assert_throw(bool condition, const Args&... args) {
-    if (condition) return;
-    std::string s;
-    append_string_(s, args...);
-    throw ExceptType(std::move(s));
-}
+    // to string
+    std::string to_string() const;
 
-#endif // __cplusplus
+}; // class Port
 
 } // namespace nano
 
-#endif // NANONET_EXCEPT_H
+#endif // NANONET_PORT_H
