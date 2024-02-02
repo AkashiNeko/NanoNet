@@ -40,7 +40,7 @@ ServerSocket::ServerSocket(const Addr& addr, const Port& port) : ServerSocket() 
 // listen
 void ServerSocket::listen(int backlog) {
     int ret = ::listen(socket_, backlog);
-    assert_throw(ret >= 0, "[tcp] listen: ", strerror(errno));
+    assert_throw_nanoexcept(ret >= 0, "[TCP] listen(): ", LAST_ERROR);
 }
 
 // accept a new connection
@@ -48,7 +48,7 @@ Socket ServerSocket::accept() {
     Socket socket;
     socklen_t socklen = sizeof(socket.remote_);
     int new_fd = ::accept(socket_, (sockaddr*)&socket.remote_, &socklen);
-    assert_throw(new_fd >= 0, "[tcp] accept: ", strerror(errno));
+    assert_throw_nanoexcept(new_fd >= 0, "[TCP] accept(): ", LAST_ERROR);
     socket.socket_ = new_fd;
     socket.local_ = this->local_;
     return socket;

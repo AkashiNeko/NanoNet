@@ -147,8 +147,9 @@ Addr Addr::dns_query(const char* domain, bool use_tcp) {
     hints.ai_socktype = use_tcp ? SOCK_STREAM : SOCK_DGRAM;
     addrinfo* result;
     int status = getaddrinfo(domain, NULL, &hints, &result);
-    assert_throw(status == 0,
-        "[addr] getaddrinfo: ", gai_strerror(status));
+    assert_throw_nanoexcept(status == 0,
+        "[Addr] dns_query(): Failed to get the address named \'",
+        domain, "\'. ", gai_strerror(status));
     addr_t addr = INADDR_ANY;
     for (addrinfo* p = result; p; p = p->ai_next) {
         if (p->ai_family == AF_INET) {

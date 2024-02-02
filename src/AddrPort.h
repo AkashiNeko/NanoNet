@@ -44,7 +44,7 @@ public:
     // ctor & dtor
     AddrPort() = default;
     AddrPort(const Addr& addr, const Port& port);
-    AddrPort(const char* addrport);
+    AddrPort(const char* addrport, char separator = ':');
     virtual ~AddrPort() = default;
 
     // getter & setter

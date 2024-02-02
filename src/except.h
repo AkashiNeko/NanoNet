@@ -28,6 +28,10 @@
 #ifndef NANONET_EXCEPT_H
 #define NANONET_EXCEPT_H
 
+// C
+#include <cstring>
+
+// C++
 #include <string>
 #include <exception>
 
@@ -48,8 +52,7 @@ public:
 #if __cplusplus >= 201703L
 
 template <class ExceptType = NanoExcept, class ...Args>
-inline void assert_throw(bool condition, const Args&... args) {
-    if (condition) return;
+inline void throw_except_(const Args&... args) {
     std::string s;
     ((s += args), ...);
     throw ExceptType(std::move(s));
@@ -65,15 +68,42 @@ inline void append_string_(std::string& s, const T& arg, const Args&... args) {
     append_string_(s, args...);
 }
 
-template <class ExceptType = NanoExcept, class ...Args>
-inline void assert_throw(bool condition, const Args&... args) {
-    if (condition) return;
+template <class ExceptType, class ...Args>
+inline void throw_except_(const Args&... args) {
     std::string s;
     append_string_(s, args...);
     throw ExceptType(std::move(s));
 }
 
 #endif // __cplusplus
+
+#define assert_throw_nanoexcept(condition, args...) \
+(static_cast<bool>(condition) ? void(0)  \
+: throw_except_<NanoExcept>(args));      \
+
+#ifdef __linux__
+
+#define LAST_ERROR (std::strerror(errno))
+
+#elif _WIN32
+
+#include <WinSock2.h>
+#include <Windows.h>
+
+std::string WSAGetLastErrorMessage_() {
+    DWORD errorCode = WSAGetLastError();
+    LPSTR errorMsg = nullptr;
+    FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                   nullptr, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&errorMsg, 0, nullptr);
+    std::string errMsg(errorMsg);
+    LocalFree(errorMsg);
+    return errMsg;
+}
+
+#define LAST_ERROR (WSAGetLastErrorMessage_())
+
+#endif
+
 
 } // namespace nano
 

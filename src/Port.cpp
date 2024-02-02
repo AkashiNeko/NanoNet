@@ -34,11 +34,11 @@ namespace {
 inline port_t parse_(const char* port) {
     unsigned result = 0;
     for (const char* p = port; *p; ++p) {
-        assert_throw(*p >= '0' && *p <= '9',
-            "[port] port ", port, " is invalied");
+        assert_throw_nanoexcept(*p >= '0' && *p <= '9',
+            "[Port] Port(): The port string \'", port, "\' is invalied");
         result = result * 10 + (*p & 0xF);
-        assert_throw(result < 65536,
-            "[port] port ", port, " is out of range");
+        assert_throw_nanoexcept(result < 65536,
+            "[Port] Port(): The port value \'", port, "\' is out of range");
     }
     return static_cast<port_t>(result);
 }

@@ -59,7 +59,8 @@ void SocketBase::create_socket_(int type) {
 #if _WIN32
     sock_open_ = socket_ != INVALID_SOCKET;
 #endif
-    assert_throw(is_open(), "[socket] create socket faild");
+    assert_throw_nanoexcept(is_open(),
+        "[Socket] Create socket faild: ", LAST_ERROR);
 }
 
 // file descriptor
@@ -93,13 +94,13 @@ void SocketBase::bind(const Addr& addr, const Port& port) {
     local_.sin_addr.s_addr = addr.net_order();
     local_.sin_port = port.net_order();
     int ret = ::bind(socket_, (const sockaddr*)&local_, sizeof(local_));
-    assert_throw(ret >= 0, "[socket] bind \'",
-        AddrPort::to_string(addr, port), "\': ", strerror(errno));
+    assert_throw_nanoexcept(ret >= 0, "[Socket] bind(): Bind address \'",
+        AddrPort::to_string(addr, port), "\' failed: ", LAST_ERROR);
 }
 
 // get local
 AddrPort SocketBase::get_local() const {
-    assert_throw(this->is_open(), "[socket] get_local: socket is closed");
+    assert_throw_nanoexcept(this->is_open(), "[Socket] get_local: socket is closed");
     return AddrPort::to_addrport(local_);
 }
 

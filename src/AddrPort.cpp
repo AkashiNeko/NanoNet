@@ -28,9 +28,27 @@
 
 namespace nano {
 
+namespace {
+
+// convert C string to Addr/Port
+inline void parse_(const char* str, char separator, Addr& addr, Port& port) {
+    const char* p = str;
+    for (; *p && *p != ':'; ++p);
+    assert_throw_nanoexcept(*p == ':',
+        "[AddrPort] AddrPort(): Cannot be constructed from the string \'", str, "\'");
+    addr = std::string(str, p - str);
+    port = p + 1;
+}
+
+} // anonymous namespace
+
 // constructor
 AddrPort::AddrPort(const Addr& addr, const Port& port)
     : addr_(addr), port_(port) {}
+
+AddrPort::AddrPort(const char* addrport, char separator) {
+    parse_(addrport, separator, this->addr_, this->port_);
+}
 
 // getter & setter
 void AddrPort::set_addr(const Addr& addr) {

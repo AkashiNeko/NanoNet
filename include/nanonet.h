@@ -78,37 +78,6 @@ public:
     }
 };
 
-// throw exceptions
-#if __cplusplus >= 201703L
-
-template <class ExceptType = NanoExcept, class ...Args>
-inline void assert_throw(bool condition, const Args&... args) {
-    if (condition) return;
-    std::string s;
-    ((s += args), ...);
-    throw ExceptType(std::move(s));
-}
-
-#else // 201103L <= __cplusplus < 201703L
-
-inline void append_string_(std::string&) {}
-
-template <class T, class ...Args>
-inline void append_string_(std::string& s, const T& arg, const Args&... args) {
-    s += arg;
-    append_string_(s, args...);
-}
-
-template <class ExceptType = NanoExcept, class ...Args>
-inline void assert_throw(bool condition, const Args&... args) {
-    if (condition) return;
-    std::string s;
-    append_string_(s, args...);
-    throw ExceptType(std::move(s));
-}
-
-#endif // __cplusplus
-
 class Addr {
 
     // host byte order addr (ipv4)
@@ -202,6 +171,7 @@ public:
     // ctor & dtor
     AddrPort() = default;
     AddrPort(const Addr& addr, const Port& port);
+    AddrPort(const char* addrport, char separator = ':');
     virtual ~AddrPort() = default;
 
     // getter & setter
