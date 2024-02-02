@@ -9,7 +9,7 @@ file(GLOB SRC_LIST ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 add_library(nanonet SHARED ${SRC_LIST})
 add_library(nanonet_static STATIC ${SRC_LIST})
 
-if(WIN32)
+if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_SYSTEM_NAME STREQUAL "Windows")
 target_link_libraries(nanonet PRIVATE "-lws2_32")
 target_link_libraries(nanonet_static PRIVATE "-lws2_32")
 endif()

@@ -1,6 +1,6 @@
 // File:     nanonet.h
 // Author:   AkashiNeko
-// Project:  NanoNet
+// Project:  NanoNet - Version 2.1
 // Github:   https://github.com/AkashiNeko/NanoNet/
 
 /* Copyright AkashiNeko. All rights reserved.
@@ -25,8 +25,8 @@
  */
 
 #pragma once
-#ifndef NANONET_H
-#define NANONET_H
+#ifndef __NANONET__
+#define __NANONET__ 2.1
 
 #if __cplusplus < 201103L
     #error "Nanonet requires at least C++11"
@@ -329,4 +329,4 @@ public:
 
 } // namespace nano
 
-#endif // NANONET_H
+#endif // __NANONET__

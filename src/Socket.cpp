@@ -67,7 +67,7 @@ int Socket::send(const std::string msg) const {
 // receive from remote
 int Socket::receive(char* buf, size_t buf_size) const {
     assert_throw_nanoexcept(this->is_open(), "[TCP] receive(): Socket is closed");
-    ssize_t len = ::recv(socket_, buf, buf_size, 0);
+    auto len = ::recv(socket_, buf, buf_size, 0);
     if (len == -1) {
 #ifdef __linux__
         int err_code = errno, would_block = EWOULDBLOCK;

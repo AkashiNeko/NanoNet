@@ -77,9 +77,9 @@ inline void throw_except_(const Args&... args) {
 
 #endif // __cplusplus
 
-#define assert_throw_nanoexcept(condition, args...) \
-(static_cast<bool>(condition) ? void(0)  \
-: throw_except_<NanoExcept>(args));      \
+#define assert_throw_nanoexcept(condition, ...)    \
+(static_cast<bool>(condition) ? void(0)            \
+: throw_except_<NanoExcept>(__VA_ARGS__));         \
 
 #ifdef __linux__
 
@@ -90,14 +90,19 @@ inline void throw_except_(const Args&... args) {
 #include <WinSock2.h>
 #include <Windows.h>
 
-std::string WSAGetLastErrorMessage_() {
-    DWORD errorCode = WSAGetLastError();
-    LPSTR errorMsg = nullptr;
-    FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                   nullptr, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&errorMsg, 0, nullptr);
-    std::string errMsg(errorMsg);
-    LocalFree(errorMsg);
-    return errMsg;
+namespace {
+    inline std::string WSAGetLastErrorMessage_() {
+        LPSTR msg = nullptr;
+        FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER
+            | FORMAT_MESSAGE_FROM_SYSTEM
+            | FORMAT_MESSAGE_IGNORE_INSERTS,
+            nullptr, WSAGetLastError(),
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPSTR)&msg, 0, nullptr);
+        std::string result(msg);
+        LocalFree(msg);
+        return result;
+    }
 }
 
 #define LAST_ERROR (WSAGetLastErrorMessage_())

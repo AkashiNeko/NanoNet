@@ -35,7 +35,7 @@ int receive_from_(int sock_fd, char* buf, size_t buf_size, AddrPort* addrport) {
         "[UDP] receive_from(): Socket is closed");
     sockaddr_in remote_addr;
     socklen_t socklen = sizeof(remote_addr);
-    ssize_t len = ::recvfrom(sock_fd, buf, buf_size,
+    auto len = ::recvfrom(sock_fd, buf, buf_size,
         0, (sockaddr*)&remote_addr, &socklen);
     if (len == -1) {
 #ifdef __linux__
@@ -71,7 +71,7 @@ int UdpSocket::send_to(const char* msg, size_t length, const AddrPort& remote) c
     remote_addr.sin_family = AF_INET;
     remote_addr.sin_addr.s_addr = remote.get_addr().net_order();
     remote_addr.sin_port = remote.get_port().net_order();
-    ssize_t ret = ::sendto(socket_, msg, length, 0,
+    auto ret = ::sendto(socket_, msg, length, 0,
         (const sockaddr*)&remote_addr, sizeof(remote_addr));
     assert_throw_nanoexcept(ret >= 0,
         "[UDP] send_to(): ", LAST_ERROR);
@@ -135,7 +135,7 @@ int UdpSocket::receive(char* buf, size_t buf_size) const {
     assert_throw_nanoexcept(is_connected_,
         "[UDP] receive(): Socket is not connected");
 
-    ssize_t len = ::recv(socket_, buf, buf_size, 0);
+    auto len = ::recv(socket_, buf, buf_size, 0);
     if (len == -1) {
 #ifdef __linux__
         int err_code = errno, would_block = EWOULDBLOCK;

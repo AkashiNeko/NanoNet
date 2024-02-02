@@ -26,23 +26,28 @@
 
 #include "SocketBase.h"
 
+namespace nano {
+
+// init WSA
 #ifdef _WIN32
-namespace { // init wsa
+
+namespace {
+
 class WSAInit {
 public:
     WSAInit() {
         WSADATA wsa;
         int result = WSAStartup(MAKEWORD(2, 2), &wsa);
-        nano::assert_throw(result == 0, "WSAStartup failed");
+        assert_throw_nanoexcept(result == 0, "[WSA] WSAStartup() failed");
     }
     ~WSAInit() {
         WSACleanup();
     }
 }__wsa_initializer_; // RAII
-} // anonymous namespace
-#endif
 
-namespace nano {
+} // anonymous namespace
+
+#endif
 
 // constructor
 SocketBase::SocketBase() {
