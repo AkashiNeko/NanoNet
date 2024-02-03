@@ -1,6 +1,6 @@
 // File:     nanonet.h
 // Author:   AkashiNeko
-// Project:  NanoNet - Version 2.1
+// Project:  NanoNet - Version 2.2
 // Github:   https://github.com/AkashiNeko/NanoNet/
 
 /* Copyright AkashiNeko. All rights reserved.
@@ -26,7 +26,7 @@
 
 #pragma once
 #ifndef __NANONET__
-#define __NANONET__ 2.1
+#define __NANONET__ 2.2
 
 #if __cplusplus < 201103L
     #error "Nanonet requires at least C++11"
@@ -172,6 +172,7 @@ public:
     AddrPort() = default;
     AddrPort(const Addr& addr, const Port& port);
     AddrPort(const char* addrport, char separator = ':');
+    AddrPort(const std::string& addrport, char separator = ':');
     virtual ~AddrPort() = default;
 
     // getter & setter
@@ -192,7 +193,8 @@ public:
 class SocketBase {
 protected:
 
-    // linux: fd, windows: SOCKET
+    // Linux   : int (fd)
+    // Windows : SOCKET
     sock_t socket_;
 
 #ifdef _WIN32
@@ -204,11 +206,8 @@ protected:
 
 protected:
 
-    // create a socket
-    void create_socket_(int type);
-
     // ctor
-    SocketBase();
+    SocketBase(int type);
 
 public:
     // dtor
@@ -225,15 +224,18 @@ public:
     // get local
     AddrPort get_local() const;
 
+    // non-blocking
+    bool set_blocking(bool blocking);
+
     // set socket option
     template <class OptionType>
     inline bool set_option(int level, int optname, const OptionType& optval) const {
-        return 0 == ::setsockopt(socket_, level, optname, (const char*)&optval, sizeof(optval));
+        return ::setsockopt(socket_, level, optname, (const char*)&optval, sizeof(optval)) == 0;
     }
 
     template <class OptionType>
     inline bool get_option(int level, int optname, OptionType& optval) const {
-        return 0 == ::getsockopt(socket_, level, optname, (const char*)&optval, sizeof(optval));
+        return ::getsockopt(socket_, level, optname, (const char*)&optval, sizeof(optval)) == 0;
     }
 
 }; // class SocketBase
@@ -276,6 +278,8 @@ public:
     // ctor & dtor
     ServerSocket();
     ServerSocket(const Addr& addr, const Port& port);
+    ServerSocket(const AddrPort& addrport);
+    ServerSocket(const Port& port);
     virtual ~ServerSocket() = default;
 
     // listen

@@ -35,7 +35,8 @@ inline void parse_(const char* str, char separator, Addr& addr, Port& port) {
     const char* p = str;
     for (; *p && *p != ':'; ++p);
     assert_throw_nanoexcept(*p == ':',
-        "[AddrPort] AddrPort(): Cannot be constructed from the string \'", str, "\'");
+        "[AddrPort] AddrPort(): Cannot be constructed from the string \'",
+        str, "\'");
     addr = std::string(str, p - str);
     port = p + 1;
 }
@@ -48,6 +49,10 @@ AddrPort::AddrPort(const Addr& addr, const Port& port)
 
 AddrPort::AddrPort(const char* addrport, char separator) {
     parse_(addrport, separator, this->addr_, this->port_);
+}
+
+AddrPort::AddrPort(const std::string& addrport, char separator) {
+    parse_(addrport.c_str(), separator, this->addr_, this->port_);
 }
 
 // getter & setter

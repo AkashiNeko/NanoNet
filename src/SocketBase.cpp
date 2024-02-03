@@ -50,21 +50,13 @@ public:
 #endif
 
 // constructor
-SocketBase::SocketBase() {
-#ifdef __linux__
-    socket_ = -1;
-#elif _WIN32
-    sock_open_ = false;
-#endif
+SocketBase::SocketBase(int type) {
     local_.sin_family = AF_INET;
-}
-
-void SocketBase::create_socket_(int type) {
     socket_ = ::socket(AF_INET, type, 0);
 #if _WIN32
     sock_open_ = socket_ != INVALID_SOCKET;
 #endif
-    assert_throw_nanoexcept(is_open(),
+    assert_throw_nanoexcept(this->is_open(),
         "[Socket] Create socket faild: ", LAST_ERROR);
 }
 
@@ -105,8 +97,25 @@ void SocketBase::bind(const Addr& addr, const Port& port) {
 
 // get local
 AddrPort SocketBase::get_local() const {
-    assert_throw_nanoexcept(this->is_open(), "[Socket] get_local: socket is closed");
     return AddrPort::to_addrport(local_);
+}
+
+// non-blocking
+bool SocketBase::set_blocking(bool blocking) {
+    assert_throw_nanoexcept(this->is_open(),
+        "[Socket] set_blocking(): Socket is closed");
+#ifdef __linux__
+    int flags = fcntl(socket_, F_GETFL, 0);
+    if (flags == -1) return false;
+    if (blocking)
+        flags &= ~O_NONBLOCK;
+    else
+        flags |= O_NONBLOCK;
+    return 0 == fcntl(socket_, F_SETFL, flags);
+#elif _WIN32
+    u_long mode = blocking ? 0 : 1;
+    return 0 == ioctlsocket(socket_, FIONBIO, &mode);
+#endif
 }
 
 } // namespace nano

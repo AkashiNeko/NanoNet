@@ -29,13 +29,19 @@
 namespace nano {
 
 // constructor
-ServerSocket::ServerSocket() {
-    this->create_socket_(SOCK_STREAM);
-}
+ServerSocket::ServerSocket() : SocketBase(SOCK_STREAM) {}
 
-ServerSocket::ServerSocket(const Addr& addr, const Port& port) : ServerSocket() {
+ServerSocket::ServerSocket(const Addr& addr, const Port& port)
+    : ServerSocket() {
+    this->reuse_addr(true);
     this->bind(addr, port);
 }
+
+ServerSocket::ServerSocket(const AddrPort& addrport)
+    : ServerSocket(addrport.get_addr(), addrport.get_port()) {}
+
+ServerSocket::ServerSocket(const Port& port)
+    : ServerSocket(addr_t(0), port) {}
 
 // listen
 void ServerSocket::listen(int backlog) {

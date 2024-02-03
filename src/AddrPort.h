@@ -45,6 +45,7 @@ public:
     AddrPort() = default;
     AddrPort(const Addr& addr, const Port& port);
     AddrPort(const char* addrport, char separator = ':');
+    AddrPort(const std::string& addrport, char separator = ':');
     virtual ~AddrPort() = default;
 
     // getter & setter

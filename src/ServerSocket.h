@@ -39,6 +39,8 @@ public:
     // ctor & dtor
     ServerSocket();
     ServerSocket(const Addr& addr, const Port& port);
+    ServerSocket(const AddrPort& addrport);
+    ServerSocket(const Port& port);
     virtual ~ServerSocket() = default;
 
     // listen

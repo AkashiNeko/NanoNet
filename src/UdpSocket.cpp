@@ -30,13 +30,14 @@ namespace nano {
 
 namespace {
 
-int receive_from_(int sock_fd, char* buf, size_t buf_size, AddrPort* addrport) {
+int receive_from_(int sock_fd, char* buf, size_t buf_size,
+        AddrPort* addrport) {
     assert_throw_nanoexcept(sock_fd >= 0,
         "[UDP] receive_from(): Socket is closed");
     sockaddr_in remote_addr;
     socklen_t socklen = sizeof(remote_addr);
-    auto len = ::recvfrom(sock_fd, buf, buf_size,
-        0, (sockaddr*)&remote_addr, &socklen);
+    int len = static_cast<int>(::recvfrom(sock_fd, buf, buf_size,
+        0, (sockaddr*)&remote_addr, &socklen));
     if (len == -1) {
 #ifdef __linux__
         int err_code = errno, would_block = EWOULDBLOCK;
@@ -45,7 +46,8 @@ int receive_from_(int sock_fd, char* buf, size_t buf_size, AddrPort* addrport) {
 #endif
         assert_throw_nanoexcept(err_code == would_block,
             "[UDP] receive_from(): ", LAST_ERROR);
-    }
+        return -1;
+    }  
     // truncate buffer
     if (len < buf_size) buf[len] = 0;
     if (addrport) {
@@ -58,9 +60,10 @@ int receive_from_(int sock_fd, char* buf, size_t buf_size, AddrPort* addrport) {
 } // anonymous namespace
 
 // constructor
-UdpSocket::UdpSocket() : remote_({}), is_connected_(false) {
+UdpSocket::UdpSocket()
+        : SocketBase(SOCK_DGRAM),
+        remote_({}), is_connected_(false) {
     remote_.sin_family = AF_INET;
-    this->create_socket_(SOCK_DGRAM);
 }
 
 // send to the specified remote
@@ -78,12 +81,14 @@ int UdpSocket::send_to(const char* msg, size_t length, const AddrPort& remote) c
     return static_cast<int>(ret);
 }
 
-int UdpSocket::send_to(const std::string& msg, const AddrPort& remote) const {
+int UdpSocket::send_to(const std::string& msg,
+        const AddrPort& remote) const {
     return send_to(msg.c_str(), msg.size(), remote);
 }
 
 // receive from the specified remote
-int UdpSocket::receive_from(char* buf, size_t buf_size, AddrPort& addrport) const {
+int UdpSocket::receive_from(char* buf, size_t buf_size,
+        AddrPort& addrport) const {
     return receive_from_(socket_, buf, buf_size, &addrport);
 }
 
@@ -101,7 +106,7 @@ void UdpSocket::connect(const Addr& addr, const Port& port) {
     remote_.sin_port = port.net_order();
 
     // connect
-    int ret = ::connect(socket_, (const sockaddr*)&remote_, sizeof(remote_));
+    int ret = ::connect(socket_,(const sockaddr*)&remote_, sizeof(remote_));
     assert_throw_nanoexcept(ret >= 0, "[UDP] connect(): ", LAST_ERROR);
     is_connected_ = true;
 
@@ -135,20 +140,21 @@ int UdpSocket::receive(char* buf, size_t buf_size) const {
     assert_throw_nanoexcept(is_connected_,
         "[UDP] receive(): Socket is not connected");
 
-    auto len = ::recv(socket_, buf, buf_size, 0);
+    int len = static_cast<int>(::recv(socket_, buf, buf_size, 0));
     if (len == -1) {
-#ifdef __linux__
+        // error
+    #ifdef __linux__
         int err_code = errno, would_block = EWOULDBLOCK;
-#elif _WIN32
+    #elif _WIN32
         int err_code = WSAGetLastError(), would_block = WSAEWOULDBLOCK;
-#endif
+    #endif
         assert_throw_nanoexcept(err_code == would_block,
             "[UDP] receive(): ", LAST_ERROR);
         return -1;
     }
     // truncate buffer
     if (len < buf_size) buf[len] = 0;
-    return static_cast<int>(len);
+    return len;
 }
 
 // set receive timeout

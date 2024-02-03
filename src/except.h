@@ -28,8 +28,17 @@
 #ifndef NANONET_EXCEPT_H
 #define NANONET_EXCEPT_H
 
-// C
+// get last error
+#ifdef __linux__
+
 #include <cstring>
+
+#elif _WIN32
+
+#include <WinSock2.h>
+#include <Windows.h>
+
+#endif
 
 // C++
 #include <string>
@@ -77,9 +86,9 @@ inline void throw_except_(const Args&... args) {
 
 #endif // __cplusplus
 
-#define assert_throw_nanoexcept(condition, ...)    \
-(static_cast<bool>(condition) ? void(0)            \
-: throw_except_<NanoExcept>(__VA_ARGS__));         \
+#define assert_throw_nanoexcept(condition, ...) \
+(static_cast<bool>(condition) ? void(0)         \
+: throw_except_<NanoExcept>(__VA_ARGS__));      \
 
 #ifdef __linux__
 
@@ -87,28 +96,24 @@ inline void throw_except_(const Args&... args) {
 
 #elif _WIN32
 
-#include <WinSock2.h>
-#include <Windows.h>
-
 namespace {
-    inline std::string WSAGetLastErrorMessage_() {
-        LPSTR msg = nullptr;
-        FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER
-            | FORMAT_MESSAGE_FROM_SYSTEM
-            | FORMAT_MESSAGE_IGNORE_INSERTS,
-            nullptr, WSAGetLastError(),
-            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-            (LPSTR)&msg, 0, nullptr);
-        std::string result(msg);
-        LocalFree(msg);
-        return result;
-    }
+inline std::string WSAGetLastErrorMessage_() {
+    LPSTR msg = nullptr;
+    FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER
+        | FORMAT_MESSAGE_FROM_SYSTEM
+        | FORMAT_MESSAGE_IGNORE_INSERTS,
+        nullptr, WSAGetLastError(),
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        (LPSTR)&msg, 0, nullptr);
+    std::string result(msg);
+    LocalFree(msg);
+    return result;
 }
+} // anonymous namespace
 
 #define LAST_ERROR (WSAGetLastErrorMessage_())
 
 #endif
-
 
 } // namespace nano
 

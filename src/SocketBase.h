@@ -31,6 +31,11 @@
 #ifdef __linux__
 
 #include <unistd.h>
+#include <fcntl.h>
+
+#elif _WIN32
+
+#include <ws2tcpip.h>
 
 #endif
 
@@ -63,11 +68,8 @@ protected:
 
 protected:
 
-    // create a socket
-    void create_socket_(int type);
-
     // ctor
-    SocketBase();
+    SocketBase(int type);
 
 public:
     // dtor
@@ -83,6 +85,9 @@ public:
 
     // get local
     AddrPort get_local() const;
+
+    // non-blocking
+    bool set_blocking(bool blocking);
 
     // set socket option
     template <class OptionType>

@@ -29,15 +29,15 @@
 namespace nano {
 
 // constructor
-Socket::Socket() : remote_({}) {
+Socket::Socket() : SocketBase(SOCK_STREAM), remote_({}) {
     remote_.sin_family = AF_INET;
-    this->create_socket_(SOCK_STREAM);
 }
 
 // connect to remote
 void Socket::connect(const Addr& addr, const Port& port) {
     // set remote
-    assert_throw_nanoexcept(this->is_open(), "[TCP] connect(): Socket is closed");
+    assert_throw_nanoexcept(this->is_open(),
+        "[TCP] connect(): Socket is closed");
     remote_.sin_addr.s_addr = addr.net_order();
     remote_.sin_port = port.net_order();
     // connect to remote
@@ -50,7 +50,8 @@ void Socket::connect(const Addr& addr, const Port& port) {
 
 // send to remote
 int Socket::send(const char* msg, size_t size) const {
-    assert_throw_nanoexcept(this->is_open(), "[TCP] send(): Socket is closed");
+    assert_throw_nanoexcept(this->is_open(),
+        "[TCP] send(): Socket is closed");
 
     // send to remote
     int len = ::send(socket_, msg, size, 0);
@@ -66,13 +67,14 @@ int Socket::send(const std::string msg) const {
 
 // receive from remote
 int Socket::receive(char* buf, size_t buf_size) const {
-    assert_throw_nanoexcept(this->is_open(), "[TCP] receive(): Socket is closed");
-    auto len = ::recv(socket_, buf, buf_size, 0);
+    assert_throw_nanoexcept(this->is_open(),
+        "[TCP] receive(): Socket is closed");
+    int len = static_cast<int>(::recv(socket_, buf, buf_size, 0));
     if (len == -1) {
 #ifdef __linux__
         int err_code = errno, would_block = EWOULDBLOCK;
 #elif _WIN32
-        int err_code = WSAGetLastError(), would_block = WSAEWOULDBLOCK;
+        int err_code = WSAGetLastError(),would_block = WSAEWOULDBLOCK;
 #endif
         assert_throw_nanoexcept(err_code == would_block,
             "[TCP] receive(): ", LAST_ERROR);
@@ -80,7 +82,7 @@ int Socket::receive(char* buf, size_t buf_size) const {
     }
     // truncate buffer
     if (len < buf_size) buf[len] = 0;
-    return static_cast<int>(len);
+    return len;
 }
 
 bool Socket::recv_timeout(long ms) const {
