@@ -29,14 +29,11 @@
 #define NANONET_SOCKET_H
 
 // NanoNet
-#include "SocketBase.h"
+#include "TransSocket.h"
 
 namespace nano {
 
-class Socket : public SocketBase {
-
-    // remote address
-    sockaddr_in remote_;
+class Socket : public TransSocket {
 
     // server socket
     friend class ServerSocket;
@@ -47,15 +44,17 @@ public:
     Socket();
     virtual ~Socket() = default;
 
+    // bind local
+    virtual void bind(const Addr& addr, const Port& port) override;
+    void bind(const Addr& addr);
+
     // connect to remote
-    void connect(const Addr& addr, const Port& port);
+    virtual void connect(const Addr& addr, const Port& port) override;
 
-    // send to remote
-    int send(const char* msg, size_t length) const;
-    int send(const std::string msg) const;
-
-    // receive from remote
-    int receive(char* buf, size_t buf_size) const;
+    // send & receive
+    virtual int send(const char* msg, size_t length) const override;
+    virtual int send(const std::string& msg) const override;
+    virtual int receive(char* buf, size_t buf_size) const override;
 
     // set receive timeout
     bool recv_timeout(long ms) const;

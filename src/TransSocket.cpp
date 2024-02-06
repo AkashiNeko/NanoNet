@@ -1,4 +1,4 @@
-// File:     src/ServerSocket.h
+// File:     src/TransSocket.cpp
 // Author:   AkashiNeko
 // Project:  NanoNet
 // Github:   https://github.com/AkashiNeko/NanoNet/
@@ -24,39 +24,12 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#pragma once
-#ifndef NANONET_SERVER_SOCKET_H
-#define NANONET_SERVER_SOCKET_H
-
-// NanoNet
-#include "Socket.h"
+#include "TransSocket.h"
 
 namespace nano {
 
-class ServerSocket : public TransSocket {
-public:
-
-    // ctor & dtor
-    ServerSocket();
-    ServerSocket(const Addr& addr, const Port& port);
-    ServerSocket(const AddrPort& addrport);
-    ServerSocket(const Port& port);
-    virtual ~ServerSocket() = default;
-
-    virtual void bind(const Addr& addr, const Port& port) override;
-    void bind(const Port& port);
-
-    // listen
-    void listen(int backlog = 20);
-
-    // accept from client
-    Socket accept();
-
-    // set address reuse
-    bool reuse_addr(bool reuseAddr);
-
-}; // class ServerSocket
+TransSocket::TransSocket() {
+    remote_.sin_family = AF_INET;
+}
 
 } // namespace nano
-
-#endif // NANONET_SERVER_SOCKET_H

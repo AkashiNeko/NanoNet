@@ -60,14 +60,21 @@ int receive_from_(int sock_fd, char* buf, size_t buf_size,
 } // anonymous namespace
 
 // constructor
-UdpSocket::UdpSocket()
-        : SocketBase(SOCK_DGRAM),
-        remote_({}), is_connected_(false) {
-    remote_.sin_family = AF_INET;
+UdpSocket::UdpSocket() : is_connected_(false) {}
+
+void UdpSocket::bind(const Addr& addr, const Port& port) {
+    create_if_closed_(SOCK_DGRAM);
+    SocketBase::bind(addr, port);
+}
+
+void UdpSocket::bind(const Addr& addr) {
+    create_if_closed_(SOCK_DGRAM);
+    SocketBase::bind(addr, (port_t)0);
 }
 
 // send to the specified remote
-int UdpSocket::send_to(const char* msg, size_t length, const AddrPort& remote) const {
+int UdpSocket::send_to(const char* msg, size_t length,
+        const AddrPort& remote) const {
     assert_throw_nanoexcept(this->is_open(),
         "[UDP] send_to(): Socket is closed");
     sockaddr_in remote_addr;

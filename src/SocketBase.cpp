@@ -49,37 +49,42 @@ public:
 
 #endif
 
-// constructor
-SocketBase::SocketBase(int type) {
-    local_.sin_family = AF_INET;
-    socket_ = ::socket(AF_INET, type, 0);
-#if _WIN32
-    sock_open_ = socket_ != INVALID_SOCKET;
-#endif
-    assert_throw_nanoexcept(this->is_open(),
+void SocketBase::create_if_closed_(int type) {
+    if (!is_open()) {
+        socket_ = ::socket(AF_INET, type, 0);
+        assert_throw_nanoexcept(this->is_open(),
         "[Socket] Create socket faild: ", LAST_ERROR);
+    }
 }
 
-// file descriptor
-void SocketBase::close() {
+// constructor
+SocketBase::SocketBase() {
 #ifdef __linux__
-    if (socket_ != -1) {
+    socket_ = -1;
+#elif _WIN32
+    socket_ = INVALID_SOCKET;
+#endif
+    local_.sin_family = AF_INET;
+}
+
+// close socket
+void SocketBase::close() {
+    if (this->is_open()) {
+#ifdef __linux__
         ::close(socket_);
         socket_ = -1;
-    }
 #elif _WIN32
-    if (sock_open_) {
         closesocket(socket_);
-        sock_open_ = false;
-    }
+        socket_ = INVALID_SOCKET;
 #endif
+    }
 }
 
 bool SocketBase::is_open() const {
 #ifdef __linux__
     return socket_ != -1;
 #elif _WIN32
-    return sock_open_;
+    return socket_ != INVALID_SOCKET;
 #endif
 }
 
@@ -90,13 +95,10 @@ sock_t SocketBase::get_sock() const {
 void SocketBase::bind(const Addr& addr, const Port& port) {
     local_.sin_addr.s_addr = addr.net_order();
     local_.sin_port = port.net_order();
-    int ret = ::bind(socket_, (const sockaddr*)&local_, sizeof(local_));
+    int ret = ::bind(socket_,
+        reinterpret_cast<const sockaddr*>(&local_), sizeof(local_));
     assert_throw_nanoexcept(ret >= 0, "[Socket] bind(): Bind address \'",
         AddrPort::to_string(addr, port), "\' failed: ", LAST_ERROR);
-}
-
-void SocketBase::bind(const Addr& addr) {
-    this->bind(addr, (port_t)0);
 }
 
 // get local
@@ -104,7 +106,7 @@ AddrPort SocketBase::get_local() const {
     return AddrPort::to_addrport(local_);
 }
 
-// non-blocking
+// blocking
 bool SocketBase::set_blocking(bool blocking) {
     assert_throw_nanoexcept(this->is_open(),
         "[Socket] set_blocking(): Socket is closed");

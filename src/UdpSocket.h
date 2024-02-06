@@ -29,14 +29,11 @@
 #define NANONET_UDP_SOCKET_H
 
 // NanoNet
-#include "SocketBase.h"
+#include "TransSocket.h"
 
 namespace nano {
 
-class UdpSocket : public SocketBase {
-
-    // remote address
-    sockaddr_in remote_;
+class UdpSocket : public TransSocket {
 
     // is connected
     bool is_connected_;
@@ -47,6 +44,10 @@ public:
     UdpSocket();
     virtual ~UdpSocket() = default;
 
+    // bind local
+    virtual void bind(const Addr& addr, const Port& port) override;
+    void bind(const Addr& addr);
+
     // send to the specified remote
     int send_to(const char* msg, size_t length, const AddrPort& remote) const;
     int send_to(const std::string& msg, const AddrPort& remote) const;
@@ -56,12 +57,12 @@ public:
     int receive_from(char* buf, size_t buf_size) const;
 
     // connect to remote
-    void connect(const Addr& addr, const Port& port);
+    virtual void connect(const Addr& addr, const Port& port) override;
 
     // send & receive
-    int send(const char* msg, size_t length) const;
-    int send(const std::string& msg) const;
-    int receive(char* buf, size_t buf_size) const;
+    virtual int send(const char* msg, size_t length) const override;
+    virtual int send(const std::string& msg) const override;
+    virtual int receive(char* buf, size_t buf_size) const override;
 
     // set receive timeout
     bool recv_timeout(long ms) const;

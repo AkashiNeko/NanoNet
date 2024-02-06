@@ -59,35 +59,32 @@ protected:
     // Windows : SOCKET
     sock_t socket_;
 
-#ifdef _WIN32
-    bool sock_open_;
-#endif
-
     // local address
     sockaddr_in local_;
 
 protected:
 
     // ctor
-    SocketBase(int type);
+    SocketBase();
+
+    void create_if_closed_(int type);
 
 public:
     // dtor
     virtual ~SocketBase() = default;
 
     // socket
-    virtual void close();
-    virtual bool is_open() const;
-    virtual sock_t get_sock() const;
+    void close();
+    bool is_open() const;
+    sock_t get_sock() const;
 
     // bind local
-    void bind(const Addr& addr);
-    void bind(const Addr& addr, const Port& port);
+    virtual void bind(const Addr& addr, const Port& port);
 
     // get local
     AddrPort get_local() const;
 
-    // non-blocking
+    // blocking
     bool set_blocking(bool blocking);
 
     // set socket option

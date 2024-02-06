@@ -29,13 +29,22 @@
 namespace nano {
 
 // constructor
-Socket::Socket() : SocketBase(SOCK_STREAM), remote_({}) {
-    remote_.sin_family = AF_INET;
+Socket::Socket() {}
+
+void Socket::bind(const Addr& addr, const Port& port) {
+    create_if_closed_(SOCK_STREAM);
+    SocketBase::bind(addr, port);
+}
+
+void Socket::bind(const Addr& addr) {
+    create_if_closed_(SOCK_STREAM);
+    SocketBase::bind(addr, (port_t)0);
 }
 
 // connect to remote
 void Socket::connect(const Addr& addr, const Port& port) {
     // set remote
+    create_if_closed_(SOCK_DGRAM);
     assert_throw_nanoexcept(this->is_open(),
         "[TCP] connect(): Socket is closed");
     remote_.sin_addr.s_addr = addr.net_order();
@@ -61,7 +70,7 @@ int Socket::send(const char* msg, size_t size) const {
     return len;
 }
 
-int Socket::send(const std::string msg) const {
+int Socket::send(const std::string& msg) const {
     return this->send(msg.c_str(), msg.size());
 }
 

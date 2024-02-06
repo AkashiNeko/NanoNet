@@ -29,31 +29,44 @@
 namespace nano {
 
 // constructor
-ServerSocket::ServerSocket() : SocketBase(SOCK_STREAM) {}
+ServerSocket::ServerSocket() {}
 
-ServerSocket::ServerSocket(const Addr& addr, const Port& port)
-    : ServerSocket() {
+ServerSocket::ServerSocket(const Addr& addr, const Port& port) {
+    create_if_closed_(SOCK_STREAM);
     this->reuse_addr(true);
-    this->bind(addr, port);
+    SocketBase::bind(addr, port);
 }
 
 ServerSocket::ServerSocket(const AddrPort& addrport)
     : ServerSocket(addrport.get_addr(), addrport.get_port()) {}
 
 ServerSocket::ServerSocket(const Port& port)
-    : ServerSocket(addr_t(0), port) {}
+    : ServerSocket((addr_t)0, port) {}
+
+// bind
+void ServerSocket::bind(const Addr& addr, const Port& port) {
+    create_if_closed_(SOCK_STREAM);
+    SocketBase::bind(addr, port);
+}
+
+void ServerSocket::bind(const Port& port) {
+    create_if_closed_(SOCK_STREAM);
+    SocketBase::bind((addr_t)0, port);
+}
 
 // listen
 void ServerSocket::listen(int backlog) {
-    int ret = ::listen(socket_, backlog);
-    assert_throw_nanoexcept(ret >= 0, "[TCP] listen(): ", LAST_ERROR);
+    create_if_closed_(SOCK_DGRAM);
+    assert_throw_nanoexcept(::listen(socket_, backlog) >= 0,
+        "[TCP] listen(): ", LAST_ERROR);
 }
 
 // accept a new connection
 Socket ServerSocket::accept() {
     Socket socket;
     socklen_t socklen = sizeof(socket.remote_);
-    int new_fd = ::accept(socket_, (sockaddr*)&socket.remote_, &socklen);
+    int new_fd = ::accept(socket_,
+        reinterpret_cast<sockaddr*>(&socket.remote_), &socklen);
     assert_throw_nanoexcept(new_fd >= 0, "[TCP] accept(): ", LAST_ERROR);
     socket.socket_ = new_fd;
     socket.local_ = this->local_;

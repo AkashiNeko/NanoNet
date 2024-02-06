@@ -1,4 +1,4 @@
-// File:     src/ServerSocket.h
+// File:     src/TransSocket.h
 // Author:   AkashiNeko
 // Project:  NanoNet
 // Github:   https://github.com/AkashiNeko/NanoNet/
@@ -25,38 +25,35 @@
  */
 
 #pragma once
-#ifndef NANONET_SERVER_SOCKET_H
-#define NANONET_SERVER_SOCKET_H
+#ifndef NANONET_TRANSPORT_SOCKET_H
+#define NANONET_TRANSPORT_SOCKET_H
 
-// NanoNet
-#include "Socket.h"
+#include "SocketBase.h"
 
 namespace nano {
 
-class ServerSocket : public TransSocket {
+class TransSocket : public SocketBase {
+protected:
+    // remote address
+    sockaddr_in remote_;
+
+    // ctor
+    TransSocket();
+
 public:
+    // dtor
+    virtual ~TransSocket() = default;
 
-    // ctor & dtor
-    ServerSocket();
-    ServerSocket(const Addr& addr, const Port& port);
-    ServerSocket(const AddrPort& addrport);
-    ServerSocket(const Port& port);
-    virtual ~ServerSocket() = default;
+    // connect to remote
+    virtual void connect(const Addr& addr, const Port& port) = 0;
 
-    virtual void bind(const Addr& addr, const Port& port) override;
-    void bind(const Port& port);
+    // send & receive
+    virtual int send(const char* msg, size_t length) const = 0;
+    virtual int send(const std::string& msg) const = 0;
+    virtual int receive(char* buf, size_t buf_size) const = 0;
 
-    // listen
-    void listen(int backlog = 20);
-
-    // accept from client
-    Socket accept();
-
-    // set address reuse
-    bool reuse_addr(bool reuseAddr);
-
-}; // class ServerSocket
+}; // class TransSocket
 
 } // namespace nano
 
-#endif // NANONET_SERVER_SOCKET_H
+#endif // NANONET_TRANSPORT_SOCKET_H
