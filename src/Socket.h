@@ -47,9 +47,6 @@ public:
     Socket();
     virtual ~Socket() = default;
 
-    // bind local
-    void bind(const Addr& addr);
-
     // connect to remote
     virtual void connect(const Addr& addr, const Port& port) override;
     void connect(const AddrPort& addrport);

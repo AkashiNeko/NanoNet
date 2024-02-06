@@ -73,10 +73,6 @@ UdpSocket::UdpSocket(const Port& port) : UdpSocket() {
     SocketBase::bind(INADDR_ANY, port);
 }
 
-void UdpSocket::bind(const Addr& addr) {
-    SocketBase::bind(addr, (port_t)0);
-}
-
 // send to the specified remote
 int UdpSocket::send_to(const char* msg,
         size_t length, const AddrPort& remote) {

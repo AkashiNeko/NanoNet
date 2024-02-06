@@ -50,9 +50,6 @@ public:
 
     virtual ~UdpSocket() = default;
 
-    // bind local
-    void bind(const Addr& addr);
-
     // send to the specified remote
     int send_to(const char* msg, size_t length, const AddrPort& remote);
     int send_to(const std::string& msg, const AddrPort& remote);

@@ -34,4 +34,13 @@ TransSocket::TransSocket(int type) : SocketBase(type), remote_({}) {
     remote_.sin_family = AF_INET;
 }
 
+// bind local
+void TransSocket::bind(const Addr& addr, const Port& port) {
+    SocketBase::bind(addr, port);
+}
+
+void TransSocket::bind(const Port& port) {
+    SocketBase::bind((addr_t)0, port);
+}
+
 } // namespace nano

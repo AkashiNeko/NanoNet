@@ -34,10 +34,6 @@ Socket::Socket(bool, bool, bool) : TransSocket() {}
 // constructor
 Socket::Socket() : TransSocket(SOCK_STREAM) {}
 
-void Socket::bind(const Addr& addr) {
-    SocketBase::bind(addr, (port_t)0);
-}
-
 // connect to remote
 void Socket::connect(const Addr& addr, const Port& port) {
     // set remote

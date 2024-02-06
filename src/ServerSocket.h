@@ -47,6 +47,8 @@ public:
     ServerSocket(const Port& port);
     virtual ~ServerSocket() = default;
 
+    // bind local
+    void bind(const Addr& addr, const Port& port);
     void bind(const Port& port);
 
     // listen

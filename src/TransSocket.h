@@ -45,6 +45,10 @@ public:
     // dtor
     virtual ~TransSocket() = default;
 
+    // bind local
+    void bind(const Addr& addr, const Port& port);
+    void bind(const Port& port);
+
     // connect to remote
     virtual void connect(const Addr& addr, const Port& port) = 0;
 

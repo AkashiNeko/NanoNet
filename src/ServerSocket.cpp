@@ -46,7 +46,11 @@ ServerSocket::ServerSocket(const AddrPort& addrport)
 ServerSocket::ServerSocket(const Port& port)
     : ServerSocket((addr_t)0, port) {}
 
-// bind
+// bind local
+void ServerSocket::bind(const Addr& addr, const Port& port) {
+    SocketBase::bind(addr, port);
+}
+
 void ServerSocket::bind(const Port& port) {
     SocketBase::bind((addr_t)0, port);
 }

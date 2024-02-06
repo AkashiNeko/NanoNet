@@ -216,7 +216,7 @@ public:
     sock_t get_sock() const;
 
     // bind local
-    void bind(const Addr& addr, const Port& port);
+    virtual void bind(const Addr& addr, const Port& port);
 
     // get local
     AddrPort get_local() const;
@@ -250,6 +250,10 @@ public:
     // dtor
     virtual ~TransSocket() = default;
 
+    // bind local
+    void bind(const Addr& addr, const Port& port);
+    void bind(const Port& port);
+
     // connect to remote
     virtual void connect(const Addr& addr, const Port& port) = 0;
 
@@ -273,9 +277,6 @@ public:
     // ctor & dtor
     Socket();
     virtual ~Socket() = default;
-
-    // bind local
-    void bind(const Addr& addr);
 
     // connect to remote
     virtual void connect(const Addr& addr, const Port& port) override;
@@ -312,9 +313,6 @@ public:
     UdpSocket(const Port& port);
 
     virtual ~UdpSocket() = default;
-
-    // bind local
-    void bind(const Addr& addr);
 
     // send to the specified remote
     int send_to(const char* msg, size_t length, const AddrPort& remote);
@@ -358,6 +356,8 @@ public:
     ServerSocket(const Port& port);
     virtual ~ServerSocket() = default;
 
+    // bind local
+    void bind(const Addr& addr, const Port& port);
     void bind(const Port& port);
 
     // listen
