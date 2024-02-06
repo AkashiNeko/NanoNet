@@ -95,6 +95,10 @@ void SocketBase::bind(const Addr& addr, const Port& port) {
         AddrPort::to_string(addr, port), "\' failed: ", LAST_ERROR);
 }
 
+void SocketBase::bind(const Addr& addr) {
+    this->bind(addr, (port_t)0);
+}
+
 // get local
 AddrPort SocketBase::get_local() const {
     return AddrPort::to_addrport(local_);

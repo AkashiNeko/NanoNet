@@ -81,6 +81,7 @@ public:
     virtual sock_t get_sock() const;
 
     // bind local
+    void bind(const Addr& addr);
     void bind(const Addr& addr, const Port& port);
 
     // get local
