@@ -197,35 +197,32 @@ protected:
     // Windows : SOCKET
     sock_t socket_;
 
-#ifdef _WIN32
-    bool sock_open_;
-#endif
-
     // local address
     sockaddr_in local_;
 
 protected:
 
     // ctor
-    SocketBase(int type);
+    SocketBase();
+
+    void create_if_closed_(int type);
 
 public:
     // dtor
     virtual ~SocketBase() = default;
 
     // socket
-    virtual void close();
-    virtual bool is_open() const;
-    virtual sock_t get_sock() const;
+    void close();
+    bool is_open() const;
+    sock_t get_sock() const;
 
     // bind local
-    void bind(const Addr& addr);
-    void bind(const Addr& addr, const Port& port);
+    virtual void bind(const Addr& addr, const Port& port);
 
     // get local
     AddrPort get_local() const;
 
-    // non-blocking
+    // blocking
     bool set_blocking(bool blocking);
 
     // set socket option
@@ -241,10 +238,29 @@ public:
 
 }; // class SocketBase
 
-class Socket : public SocketBase {
-
+class TransSocket : public SocketBase {
+protected:
     // remote address
     sockaddr_in remote_;
+
+    // ctor
+    TransSocket();
+
+public:
+    // dtor
+    virtual ~TransSocket() = default;
+
+    // connect to remote
+    virtual void connect(const Addr& addr, const Port& port) = 0;
+
+    // send & receive
+    virtual int send(const char* msg, size_t length) const = 0;
+    virtual int send(const std::string& msg) const = 0;
+    virtual int receive(char* buf, size_t buf_size) const = 0;
+
+}; // class TransSocket
+
+class Socket : public TransSocket {
 
     // server socket
     friend class ServerSocket;
@@ -255,15 +271,17 @@ public:
     Socket();
     virtual ~Socket() = default;
 
+    // bind local
+    virtual void bind(const Addr& addr, const Port& port) override;
+    void bind(const Addr& addr);
+
     // connect to remote
-    void connect(const Addr& addr, const Port& port);
+    virtual void connect(const Addr& addr, const Port& port) override;
 
-    // send to remote
-    int send(const char* msg, size_t length) const;
-    int send(const std::string msg) const;
-
-    // receive from remote
-    int receive(char* buf, size_t buf_size) const;
+    // send & receive
+    virtual int send(const char* msg, size_t length) const override;
+    virtual int send(const std::string& msg) const override;
+    virtual int receive(char* buf, size_t buf_size) const override;
 
     // set receive timeout
     bool recv_timeout(long ms) const;
@@ -273,7 +291,7 @@ public:
 
 }; // class Socket
 
-class ServerSocket : public SocketBase {
+class ServerSocket : public TransSocket {
 public:
 
     // ctor & dtor
@@ -282,6 +300,9 @@ public:
     ServerSocket(const AddrPort& addrport);
     ServerSocket(const Port& port);
     virtual ~ServerSocket() = default;
+
+    virtual void bind(const Addr& addr, const Port& port) override;
+    void bind(const Port& port);
 
     // listen
     void listen(int backlog = 20);
@@ -294,10 +315,7 @@ public:
 
 }; // class ServerSocket
 
-class UdpSocket : public SocketBase {
-
-    // remote address
-    sockaddr_in remote_;
+class UdpSocket : public TransSocket {
 
     // is connected
     bool is_connected_;
@@ -308,6 +326,10 @@ public:
     UdpSocket();
     virtual ~UdpSocket() = default;
 
+    // bind local
+    virtual void bind(const Addr& addr, const Port& port) override;
+    void bind(const Addr& addr);
+
     // send to the specified remote
     int send_to(const char* msg, size_t length, const AddrPort& remote) const;
     int send_to(const std::string& msg, const AddrPort& remote) const;
@@ -317,12 +339,12 @@ public:
     int receive_from(char* buf, size_t buf_size) const;
 
     // connect to remote
-    void connect(const Addr& addr, const Port& port);
+    virtual void connect(const Addr& addr, const Port& port) override;
 
     // send & receive
-    int send(const char* msg, size_t length) const;
-    int send(const std::string& msg) const;
-    int receive(char* buf, size_t buf_size) const;
+    virtual int send(const char* msg, size_t length) const override;
+    virtual int send(const std::string& msg) const override;
+    virtual int receive(char* buf, size_t buf_size) const override;
 
     // set receive timeout
     bool recv_timeout(long ms) const;
