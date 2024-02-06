@@ -237,35 +237,6 @@ public:
 
 }; // class SocketBase
 
-class ServerSocket : public SocketBase {
-
-    // null socket factory
-    explicit ServerSocket(bool, bool, bool);
-
-public:
-
-    // ctor & dtor
-    ServerSocket();
-    ServerSocket(const Addr& addr, const Port& port);
-    ServerSocket(const AddrPort& addrport);
-    ServerSocket(const Port& port);
-    virtual ~ServerSocket() = default;
-
-    void bind(const Port& port);
-
-    // listen
-    void listen(int backlog = 20);
-
-    // accept from client
-    Socket accept();
-
-    // set address reuse
-    bool reuse_addr(bool reuseAddr);
-
-    static ServerSocket null_socket();
-
-}; // class ServerSocket
-
 class TransSocket : public SocketBase {
 protected:
     // remote address
@@ -372,6 +343,35 @@ public:
     static UdpSocket null_socket();
 
 }; // class UdpSocket
+
+class ServerSocket : public SocketBase {
+
+    // null socket factory
+    explicit ServerSocket(bool, bool, bool);
+
+public:
+
+    // ctor & dtor
+    ServerSocket();
+    ServerSocket(const Addr& addr, const Port& port);
+    ServerSocket(const AddrPort& addrport);
+    ServerSocket(const Port& port);
+    virtual ~ServerSocket() = default;
+
+    void bind(const Port& port);
+
+    // listen
+    void listen(int backlog = 20);
+
+    // accept from client
+    Socket accept();
+
+    // set address reuse
+    bool reuse_addr(bool reuseAddr);
+
+    static ServerSocket null_socket();
+
+}; // class ServerSocket
 
 } // namespace nano
 
