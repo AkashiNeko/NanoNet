@@ -38,14 +38,19 @@ class UdpSocket : public TransSocket {
     // is connected
     bool is_connected_;
 
+    // null socket factory
+    explicit UdpSocket(bool, bool, bool);
+
 public:
 
     // ctor & dtor
     UdpSocket();
+    UdpSocket(const Addr& addr, const Port& port);
+    UdpSocket(const Port& port);
+
     virtual ~UdpSocket() = default;
 
     // bind local
-    virtual void bind(const Addr& addr, const Port& port) override;
     void bind(const Addr& addr);
 
     // send to the specified remote
@@ -70,6 +75,9 @@ public:
 
     // getter
     AddrPort get_remote() const;
+
+    // null socket factory
+    static UdpSocket null_socket();
 
 }; // class UdpSocket
 

@@ -38,6 +38,9 @@ class Socket : public TransSocket {
     // server socket
     friend class ServerSocket;
 
+    // null socket factory
+    explicit Socket(bool, bool, bool);
+
 public:
 
     // ctor & dtor
@@ -45,7 +48,6 @@ public:
     virtual ~Socket() = default;
 
     // bind local
-    virtual void bind(const Addr& addr, const Port& port) override;
     void bind(const Addr& addr);
 
     // connect to remote
@@ -62,6 +64,8 @@ public:
 
     // get remote
     AddrPort get_remote() const;
+
+    static Socket null_socket();
 
 }; // class Socket
 

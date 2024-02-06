@@ -32,6 +32,8 @@ namespace {
 
 int receive_from_(sock_t sock_fd, char* buf,
         size_t buf_size, AddrPort* addrport) {
+    assert_throw_nanoexcept(sock_fd != INVALID_SOCKET,
+        "[UDP] receive_from(): Socket is closed");
     sockaddr_in remote_addr;
     socklen_t socklen = sizeof(remote_addr);
     int len = static_cast<int>(::recvfrom(sock_fd, buf, buf_size,
@@ -57,23 +59,29 @@ int receive_from_(sock_t sock_fd, char* buf,
 
 } // anonymous namespace
 
-// constructor
-UdpSocket::UdpSocket() : is_connected_(false) {}
+// null socket factory
+UdpSocket::UdpSocket(bool, bool, bool) : TransSocket(), is_connected_(false) {}
 
-void UdpSocket::bind(const Addr& addr, const Port& port) {
-    create_if_closed_(SOCK_DGRAM);
+// constructor
+UdpSocket::UdpSocket() : TransSocket(SOCK_DGRAM), is_connected_(false) {}
+
+UdpSocket::UdpSocket(const Addr& addr, const Port& port) : UdpSocket() {
     SocketBase::bind(addr, port);
 }
 
+UdpSocket::UdpSocket(const Port& port) : UdpSocket() {
+    SocketBase::bind(INADDR_ANY, port);
+}
+
 void UdpSocket::bind(const Addr& addr) {
-    create_if_closed_(SOCK_DGRAM);
     SocketBase::bind(addr, (port_t)0);
 }
 
 // send to the specified remote
 int UdpSocket::send_to(const char* msg,
         size_t length, const AddrPort& remote) {
-    create_if_closed_(SOCK_DGRAM);
+    assert_throw_nanoexcept(socket_ != INVALID_SOCKET,
+        "[UDP] send_to(): Socket is closed");
     sockaddr_in remote_addr;
     remote_addr.sin_family = AF_INET;
     remote_addr.sin_addr.s_addr = remote.addr().net_order();
@@ -91,18 +99,17 @@ int UdpSocket::send_to(const std::string& msg, const AddrPort& remote) {
 
 // receive from the specified remote
 int UdpSocket::receive_from(char* buf, size_t buf_size, AddrPort& addrport) {
-    create_if_closed_(SOCK_DGRAM);
     return receive_from_(socket_, buf, buf_size, &addrport);
 }
 
 int UdpSocket::receive_from(char* buf, size_t buf_size) {
-    create_if_closed_(SOCK_DGRAM);
     return receive_from_(socket_, buf, buf_size, nullptr);
 }
 
 // connect to remote
 void UdpSocket::connect(const Addr& addr, const Port& port) {
-    create_if_closed_(SOCK_DGRAM);
+    assert_throw_nanoexcept(socket_ != INVALID_SOCKET,
+        "[UDP] connect(): Socket is closed");
     assert_throw_nanoexcept(!is_connected_,
         "[UDP] connect(): Socket is connected");
     remote_.sin_addr.s_addr = addr.net_order();
@@ -123,7 +130,7 @@ void UdpSocket::connect(const AddrPort& addrport) {
 
 // send to remote
 int UdpSocket::send(const char* msg, size_t size) const {
-    assert_throw_nanoexcept(this->is_open(),
+    assert_throw_nanoexcept(socket_ != INVALID_SOCKET,
         "[UDP] send(): Socket is closed");
     assert_throw_nanoexcept(is_connected_,
         "[UDP] send(): Socket is not connected");
@@ -142,7 +149,7 @@ int UdpSocket::send(const std::string& msg) const {
 
 // receive from remote
 int UdpSocket::receive(char* buf, size_t buf_size) const {
-    assert_throw_nanoexcept(this->is_open(),
+    assert_throw_nanoexcept(socket_ != INVALID_SOCKET,
         "[UDP] receive(): Socket is closed");
     assert_throw_nanoexcept(is_connected_,
         "[UDP] receive(): Socket is not connected");
@@ -175,6 +182,11 @@ AddrPort UdpSocket::get_remote() const {
     assert_throw_nanoexcept(is_connected_,
         "[UDP] get_remote(): Socket is not connected");
     return AddrPort::to_addrport(remote_);
+}
+
+// null socket factory
+UdpSocket UdpSocket::null_socket() {
+    return UdpSocket(false, false, false);
 }
 
 } // namespace nano

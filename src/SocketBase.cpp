@@ -49,22 +49,19 @@ public:
 
 #endif
 
-void SocketBase::create_if_closed_(int type) {
-    if (!is_open()) {
-        socket_ = ::socket(AF_INET, type, 0);
-        assert_throw_nanoexcept(socket_ != INVALID_SOCKET,
-        "[Socket] Create socket faild: ", LAST_ERROR);
-    }
-}
-
 // constructor
-SocketBase::SocketBase() : socket_(INVALID_SOCKET), local_({}) {
+SocketBase::SocketBase() : socket_(INVALID_SOCKET), local_({}) {}
+
+SocketBase::SocketBase(int type) : SocketBase() {
     local_.sin_family = AF_INET;
+    socket_ = ::socket(AF_INET, type, 0);
+    assert_throw_nanoexcept(socket_ != INVALID_SOCKET,
+    "[Socket] Create socket faild: ", LAST_ERROR);
 }
 
 // close socket
 void SocketBase::close() {
-    if (this->is_open()) {
+    if (socket_ != INVALID_SOCKET) {
 #ifdef __linux__
         ::close(socket_);
 #elif _WIN32
@@ -83,6 +80,8 @@ sock_t SocketBase::get_sock() const {
 }
 
 void SocketBase::bind(const Addr& addr, const Port& port) {
+    assert_throw_nanoexcept(socket_ != INVALID_SOCKET,
+        "[TCP] connect(): Socket is closed");
     local_.sin_addr.s_addr = addr.net_order();
     local_.sin_port = port.net_order();
     int ret = ::bind(socket_,
@@ -98,7 +97,7 @@ AddrPort SocketBase::get_local() const {
 
 // blocking
 bool SocketBase::set_blocking(bool blocking) {
-    assert_throw_nanoexcept(this->is_open(),
+    assert_throw_nanoexcept(socket_ != INVALID_SOCKET,
         "[Socket] set_blocking(): Socket is closed");
 #ifdef __linux__
     int flags = fcntl(socket_, F_GETFL, 0);

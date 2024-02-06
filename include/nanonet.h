@@ -193,7 +193,7 @@ public:
 class SocketBase {
 protected:
 
-    // Linux   : int (fd)
+    // Linux   : int
     // Windows : SOCKET
     sock_t socket_;
 
@@ -204,8 +204,7 @@ protected:
 
     // ctor
     SocketBase();
-
-    void create_if_closed_(int type);
+    SocketBase(int type);
 
 public:
     // dtor
@@ -217,7 +216,7 @@ public:
     sock_t get_sock() const;
 
     // bind local
-    virtual void bind(const Addr& addr, const Port& port);
+    void bind(const Addr& addr, const Port& port);
 
     // get local
     AddrPort get_local() const;
@@ -238,6 +237,35 @@ public:
 
 }; // class SocketBase
 
+class ServerSocket : public SocketBase {
+
+    // null socket factory
+    explicit ServerSocket(bool, bool, bool);
+
+public:
+
+    // ctor & dtor
+    ServerSocket();
+    ServerSocket(const Addr& addr, const Port& port);
+    ServerSocket(const AddrPort& addrport);
+    ServerSocket(const Port& port);
+    virtual ~ServerSocket() = default;
+
+    void bind(const Port& port);
+
+    // listen
+    void listen(int backlog = 20);
+
+    // accept from client
+    Socket accept();
+
+    // set address reuse
+    bool reuse_addr(bool reuseAddr);
+
+    static ServerSocket null_socket();
+
+}; // class ServerSocket
+
 class TransSocket : public SocketBase {
 protected:
     // remote address
@@ -245,6 +273,7 @@ protected:
 
     // ctor
     TransSocket();
+    TransSocket(int type);
 
 public:
     // dtor
@@ -265,6 +294,9 @@ class Socket : public TransSocket {
     // server socket
     friend class ServerSocket;
 
+    // null socket factory
+    explicit Socket(bool, bool, bool);
+
 public:
 
     // ctor & dtor
@@ -272,7 +304,6 @@ public:
     virtual ~Socket() = default;
 
     // bind local
-    virtual void bind(const Addr& addr, const Port& port) override;
     void bind(const Addr& addr);
 
     // connect to remote
@@ -290,45 +321,28 @@ public:
     // get remote
     AddrPort get_remote() const;
 
+    static Socket null_socket();
+
 }; // class Socket
-
-class ServerSocket : public TransSocket {
-public:
-
-    // ctor & dtor
-    ServerSocket();
-    ServerSocket(const Addr& addr, const Port& port);
-    ServerSocket(const AddrPort& addrport);
-    ServerSocket(const Port& port);
-    virtual ~ServerSocket() = default;
-
-    virtual void bind(const Addr& addr, const Port& port) override;
-    void bind(const Port& port);
-
-    // listen
-    void listen(int backlog = 20);
-
-    // accept from client
-    Socket accept();
-
-    // set address reuse
-    bool reuse_addr(bool reuseAddr);
-
-}; // class ServerSocket
 
 class UdpSocket : public TransSocket {
 
     // is connected
     bool is_connected_;
 
+    // null socket factory
+    explicit UdpSocket(bool, bool, bool);
+
 public:
 
     // ctor & dtor
     UdpSocket();
+    UdpSocket(const Addr& addr, const Port& port);
+    UdpSocket(const Port& port);
+
     virtual ~UdpSocket() = default;
 
     // bind local
-    virtual void bind(const Addr& addr, const Port& port) override;
     void bind(const Addr& addr);
 
     // send to the specified remote
@@ -353,6 +367,9 @@ public:
 
     // getter
     AddrPort get_remote() const;
+
+    // null socket factory
+    static UdpSocket null_socket();
 
 }; // class UdpSocket
 

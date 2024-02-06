@@ -28,7 +28,9 @@
 
 namespace nano {
 
-TransSocket::TransSocket() : remote_({}) {
+TransSocket::TransSocket() : SocketBase(), remote_({})  {}
+
+TransSocket::TransSocket(int type) : SocketBase(type), remote_({}) {
     remote_.sin_family = AF_INET;
 }
 

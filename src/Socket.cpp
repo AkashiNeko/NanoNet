@@ -28,24 +28,20 @@
 
 namespace nano {
 
-// constructor
-Socket::Socket() {}
+// null socket factory
+Socket::Socket(bool, bool, bool) : TransSocket() {}
 
-void Socket::bind(const Addr& addr, const Port& port) {
-    create_if_closed_(SOCK_STREAM);
-    SocketBase::bind(addr, port);
-}
+// constructor
+Socket::Socket() : TransSocket(SOCK_STREAM) {}
 
 void Socket::bind(const Addr& addr) {
-    create_if_closed_(SOCK_STREAM);
     SocketBase::bind(addr, (port_t)0);
 }
 
 // connect to remote
 void Socket::connect(const Addr& addr, const Port& port) {
     // set remote
-    create_if_closed_(SOCK_DGRAM);
-    assert_throw_nanoexcept(this->is_open(),
+    assert_throw_nanoexcept(socket_ != INVALID_SOCKET,
         "[TCP] connect(): Socket is closed");
     remote_.sin_addr.s_addr = addr.net_order();
     remote_.sin_port = port.net_order();
@@ -63,7 +59,7 @@ void Socket::connect(const AddrPort& addrport) {
 
 // send to remote
 int Socket::send(const char* msg, size_t size) const {
-    assert_throw_nanoexcept(this->is_open(),
+    assert_throw_nanoexcept(socket_ != INVALID_SOCKET,
         "[TCP] send(): Socket is closed");
 
     // send to remote
@@ -80,7 +76,7 @@ int Socket::send(const std::string& msg) const {
 
 // receive from remote
 int Socket::receive(char* buf, size_t buf_size) const {
-    assert_throw_nanoexcept(this->is_open(),
+    assert_throw_nanoexcept(socket_ != INVALID_SOCKET,
         "[TCP] receive(): Socket is closed");
     int len = static_cast<int>(::recv(socket_, buf, buf_size, 0));
     if (len == -1) {
@@ -106,6 +102,11 @@ bool Socket::recv_timeout(long ms) const {
 // get remote
 AddrPort Socket::get_remote() const {
     return AddrPort::to_addrport(remote_);
+}
+
+// null socket factory
+Socket Socket::null_socket() {
+    return Socket(false, false, false);
 }
 
 } // namespace nano

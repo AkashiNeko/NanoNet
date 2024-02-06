@@ -39,6 +39,7 @@ protected:
 
     // ctor
     TransSocket();
+    TransSocket(int type);
 
 public:
     // dtor

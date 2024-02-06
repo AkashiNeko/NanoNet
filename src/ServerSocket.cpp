@@ -28,11 +28,14 @@
 
 namespace nano {
 
-// constructor
-ServerSocket::ServerSocket() {}
+// null socket factory
+ServerSocket::ServerSocket(bool, bool, bool) : SocketBase() {}
 
-ServerSocket::ServerSocket(const Addr& addr, const Port& port) {
-    create_if_closed_(SOCK_STREAM);
+// constructor
+ServerSocket::ServerSocket() : SocketBase(SOCK_STREAM) {}
+
+ServerSocket::ServerSocket(const Addr& addr, const Port& port)
+        : SocketBase(SOCK_STREAM) {
     this->reuse_addr(true);
     SocketBase::bind(addr, port);
 }
@@ -44,19 +47,14 @@ ServerSocket::ServerSocket(const Port& port)
     : ServerSocket((addr_t)0, port) {}
 
 // bind
-void ServerSocket::bind(const Addr& addr, const Port& port) {
-    create_if_closed_(SOCK_STREAM);
-    SocketBase::bind(addr, port);
-}
-
 void ServerSocket::bind(const Port& port) {
-    create_if_closed_(SOCK_STREAM);
     SocketBase::bind((addr_t)0, port);
 }
 
 // listen
 void ServerSocket::listen(int backlog) {
-    create_if_closed_(SOCK_DGRAM);
+    assert_throw_nanoexcept(socket_ != INVALID_SOCKET, 
+        "[TCP] listen(): Socket is closed");
     assert_throw_nanoexcept(::listen(socket_, backlog) >= 0,
         "[TCP] listen(): ", LAST_ERROR);
 }
@@ -76,6 +74,10 @@ Socket ServerSocket::accept() {
 // set addr reuse
 bool ServerSocket::reuse_addr(bool enable) {
     return this->set_option(SOL_SOCKET, SO_REUSEADDR, (int)enable);
+}
+
+ServerSocket ServerSocket::null_socket() {
+    return ServerSocket(false, false, false);
 }
 
 } // namespace nano

@@ -33,7 +33,11 @@
 
 namespace nano {
 
-class ServerSocket : public TransSocket {
+class ServerSocket : public SocketBase {
+
+    // null socket factory
+    explicit ServerSocket(bool, bool, bool);
+
 public:
 
     // ctor & dtor
@@ -43,7 +47,6 @@ public:
     ServerSocket(const Port& port);
     virtual ~ServerSocket() = default;
 
-    virtual void bind(const Addr& addr, const Port& port) override;
     void bind(const Port& port);
 
     // listen
@@ -54,6 +57,8 @@ public:
 
     // set address reuse
     bool reuse_addr(bool reuseAddr);
+
+    static ServerSocket null_socket();
 
 }; // class ServerSocket
 

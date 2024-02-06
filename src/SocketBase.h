@@ -56,7 +56,7 @@ namespace nano {
 class SocketBase {
 protected:
 
-    // Linux   : int (fd)
+    // Linux   : int
     // Windows : SOCKET
     sock_t socket_;
 
@@ -67,8 +67,7 @@ protected:
 
     // ctor
     SocketBase();
-
-    void create_if_closed_(int type);
+    SocketBase(int type);
 
 public:
     // dtor
@@ -80,7 +79,7 @@ public:
     sock_t get_sock() const;
 
     // bind local
-    virtual void bind(const Addr& addr, const Port& port);
+    void bind(const Addr& addr, const Port& port);
 
     // get local
     AddrPort get_local() const;
