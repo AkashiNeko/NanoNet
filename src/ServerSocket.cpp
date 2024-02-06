@@ -38,7 +38,7 @@ ServerSocket::ServerSocket(const Addr& addr, const Port& port) {
 }
 
 ServerSocket::ServerSocket(const AddrPort& addrport)
-    : ServerSocket(addrport.get_addr(), addrport.get_port()) {}
+    : ServerSocket(addrport.addr(), addrport.port()) {}
 
 ServerSocket::ServerSocket(const Port& port)
     : ServerSocket((addr_t)0, port) {}

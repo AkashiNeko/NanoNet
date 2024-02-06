@@ -49,15 +49,16 @@ public:
     void bind(const Addr& addr);
 
     // send to the specified remote
-    int send_to(const char* msg, size_t length, const AddrPort& remote) const;
-    int send_to(const std::string& msg, const AddrPort& remote) const;
+    int send_to(const char* msg, size_t length, const AddrPort& remote);
+    int send_to(const std::string& msg, const AddrPort& remote);
 
     // receive from the specified remote
-    int receive_from(char* buf, size_t buf_size, AddrPort& addrport) const;
-    int receive_from(char* buf, size_t buf_size) const;
+    int receive_from(char* buf, size_t buf_size, AddrPort& addrport);
+    int receive_from(char* buf, size_t buf_size);
 
     // connect to remote
     virtual void connect(const Addr& addr, const Port& port) override;
+    void connect(const AddrPort& addrport);
 
     // send & receive
     virtual int send(const char* msg, size_t length) const override;

@@ -49,10 +49,10 @@ public:
     virtual ~AddrPort() = default;
 
     // getter & setter
-    Addr get_addr() const;
-    Port get_port() const;
-    void set_addr(const Addr& addr);
-    void set_port(const Port& port);
+    Addr addr() const;
+    Port port() const;
+    void addr(const Addr& addr);
+    void port(const Port& port);
 
     // to string
     std::string to_string() const;

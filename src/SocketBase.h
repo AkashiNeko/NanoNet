@@ -46,6 +46,7 @@ namespace nano {
 
 #ifdef __linux__
     using sock_t = int;
+#define INVALID_SOCKET (-1)
 #elif _WIN32
     using sock_t = SOCKET;
 #else

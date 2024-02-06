@@ -50,6 +50,7 @@ public:
 
     // connect to remote
     virtual void connect(const Addr& addr, const Port& port) override;
+    void connect(const AddrPort& addrport);
 
     // send & receive
     virtual int send(const char* msg, size_t length) const override;

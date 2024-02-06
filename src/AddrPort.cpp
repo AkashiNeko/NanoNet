@@ -56,19 +56,19 @@ AddrPort::AddrPort(const std::string& addrport, char separator) {
 }
 
 // getter & setter
-void AddrPort::set_addr(const Addr& addr) {
+void AddrPort::addr(const Addr& addr) {
     this->addr_ = addr;
 }
 
-void AddrPort::set_port(const Port& port) {
+void AddrPort::port(const Port& port) {
     this->port_ = port;
 }
 
-Addr AddrPort::get_addr() const {
+Addr AddrPort::addr() const {
     return this->addr_;
 }
 
-Port AddrPort::get_port() const {
+Port AddrPort::port() const {
     return this->port_;
 }
 

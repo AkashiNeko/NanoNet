@@ -1,6 +1,6 @@
 // File:     nanonet.h
 // Author:   AkashiNeko
-// Project:  NanoNet - Version 2.2
+// Project:  NanoNet - Version 2.3
 // Github:   https://github.com/AkashiNeko/NanoNet/
 
 /* Copyright AkashiNeko. All rights reserved.
@@ -26,7 +26,7 @@
 
 #pragma once
 #ifndef __NANONET__
-#define __NANONET__ 2.2
+#define __NANONET__ 2.3
 
 #if __cplusplus < 201103L
     #error "Nanonet requires at least C++11"
@@ -176,10 +176,10 @@ public:
     virtual ~AddrPort() = default;
 
     // getter & setter
-    Addr get_addr() const;
-    Port get_port() const;
-    void set_addr(const Addr& addr);
-    void set_port(const Port& port);
+    Addr addr() const;
+    Port port() const;
+    void addr(const Addr& addr);
+    void port(const Port& port);
 
     // to string
     std::string to_string() const;
@@ -277,6 +277,7 @@ public:
 
     // connect to remote
     virtual void connect(const Addr& addr, const Port& port) override;
+    void connect(const AddrPort& addrport);
 
     // send & receive
     virtual int send(const char* msg, size_t length) const override;
@@ -331,15 +332,16 @@ public:
     void bind(const Addr& addr);
 
     // send to the specified remote
-    int send_to(const char* msg, size_t length, const AddrPort& remote) const;
-    int send_to(const std::string& msg, const AddrPort& remote) const;
+    int send_to(const char* msg, size_t length, const AddrPort& remote);
+    int send_to(const std::string& msg, const AddrPort& remote);
 
     // receive from the specified remote
-    int receive_from(char* buf, size_t buf_size, AddrPort& addrport) const;
-    int receive_from(char* buf, size_t buf_size) const;
+    int receive_from(char* buf, size_t buf_size, AddrPort& addrport);
+    int receive_from(char* buf, size_t buf_size);
 
     // connect to remote
     virtual void connect(const Addr& addr, const Port& port) override;
+    void connect(const AddrPort& addrport);
 
     // send & receive
     virtual int send(const char* msg, size_t length) const override;

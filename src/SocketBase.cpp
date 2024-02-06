@@ -52,18 +52,13 @@ public:
 void SocketBase::create_if_closed_(int type) {
     if (!is_open()) {
         socket_ = ::socket(AF_INET, type, 0);
-        assert_throw_nanoexcept(this->is_open(),
+        assert_throw_nanoexcept(socket_ != INVALID_SOCKET,
         "[Socket] Create socket faild: ", LAST_ERROR);
     }
 }
 
 // constructor
-SocketBase::SocketBase() {
-#ifdef __linux__
-    socket_ = -1;
-#elif _WIN32
-    socket_ = INVALID_SOCKET;
-#endif
+SocketBase::SocketBase() : socket_(INVALID_SOCKET), local_({}) {
     local_.sin_family = AF_INET;
 }
 
@@ -72,20 +67,15 @@ void SocketBase::close() {
     if (this->is_open()) {
 #ifdef __linux__
         ::close(socket_);
-        socket_ = -1;
 #elif _WIN32
         closesocket(socket_);
-        socket_ = INVALID_SOCKET;
 #endif
+        socket_ = INVALID_SOCKET;
     }
 }
 
 bool SocketBase::is_open() const {
-#ifdef __linux__
-    return socket_ != -1;
-#elif _WIN32
     return socket_ != INVALID_SOCKET;
-#endif
 }
 
 sock_t SocketBase::get_sock() const {

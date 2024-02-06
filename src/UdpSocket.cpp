@@ -30,10 +30,8 @@ namespace nano {
 
 namespace {
 
-int receive_from_(int sock_fd, char* buf, size_t buf_size,
-        AddrPort* addrport) {
-    assert_throw_nanoexcept(sock_fd >= 0,
-        "[UDP] receive_from(): Socket is closed");
+int receive_from_(sock_t sock_fd, char* buf,
+        size_t buf_size, AddrPort* addrport) {
     sockaddr_in remote_addr;
     socklen_t socklen = sizeof(remote_addr);
     int len = static_cast<int>(::recvfrom(sock_fd, buf, buf_size,
@@ -51,8 +49,8 @@ int receive_from_(int sock_fd, char* buf, size_t buf_size,
     // truncate buffer
     if (len < buf_size) buf[len] = 0;
     if (addrport) {
-        addrport->set_addr(::ntohl(remote_addr.sin_addr.s_addr));
-        addrport->set_port(::ntohs(remote_addr.sin_port));
+        addrport->addr(::ntohl(remote_addr.sin_addr.s_addr));
+        addrport->port(::ntohs(remote_addr.sin_port));
     }
     return len;
 }
@@ -73,14 +71,13 @@ void UdpSocket::bind(const Addr& addr) {
 }
 
 // send to the specified remote
-int UdpSocket::send_to(const char* msg, size_t length,
-        const AddrPort& remote) const {
-    assert_throw_nanoexcept(this->is_open(),
-        "[UDP] send_to(): Socket is closed");
+int UdpSocket::send_to(const char* msg,
+        size_t length, const AddrPort& remote) {
+    create_if_closed_(SOCK_DGRAM);
     sockaddr_in remote_addr;
     remote_addr.sin_family = AF_INET;
-    remote_addr.sin_addr.s_addr = remote.get_addr().net_order();
-    remote_addr.sin_port = remote.get_port().net_order();
+    remote_addr.sin_addr.s_addr = remote.addr().net_order();
+    remote_addr.sin_port = remote.port().net_order();
     auto ret = ::sendto(socket_, msg, length, 0,
         (const sockaddr*)&remote_addr, sizeof(remote_addr));
     assert_throw_nanoexcept(ret >= 0,
@@ -88,25 +85,24 @@ int UdpSocket::send_to(const char* msg, size_t length,
     return static_cast<int>(ret);
 }
 
-int UdpSocket::send_to(const std::string& msg,
-        const AddrPort& remote) const {
+int UdpSocket::send_to(const std::string& msg, const AddrPort& remote) {
     return send_to(msg.c_str(), msg.size(), remote);
 }
 
 // receive from the specified remote
-int UdpSocket::receive_from(char* buf, size_t buf_size,
-        AddrPort& addrport) const {
+int UdpSocket::receive_from(char* buf, size_t buf_size, AddrPort& addrport) {
+    create_if_closed_(SOCK_DGRAM);
     return receive_from_(socket_, buf, buf_size, &addrport);
 }
 
-int UdpSocket::receive_from(char* buf, size_t buf_size) const {
+int UdpSocket::receive_from(char* buf, size_t buf_size) {
+    create_if_closed_(SOCK_DGRAM);
     return receive_from_(socket_, buf, buf_size, nullptr);
 }
 
 // connect to remote
 void UdpSocket::connect(const Addr& addr, const Port& port) {
-    assert_throw_nanoexcept(this->is_open(),
-        "[UDP] connect(): Socket is closed");
+    create_if_closed_(SOCK_DGRAM);
     assert_throw_nanoexcept(!is_connected_,
         "[UDP] connect(): Socket is connected");
     remote_.sin_addr.s_addr = addr.net_order();
@@ -119,6 +115,10 @@ void UdpSocket::connect(const Addr& addr, const Port& port) {
 
     socklen_t addr_len = sizeof(local_);
     getsockname(socket_, (sockaddr*)&local_, &addr_len);
+}
+
+void UdpSocket::connect(const AddrPort& addrport) {
+    this->connect(addrport.addr(), addrport.port());
 }
 
 // send to remote

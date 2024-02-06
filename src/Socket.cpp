@@ -57,6 +57,10 @@ void Socket::connect(const Addr& addr, const Port& port) {
     getsockname(socket_, (sockaddr *)&local_, &addr_len);
 }
 
+void Socket::connect(const AddrPort& addrport) {
+    this->connect(addrport.addr(), addrport.port());
+}
+
 // send to remote
 int Socket::send(const char* msg, size_t size) const {
     assert_throw_nanoexcept(this->is_open(),
