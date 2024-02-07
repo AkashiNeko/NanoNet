@@ -41,21 +41,15 @@ protected:
     TransSocket();
     TransSocket(int type);
 
+    int send_(const char* msg, size_t length, int type) const;
+    int receive_(char* buf, size_t buf_size, int type) const;
+
 public:
     // dtor
     virtual ~TransSocket() = default;
 
-    // bind local
-    void bind(const Addr& addr, const Port& port);
-    void bind(const Port& port);
-
     // connect to remote
     virtual void connect(const Addr& addr, const Port& port) = 0;
-
-    // send & receive
-    virtual int send(const char* msg, size_t length) const = 0;
-    virtual int send(const std::string& msg) const = 0;
-    virtual int receive(char* buf, size_t buf_size) const = 0;
 
 }; // class TransSocket
 

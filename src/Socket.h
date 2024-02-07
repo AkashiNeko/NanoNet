@@ -52,9 +52,9 @@ public:
     void connect(const AddrPort& addrport);
 
     // send & receive
-    virtual int send(const char* msg, size_t length) const override;
-    virtual int send(const std::string& msg) const override;
-    virtual int receive(char* buf, size_t buf_size) const override;
+    int send(const char* msg, size_t length) const;
+    int send(const std::string& msg) const;
+    int receive(char* buf, size_t buf_size) const;
 
     // set receive timeout
     bool recv_timeout(long ms) const;

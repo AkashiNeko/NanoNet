@@ -81,7 +81,7 @@ sock_t SocketBase::get_sock() const {
 
 void SocketBase::bind(const Addr& addr, const Port& port) {
     assert_throw_nanoexcept(socket_ != INVALID_SOCKET,
-        "[TCP] connect(): Socket is closed");
+        "[Socket] bind(): Socket is closed");
     local_.sin_addr.s_addr = addr.net_order();
     local_.sin_port = port.net_order();
     int ret = ::bind(socket_,

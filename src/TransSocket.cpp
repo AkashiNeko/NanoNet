@@ -34,13 +34,34 @@ TransSocket::TransSocket(int type) : SocketBase(type), remote_({}) {
     remote_.sin_family = AF_INET;
 }
 
-// bind local
-void TransSocket::bind(const Addr& addr, const Port& port) {
-    SocketBase::bind(addr, port);
+// send to remote
+int TransSocket::send_(const char* msg, size_t length, int type) const {
+    // send
+    int len = ::send(socket_, msg, length, 0);
+    assert_throw_nanoexcept(len >= 0,
+        (type == SOCK_STREAM ? "[TCP]" : "[UDP]"),
+        " send(): ", LAST_ERROR);
+
+    // returns the number of bytes sent
+    return len;
 }
 
-void TransSocket::bind(const Port& port) {
-    SocketBase::bind((addr_t)0, port);
+int TransSocket::receive_(char* buf, size_t buf_size, int type) const {
+    int len = static_cast<int>(::recv(socket_, buf, buf_size, 0));
+    if (len == -1) {
+#ifdef __linux__
+        int err_code = errno, would_block = EWOULDBLOCK;
+#elif _WIN32
+        int err_code = WSAGetLastError(),would_block = WSAEWOULDBLOCK;
+#endif
+        assert_throw_nanoexcept(err_code == would_block,
+            (type == SOCK_STREAM ? "[TCP]" : "[UDP]"),
+            " receive(): ", LAST_ERROR);
+        return -1;
+    }
+    // truncate buffer
+    if (len < buf_size) buf[len] = 0;
+    return len;
 }
 
 } // namespace nano

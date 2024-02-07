@@ -54,16 +54,10 @@ void Socket::connect(const AddrPort& addrport) {
 }
 
 // send to remote
-int Socket::send(const char* msg, size_t size) const {
+int Socket::send(const char* msg, size_t length) const {
     assert_throw_nanoexcept(socket_ != INVALID_SOCKET,
         "[TCP] send(): Socket is closed");
-
-    // send to remote
-    int len = ::send(socket_, msg, size, 0);
-    assert_throw_nanoexcept(len >= 0, "[TCP] send():", LAST_ERROR);
-
-    // returns the number of bytes sent
-    return len;
+    return TransSocket::send_(msg, length, SOCK_STREAM);
 }
 
 int Socket::send(const std::string& msg) const {
@@ -74,20 +68,7 @@ int Socket::send(const std::string& msg) const {
 int Socket::receive(char* buf, size_t buf_size) const {
     assert_throw_nanoexcept(socket_ != INVALID_SOCKET,
         "[TCP] receive(): Socket is closed");
-    int len = static_cast<int>(::recv(socket_, buf, buf_size, 0));
-    if (len == -1) {
-#ifdef __linux__
-        int err_code = errno, would_block = EWOULDBLOCK;
-#elif _WIN32
-        int err_code = WSAGetLastError(),would_block = WSAEWOULDBLOCK;
-#endif
-        assert_throw_nanoexcept(err_code == would_block,
-            "[TCP] receive(): ", LAST_ERROR);
-        return -1;
-    }
-    // truncate buffer
-    if (len < buf_size) buf[len] = 0;
-    return len;
+    return TransSocket::receive_(buf, buf_size, SOCK_STREAM);
 }
 
 bool Socket::recv_timeout(long ms) const {

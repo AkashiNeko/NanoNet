@@ -65,7 +65,7 @@ void ServerSocket::listen(int backlog) {
 
 // accept a new connection
 Socket ServerSocket::accept() {
-    Socket socket;
+    Socket socket = Socket::null_socket();
     socklen_t socklen = sizeof(socket.remote_);
     int new_fd = ::accept(socket_,
         reinterpret_cast<sockaddr*>(&socket.remote_), &socklen);
