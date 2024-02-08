@@ -28,6 +28,10 @@
 #ifndef NANONET_NET_H
 #define NANONET_NET_H
 
+#if __cplusplus < 201103L
+#error "Nanonet requires at least C++11"
+#endif
+
 #ifdef __linux__ // Linux
 
 #define NANO_LINUX
@@ -36,6 +40,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <unistd.h>
 
 #elif _WIN32 // Windows
 
@@ -78,18 +83,18 @@ enum SockType {
 }; // protocol type
 
 // Convert network byte order and host byte order
-addr_t net_to_host(addr_t addr) noexcept;
-addr_t host_to_net(addr_t addr) noexcept;
-port_t net_to_host(port_t addr) noexcept;
-port_t host_to_net(port_t addr) noexcept;
+addr_t addr_ntoh(addr_t addr) noexcept;
+addr_t addr_hton(addr_t addr) noexcept;
+port_t port_ntoh(port_t addr) noexcept;
+port_t port_hton(port_t addr) noexcept;
 
 // Converts an ip address to a numeric value and a dotted-decimal string
-addr_t parse_host_addr(const char* str);
-std::string net_to_string(addr_t addr);
+addr_t addr_ston(const char* str);
+std::string addr_ntos(addr_t addr);
 
 // Query the ip address corresponding to the domain name
 size_t dns_query(const char* name, addr_t addrs[], size_t size,
-    int protocol = SockType::UDP_SOCK) noexcept;
+    int protocol = SockType::UDP_SOCK);
 
 // Create a TCP/UDP socket
 sock_t create_socket(int domain, int type, int protocol = 0) noexcept;
@@ -98,21 +103,26 @@ sock_t create_socket(int domain, int type, int protocol = 0) noexcept;
 bool bind_address(sock_t socket, addr_t addr, port_t port) noexcept;
 
 // Accept a connection on a socket
-sock_t accept(sock_t socket, addr_t* addr, port_t* port, int backlog = 20);
+sock_t accept_from(sock_t socket, addr_t* addr, port_t* port) noexcept;
+
+// Listen for connections on a socket
+bool enable_listening(sock_t socket, int backlog = 20) noexcept;
 
 // Initiate a connection on a socket
-bool connect(sock_t socket, addr_t addr, port_t port) noexcept;
+bool connect_to(sock_t socket, addr_t addr, port_t port) noexcept;
 
-// receive a message from a socket
-int receive(sock_t socket, char* buf, size_t buf_size, int flags = 0);
-int receive_from(sock_t socket, char* buf, size_t buf_size,
-    addr_t* addr, port_t* port, int flags);
+// Receive a message from a socket
+int recv_msg(sock_t socket, char* buf, size_t buf_size, int flags = 0);
+int recv_msg_from(sock_t socket, char* buf, size_t buf_size,
+    addr_t* addr, port_t* port, int flags = 0);
 
-// send a message on a socket
-int send(sock_t socket, const char* msg, size_t length, int flags = 0);
+// Send a message on a socket
+int send_msg(sock_t socket, const char* msg, size_t length, int flags = 0);
+int send_msg_to(sock_t socket, const char* msg, size_t length,
+    addr_t addr, port_t port, int flags = 0);
 
-int send_to(sock_t socket, const char* msg, size_t length,
-    addr_t* addr, port_t* port, int flags);
+// Close the socket
+bool close_socket(sock_t socket) noexcept;
 
 } // namespace nano
 

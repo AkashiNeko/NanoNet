@@ -49,27 +49,27 @@ public:
 
 #endif
 
-addr_t net_to_host(addr_t addr) noexcept {
+addr_t addr_ntoh(addr_t addr) noexcept {
     return static_cast<addr_t>(::ntohl(
         static_cast<uint32_t>(addr)));
 }
 
-addr_t host_to_net(addr_t addr) noexcept {
+addr_t addr_hton(addr_t addr) noexcept {
     return static_cast<addr_t>(::htonl(
         static_cast<uint32_t>(addr)));
 }
 
-port_t net_to_host(port_t addr) noexcept {
+port_t port_ntoh(port_t addr) noexcept {
     return static_cast<port_t>(::ntohs(
         static_cast<uint16_t>(addr)));
 }
 
-port_t host_to_net(port_t addr) noexcept {
+port_t port_hton(port_t addr) noexcept {
     return static_cast<port_t>(::htons(
         static_cast<uint16_t>(addr)));
 }
 
-addr_t parse_host_addr(const char* str) {
+addr_t addr_ston(const char* str) {
     addr_t addr;
 #ifdef NANO_LINUX
     switch (inet_pton(AF_INET, str, &addr))
@@ -88,7 +88,7 @@ addr_t parse_host_addr(const char* str) {
     }
 }
 
-std::string net_to_string(addr_t addr) {
+std::string addr_ntos(addr_t addr) {
     char buf[INET_ADDRSTRLEN] = {};
 #ifdef NANO_LINUX
     in_addr inaddr = {addr};
@@ -107,8 +107,7 @@ std::string net_to_string(addr_t addr) {
     return std::string(result);
 }
 
-size_t dns_query(const char* name, addr_t addrs[],
-        size_t size, int type) noexcept {
+size_t dns_query(const char* name, addr_t addrs[], size_t size, int type) {
     addrinfo info {};
     info.ai_family = AF_INET;
     info.ai_socktype = type;
@@ -142,15 +141,21 @@ bool bind_address(sock_t socket, addr_t addr, port_t port) noexcept {
     return 0 == ::bind(socket, reinterpret_cast<const sockaddr*>(&local), len);
 }
 
-sock_t accept(sock_t socket, addr_t* addr, port_t* port, int backlog) {
+sock_t accept_from(sock_t socket, addr_t* addr, port_t* port) noexcept {
     sockaddr_in remote {};
     socklen_t socklen = sizeof(remote);
     sock_t link_socket = ::accept(socket,
         reinterpret_cast<sockaddr*>(&remote), &socklen);
+    if (addr) *addr = remote.sin_addr.s_addr;
+    if (port) *port = remote.sin_port;
     return link_socket;
 }
 
-bool connect(sock_t socket, addr_t addr, port_t port) noexcept {
+bool enable_listening(sock_t socket, int backlog) noexcept {
+    return 0 == ::listen(socket, backlog);
+}
+
+bool connect_to(sock_t socket, addr_t addr, port_t port) noexcept {
     sockaddr_in remote {};
     remote.sin_family = AF_INET;
     remote.sin_addr.s_addr = addr;
@@ -159,7 +164,7 @@ bool connect(sock_t socket, addr_t addr, port_t port) noexcept {
     return ret == 0;
 }
 
-int receive(sock_t socket, char* buf, size_t buf_size, int flags) {
+int recv_msg(sock_t socket, char* buf, size_t buf_size, int flags) {
     int len = static_cast<int>(::recv(socket, buf, buf_size, flags));
     if (len >= 0) {
         // truncate buffer
@@ -175,7 +180,7 @@ int receive(sock_t socket, char* buf, size_t buf_size, int flags) {
     return -1;
 }
 
-int receive_from(sock_t socket, char* buf, size_t buf_size,
+int recv_msg_from(sock_t socket, char* buf, size_t buf_size,
         addr_t* addr, port_t* port, int flags) {
     sockaddr_in remote;
     socklen_t socklen = sizeof(remote);
@@ -184,8 +189,8 @@ int receive_from(sock_t socket, char* buf, size_t buf_size,
     if (len >= 0) {
         // truncate buffer
         if (len < buf_size) buf[len] = 0;
-        if (addr) *addr = ::ntohl(remote.sin_addr.s_addr);
-        if (port) *port = ::ntohs(remote.sin_port);
+        if (addr) *addr = remote.sin_addr.s_addr;
+        if (port) *port = remote.sin_port;
         return len;
     }
 #ifdef NANO_LINUX
@@ -197,13 +202,13 @@ int receive_from(sock_t socket, char* buf, size_t buf_size,
     return -1;
 }
 
-int send(sock_t socket, const char* msg, size_t length, int flags) {
+int send_msg(sock_t socket, const char* msg, size_t length, int flags) {
     int len = static_cast<int>(::send(socket, msg, length, flags));
     assert_throw_nanoexcept(len >= 0, LAST_ERROR);
     return len;
 }
 
-int send_to(sock_t socket, const char* msg, size_t length,
+int send_msg_to(sock_t socket, const char* msg, size_t length,
         addr_t addr, port_t port, int flags) {
     sockaddr_in remote;
     remote.sin_family = AF_INET;
@@ -213,6 +218,14 @@ int send_to(sock_t socket, const char* msg, size_t length,
         reinterpret_cast<const sockaddr*>(&remote), sizeof(remote)));
     assert_throw_nanoexcept(ret >= 0, LAST_ERROR);
     return ret;
+}
+
+bool close_socket(sock_t socket) noexcept {
+#ifdef NANO_LINUX
+    return 0 == ::close(socket);
+#elif NANO_WINDOWS
+    return 0 == ::closesocket(socket);
+#endif
 }
 
 } // namespace nano

@@ -29,30 +29,36 @@
 #define __NANONET__ 2.3
 
 #if __cplusplus < 201103L
-    #error "Nanonet requires at least C++11"
+#error "Nanonet requires at least C++11"
 #endif
 
 // C++
 #include <string>
 
 // platform
-#ifdef NANO_LINUX
+#ifdef __linux__ // Linux
 
-#include <unistd.h>
+#define NANO_LINUX
+#define INVALID_SOCKET (-1)
+
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <netinet/in.h>
 
-#elif NANO_WINDOWS
+#elif _WIN32 // Windows
+
+#define NANO_WINDOWS
 
 #include <WinSock2.h>
+#include <ws2ipdef.h>
+#include <ws2tcpip.h>
 
-#ifdef _MSC_VER
+#ifdef _MSC_VER // MSVC
 #pragma comment(lib, "ws2_32.lib")
 #endif
 
-#else
-    #error "Unsupported platform. Only Windows and Linux are supported."
+#else // Other platforms
+#error "Unsupported platform. Only Windows and Linux are supported."
 #endif
 
 namespace nano {
@@ -67,6 +73,17 @@ namespace nano {
     using port_t = USHORT;
 #endif
 
+enum Domain {
+    IPv4 = AF_INET,
+    // IPv6 = AF_INET6, // Not supported yet (NanoNet 2.3)
+};
+
+enum SockType {
+    TCP_SOCK = SOCK_STREAM,
+    UDP_SOCK = SOCK_DGRAM,
+    NONBLOCK = SOCK_NONBLOCK,
+}; // protocol type
+
 class NanoExcept : public std::exception {
     std::string except_msg_;
 public:
@@ -77,6 +94,48 @@ public:
         return except_msg_.c_str();
     }
 };
+
+// Convert network byte order and host byte order
+addr_t addr_ntoh(addr_t addr) noexcept;
+addr_t addr_hton(addr_t addr) noexcept;
+port_t port_ntoh(port_t addr) noexcept;
+port_t port_hton(port_t addr) noexcept;
+
+// Converts an ip address to a numeric value and a dotted-decimal string
+addr_t addr_ston(const char* str);
+std::string addr_ntos(addr_t addr);
+
+// Query the ip address corresponding to the domain name
+size_t dns_query(const char* name, addr_t addrs[], size_t size,
+    int protocol = SockType::UDP_SOCK);
+
+// Create a TCP/UDP socket
+sock_t create_socket(int domain, int type, int protocol = 0) noexcept;
+
+// Bind a address to a socket
+bool bind_address(sock_t socket, addr_t addr, port_t port) noexcept;
+
+// Accept a connection on a socket
+sock_t accept_from(sock_t socket, addr_t* addr, port_t* port) noexcept;
+
+// Listen for connections on a socket
+bool enable_listening(sock_t socket, int backlog = 20) noexcept;
+
+// Initiate a connection on a socket
+bool connect_to(sock_t socket, addr_t addr, port_t port) noexcept;
+
+// Receive a message from a socket
+int recv_msg(sock_t socket, char* buf, size_t buf_size, int flags = 0);
+int recv_msg_from(sock_t socket, char* buf, size_t buf_size,
+    addr_t* addr, port_t* port, int flags = 0);
+
+// Send a message on a socket
+int send_msg(sock_t socket, const char* msg, size_t length, int flags = 0);
+int send_msg_to(sock_t socket, const char* msg, size_t length,
+    addr_t addr, port_t port, int flags = 0);
+
+// Close the socket
+bool close_socket(sock_t socket) noexcept;
 
 class Addr {
 
