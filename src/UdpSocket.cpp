@@ -39,9 +39,9 @@ int receive_from_(sock_t sock_fd, char* buf,
     int len = static_cast<int>(::recvfrom(sock_fd, buf, buf_size,
         0, (sockaddr*)&remote_addr, &socklen));
     if (len == -1) {
-#ifdef __linux__
+#ifdef NANO_LINUX
         int err_code = errno, would_block = EWOULDBLOCK;
-#elif _WIN32
+#elif NANO_WINDOWS
         int err_code = WSAGetLastError(), would_block = WSAEWOULDBLOCK;
 #endif
         assert_throw_nanoexcept(err_code == would_block,

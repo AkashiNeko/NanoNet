@@ -31,12 +31,12 @@
 // get last error
 #ifdef __linux__
 
-#include <cstring>
+#include <cstring>    // std::strerror()
 
 #elif _WIN32
 
-#include <WinSock2.h>
-#include <Windows.h>
+#include <WinSock2.h> // WSAGetLastError()
+#include <Windows.h>  // FormatMessageA()
 
 #endif
 
@@ -61,13 +61,15 @@ public:
 #if __cplusplus >= 201703L
 
 template <class ExceptType = NanoExcept, class ...Args>
-inline void throw_except_(const Args&... args) {
+inline void throw_except(const Args&... args) {
     std::string s;
     ((s += args), ...);
     throw ExceptType(std::move(s));
 }
 
 #else // 201103L <= __cplusplus < 201703L
+
+namespace {
 
 inline void append_string_(std::string&) {}
 
@@ -77,8 +79,10 @@ inline void append_string_(std::string& s, const T& arg, const Args&... args) {
     append_string_(s, args...);
 }
 
-template <class ExceptType, class ...Args>
-inline void throw_except_(const Args&... args) {
+} // anonymous namespace
+
+template <class ExceptType = NanoExcept, class ...Args>
+inline void throw_except(const Args&... args) {
     std::string s;
     append_string_(s, args...);
     throw ExceptType(std::move(s));
@@ -88,21 +92,22 @@ inline void throw_except_(const Args&... args) {
 
 #define assert_throw_nanoexcept(condition, ...) \
 (static_cast<bool>(condition) ? void(0)         \
-: throw_except_<NanoExcept>(__VA_ARGS__));      \
+: throw_except<NanoExcept>(__VA_ARGS__));       \
 
 #ifdef __linux__
 
-#define LAST_ERROR (std::strerror(errno))
+#define ERR_CODE errno
+#define LAST_ERROR (std::strerror(ERR_CODE))
 
 #elif _WIN32
+
+#define ERR_CODE (WSAGetLastError())
 
 namespace {
 inline std::string WSAGetLastErrorMessage_() {
     LPSTR msg = nullptr;
-    FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER
-        | FORMAT_MESSAGE_FROM_SYSTEM
-        | FORMAT_MESSAGE_IGNORE_INSERTS,
-        nullptr, WSAGetLastError(),
+    FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM
+        | FORMAT_MESSAGE_IGNORE_INSERTS, nullptr, ERR_CODE,
         MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
         (LPSTR)&msg, 0, nullptr);
     std::string result(msg);

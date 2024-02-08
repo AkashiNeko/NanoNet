@@ -34,34 +34,10 @@
 // C++
 #include <string>
 
-#ifdef __linux__
-
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <netinet/in.h>
-
-#elif _WIN32
-
-#include <WinSock2.h>
-#include <ws2ipdef.h>
-#include <ws2tcpip.h>
-
-#ifdef _MSC_VER
-#pragma comment(lib, "ws2_32.lib")
-#endif
-
-#endif
-
 // NanoNet
-#include "except.h"
+#include "net.h"
 
 namespace nano {
-
-#ifdef __linux__
-    using addr_t = in_addr_t;
-#elif _WIN32
-    using addr_t = ULONG;
-#endif
 
 class Addr {
 

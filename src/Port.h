@@ -31,30 +31,10 @@
 // C++
 #include <string>
 
-#ifdef __linux__
-
-#include <netinet/in.h>
-
-#elif _WIN32
-
-#include <WinSock2.h>
-
-#ifdef _MSC_VER
-#pragma comment(lib, "ws2_32.lib")
-#endif
-
-#endif
-
 // NanoNet
-#include "except.h"
+#include "net.h"
 
 namespace nano {
-
-#ifdef __linux__
-    using port_t = in_port_t;
-#elif _WIN32
-    using port_t = USHORT;
-#endif
 
 class Port {
 

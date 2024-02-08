@@ -28,30 +28,21 @@
 #ifndef NANONET_SOCKET_BASE_H
 #define NANONET_SOCKET_BASE_H
 
-#ifdef __linux__
+// NanoNet
+#include "AddrPort.h"
+
+#ifdef NANO_LINUX
 
 #include <unistd.h>
 #include <fcntl.h>
 
-#elif _WIN32
+#elif NANO_WINDOWS
 
 #include <ws2tcpip.h>
 
 #endif
 
-// NanoNet
-#include "AddrPort.h"
-
 namespace nano {
-
-#ifdef __linux__
-    using sock_t = int;
-#define INVALID_SOCKET (-1)
-#elif _WIN32
-    using sock_t = SOCKET;
-#else
-    #error "Unsupported platform. Only Windows and Linux are supported."
-#endif
 
 class SocketBase {
 protected:

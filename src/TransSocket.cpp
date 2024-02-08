@@ -49,9 +49,9 @@ int TransSocket::send_(const char* msg, size_t length, int type) const {
 int TransSocket::receive_(char* buf, size_t buf_size, int type) const {
     int len = static_cast<int>(::recv(socket_, buf, buf_size, 0));
     if (len == -1) {
-#ifdef __linux__
+#ifdef NANO_LINUX
         int err_code = errno, would_block = EWOULDBLOCK;
-#elif _WIN32
+#elif NANO_WINDOWS
         int err_code = WSAGetLastError(),would_block = WSAEWOULDBLOCK;
 #endif
         assert_throw_nanoexcept(err_code == would_block,

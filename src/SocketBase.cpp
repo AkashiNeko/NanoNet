@@ -28,27 +28,6 @@
 
 namespace nano {
 
-// init WSA
-#ifdef _WIN32
-
-namespace {
-
-class WSAInit {
-public:
-    WSAInit() {
-        WSADATA wsa;
-        int result = WSAStartup(MAKEWORD(2, 2), &wsa);
-        assert_throw_nanoexcept(result == 0, "[WSA] WSAStartup() failed");
-    }
-    ~WSAInit() {
-        WSACleanup();
-    }
-}__wsa_initializer_; // RAII
-
-} // anonymous namespace
-
-#endif
-
 // constructor
 SocketBase::SocketBase() : socket_(INVALID_SOCKET), local_({}) {}
 
@@ -62,9 +41,9 @@ SocketBase::SocketBase(int type) : SocketBase() {
 // close socket
 void SocketBase::close() {
     if (socket_ != INVALID_SOCKET) {
-#ifdef __linux__
+#ifdef NANO_LINUX
         ::close(socket_);
-#elif _WIN32
+#elif NANO_WINDOWS
         closesocket(socket_);
 #endif
         socket_ = INVALID_SOCKET;
@@ -99,7 +78,7 @@ AddrPort SocketBase::get_local() const {
 bool SocketBase::set_blocking(bool blocking) {
     assert_throw_nanoexcept(socket_ != INVALID_SOCKET,
         "[Socket] set_blocking(): Socket is closed");
-#ifdef __linux__
+#ifdef NANO_LINUX
     int flags = fcntl(socket_, F_GETFL, 0);
     if (flags == -1) return false;
     if (blocking)
@@ -107,7 +86,7 @@ bool SocketBase::set_blocking(bool blocking) {
     else
         flags |= O_NONBLOCK;
     return 0 == fcntl(socket_, F_SETFL, flags);
-#elif _WIN32
+#elif NANO_WINDOWS
     u_long mode = blocking ? 0 : 1;
     return 0 == ioctlsocket(socket_, FIONBIO, &mode);
 #endif

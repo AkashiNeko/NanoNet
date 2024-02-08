@@ -36,14 +36,14 @@
 #include <string>
 
 // platform
-#ifdef __linux__
+#ifdef NANO_LINUX
 
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <netinet/in.h>
 
-#elif _WIN32
+#elif NANO_WINDOWS
 
 #include <WinSock2.h>
 
@@ -57,11 +57,11 @@
 
 namespace nano {
 
-#ifdef __linux__
+#ifdef NANO_LINUX
     using sock_t = int;
     using addr_t = in_addr_t;
     using port_t = in_port_t;
-#elif _WIN32
+#elif NANO_WINDOWS
     using sock_t = SOCKET;
     using addr_t = ULONG;
     using port_t = USHORT;
