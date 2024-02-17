@@ -51,7 +51,7 @@ TransSocket& TransSocket::operator=(TransSocket&& other) {
 }
 
 AddrPort TransSocket::remote() const {
-    return AddrPort(remote_addr_, remote_port_);
+    return AddrPort(addr_ntoh(remote_addr_), port_ntoh(remote_port_));
 }
 
 void TransSocket::connect(const Addr& addr, const Port& port) {

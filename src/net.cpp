@@ -271,7 +271,7 @@ void get_local_address(sock_t socket, addr_t* addr, port_t* port) {
     sockaddr_in local {};
     local.sin_family = AF_INET;
     socklen_t addr_len = sizeof(local);
-    getsockname(socket, reinterpret_cast<sockaddr*>(&local), &addr_len);
+    ::getsockname(socket, reinterpret_cast<sockaddr*>(&local), &addr_len);
     if (addr) *addr = local.sin_addr.s_addr;
     if (port) *port = local.sin_port;
 }

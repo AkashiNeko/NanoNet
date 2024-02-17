@@ -94,7 +94,7 @@ void SocketBase::bind(const AddrPort& addrport) {
 
 // get local
 AddrPort SocketBase::local() const {
-    return AddrPort(local_addr_, local_port_);
+    return AddrPort(addr_ntoh(local_addr_), port_ntoh(local_port_));
 }
 
 // blocking

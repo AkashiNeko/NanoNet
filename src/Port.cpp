@@ -41,7 +41,7 @@ inline port_t parse_(const char* port) {
         assert_throw_nanoexcept(result < 65536,
             "[Port] Port(): The port value \'", port, "\' is out of range");
     }
-    return static_cast<port_t>(result);
+    return port_hton(static_cast<port_t>(result));
 }
 
 // compare port_t and C string
@@ -56,11 +56,11 @@ inline bool equal_(const port_t& port, const char* other) {
 } // anonymous namespace
 
 // constructor
-Port::Port(port_t port) : val_(port) {}
+Port::Port(port_t port) : val_(port_hton(port)) {}
 
 Port::Port(std::string_view port) : val_(parse_(port.data())) {}
 
-// assign
+// assignment
 Port& Port::operator=(port_t other) {
     this->val_ = other;
     return *this;
@@ -98,7 +98,7 @@ void Port::set(port_t val) {
 
 // to string
 std::string Port::to_string() const {
-    return std::to_string(this->val_);
+    return std::to_string(port_ntoh(this->val_));
 }
 
 } // namespace nano

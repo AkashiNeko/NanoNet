@@ -51,12 +51,13 @@ void ServerSocket::listen(int backlog) {
 
 // accept a new connection
 Socket ServerSocket::accept() {
-    Socket socket(false);
-    socket.socket_ = accept_from(socket_,
-        &socket.local_addr_, &socket.local_port_);
-    assert_throw_nanoexcept(socket.socket_ >= 0,
+    Socket ret(false);
+    ret.socket_ = accept_from(socket_,
+        &ret.remote_addr_, &ret.remote_port_);
+    get_local_address(ret.socket_, &ret.local_addr_, &ret.local_port_);
+    assert_throw_nanoexcept(ret.socket_ >= 0,
         except_name(), "accept(): ", LAST_ERROR);
-    return std::move(socket);
+    return std::move(ret);
 }
 
 // set addr reuse

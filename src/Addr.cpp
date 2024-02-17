@@ -56,7 +56,7 @@ inline bool equal_(const addr_t& addr, const char* other) {
 } // anonymous namespace
 
 // constructor
-Addr::Addr(addr_t val) : val_(val) {}
+Addr::Addr(addr_t val) : val_(addr_hton(val)) {}
 
 Addr::Addr(std::string_view addr) : val_(parse_(addr.data())) {}
 
@@ -98,9 +98,7 @@ void Addr::set(addr_t val) {
 
 // to string
 std::string Addr::to_string() const {
-    uint32_t val = static_cast<uint32_t>(::htonl(this->val_));
-    return std::to_string(val & 0xFF) + '.' + std::to_string((val >> 8) & 0xFF) + '.'
-        + std::to_string((val >> 16) & 0xFF) + '.' + std::to_string((val >> 24) & 0xFF);
+    return addr_ntos(this->val_);
 }
 
 }  // namespace nano
