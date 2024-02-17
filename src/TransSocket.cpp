@@ -28,40 +28,66 @@
 
 namespace nano {
 
-TransSocket::TransSocket() : SocketBase(), remote_({})  {}
+TransSocket::TransSocket(int type) : SocketBase(type),
+    remote_addr_(0U), remote_port_(0U) {}
 
-TransSocket::TransSocket(int type) : SocketBase(type), remote_({}) {
-    remote_.sin_family = AF_INET;
+TransSocket::TransSocket(TransSocket&& other)
+        : SocketBase(std::move(other)),
+        remote_addr_(other.remote_addr_),
+        remote_port_(other.remote_port_) {
+    other.remote_addr_ = 0U;
+    other.remote_port_ = 0U;
 }
 
-// send to remote
-int TransSocket::send_(const char* msg, size_t length, int type) const {
-    // send
-    int len = ::send(socket_, msg, length, 0);
-    assert_throw_nanoexcept(len >= 0,
-        (type == SOCK_STREAM ? "[TCP]" : "[UDP]"),
-        " send(): ", LAST_ERROR);
-
-    // returns the number of bytes sent
-    return len;
+TransSocket& TransSocket::operator=(TransSocket&& other) {
+    SocketBase::operator=(std::move(other));
+    // copy
+    remote_addr_ = other.remote_addr_;
+    remote_port_ = other.remote_port_;
+    // clear
+    other.remote_addr_ = 0U;
+    other.remote_port_ = 0U;
+    return *this;
 }
 
-int TransSocket::receive_(char* buf, size_t buf_size, int type) const {
-    int len = static_cast<int>(::recv(socket_, buf, buf_size, 0));
-    if (len == -1) {
-#ifdef NANO_LINUX
-        int err_code = errno, would_block = EWOULDBLOCK;
-#elif NANO_WINDOWS
-        int err_code = WSAGetLastError(),would_block = WSAEWOULDBLOCK;
-#endif
-        assert_throw_nanoexcept(err_code == would_block,
-            (type == SOCK_STREAM ? "[TCP]" : "[UDP]"),
-            " receive(): ", LAST_ERROR);
-        return -1;
+AddrPort TransSocket::remote() const {
+    return AddrPort(remote_addr_, remote_port_);
+}
+
+void TransSocket::connect(const Addr& addr, const Port& port) {
+    // set remote
+    assert_throw_nanoexcept(socket_ != INVALID_SOCKET,
+        except_name(), "connect(): Socket is closed");
+    // connect to remote
+    assert_throw_nanoexcept(connect_to(socket_, addr.get(), port.get()),
+        except_name(), "connect(): ", LAST_ERROR);
+    // get local address and port
+    get_local_address(socket_, &local_addr_, &local_port_);
+}
+
+int TransSocket::send(const char* msg, size_t length) {
+    assert_throw_nanoexcept(socket_ != INVALID_SOCKET,
+        except_name(), "Socket is closed");
+    try {
+        return send_msg(socket_, msg, length);
+    } catch (const NanoExcept& e) {
+        throw_except(except_name(), e.what());
     }
-    // truncate buffer
-    if (len < buf_size) buf[len] = 0;
-    return len;
+    return 0; // never
+}
+
+int TransSocket::receive(char* buf, size_t buf_size) {
+    try {
+        return recv_msg(socket_, buf, buf_size);
+    } catch (const NanoExcept& e) {
+        throw_except(except_name(), e.what());
+    }
+    return 0; // never
+}
+
+bool TransSocket::recv_timeout(long ms) const {
+    timeval tm = {ms / 1000, ms % 1000 * 1000};
+    return set_option(SOL_SOCKET, SO_RCVTIMEO, tm);
 }
 
 } // namespace nano

@@ -34,6 +34,7 @@ namespace {
 inline port_t parse_(const char* port) {
     unsigned result = 0;
     for (const char* p = port; *p; ++p) {
+        if (*p == ' ') continue;
         assert_throw_nanoexcept(*p >= '0' && *p <= '9',
             "[Port] Port(): The port string \'", port, "\' is invalied");
         result = result * 10 + (*p & 0xF);
@@ -55,14 +56,9 @@ inline bool equal_(const port_t& port, const char* other) {
 } // anonymous namespace
 
 // constructor
-Port::Port(port_t port)
-    : val_(port) {}
+Port::Port(port_t port) : val_(port) {}
 
-Port::Port(const char* port)
-    : val_(parse_(port)) {}
-
-Port::Port(const std::string& port)
-    : val_(parse_(port.c_str())) {}
+Port::Port(std::string_view port) : val_(parse_(port.data())) {}
 
 // assign
 Port& Port::operator=(port_t other) {
@@ -70,13 +66,8 @@ Port& Port::operator=(port_t other) {
     return *this;
 }
 
-Port& Port::operator=(const char* other) {
-    this->val_ = parse_(other);
-    return *this;
-}
-
-Port& Port::operator=(const std::string& other) {
-    this->val_ = parse_(other.c_str());
+Port& Port::operator=(std::string_view other) {
+    this->val_ = parse_(other.data());
     return *this;
 }
 
@@ -84,34 +75,21 @@ bool Port::operator==(port_t other) const {
     return this->val_ == other;
 }
 
+bool Port::operator==(std::string_view other) const {
+    return equal_(this->val_, other.data());
+}
+
 bool Port::operator!=(port_t other) const {
     return this->val_ != other;
 }
 
-bool Port::operator==(const char* other) const {
-    return equal_(this->val_, other);
-}
-
-bool Port::operator!=(const char* other) const {
-    return !equal_(this->val_, other);
-}
-
-bool Port::operator==(const std::string& other) const {
-    return equal_(this->val_, other.c_str());
-}
-
-bool Port::operator!=(const std::string& other) const {
-    return !equal_(this->val_, other.c_str());
-}
-
-// to network byte order
-port_t Port::net_order() const {
-    return ::htons(this->val_);
+bool Port::operator!=(std::string_view other) const {
+    return !equal_(this->val_, other.data());
 }
 
 // getter & setter
-port_t Port::get() const {
-    return this->val_;
+port_t Port::get(bool net_order) const {
+    return net_order ? this->val_ : port_ntoh(this->val_);
 }
 
 void Port::set(port_t val) {

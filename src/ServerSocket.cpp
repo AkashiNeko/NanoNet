@@ -28,11 +28,9 @@
 
 namespace nano {
 
-// null socket factory
-ServerSocket::ServerSocket(bool, bool, bool) : SocketBase() {}
-
 // constructor
-ServerSocket::ServerSocket() : SocketBase(SOCK_STREAM) {}
+ServerSocket::ServerSocket(bool create)
+    : SocketBase(create ? SOCK_STREAM : NULL_SOCKET) {}
 
 ServerSocket::ServerSocket(const Addr& addr, const Port& port)
         : SocketBase(SOCK_STREAM) {
@@ -43,45 +41,27 @@ ServerSocket::ServerSocket(const Addr& addr, const Port& port)
 ServerSocket::ServerSocket(const AddrPort& addrport)
     : ServerSocket(addrport.addr(), addrport.port()) {}
 
-ServerSocket::ServerSocket(const Port& port)
-    : ServerSocket((addr_t)0, port) {}
-
-// bind local
-void ServerSocket::bind(const Addr& addr, const Port& port) {
-    SocketBase::bind(addr, port);
-}
-
-void ServerSocket::bind(const Port& port) {
-    SocketBase::bind((addr_t)0, port);
-}
-
 // listen
 void ServerSocket::listen(int backlog) {
     assert_throw_nanoexcept(socket_ != INVALID_SOCKET, 
-        "[TCP] listen(): Socket is closed");
-    assert_throw_nanoexcept(::listen(socket_, backlog) >= 0,
-        "[TCP] listen(): ", LAST_ERROR);
+        except_name(), "listen(): Socket is closed");
+    assert_throw_nanoexcept(enable_listening(socket_, backlog),
+        except_name(), "listen(): ", LAST_ERROR);
 }
 
 // accept a new connection
 Socket ServerSocket::accept() {
-    Socket socket = Socket::null_socket();
-    socklen_t socklen = sizeof(socket.remote_);
-    int new_fd = ::accept(socket_,
-        reinterpret_cast<sockaddr*>(&socket.remote_), &socklen);
-    assert_throw_nanoexcept(new_fd >= 0, "[TCP] accept(): ", LAST_ERROR);
-    socket.socket_ = new_fd;
-    socket.local_ = this->local_;
-    return socket;
+    Socket socket(false);
+    socket.socket_ = accept_from(socket_,
+        &socket.local_addr_, &socket.local_port_);
+    assert_throw_nanoexcept(socket.socket_ >= 0,
+        except_name(), "accept(): ", LAST_ERROR);
+    return std::move(socket);
 }
 
 // set addr reuse
 bool ServerSocket::reuse_addr(bool enable) {
     return this->set_option(SOL_SOCKET, SO_REUSEADDR, (int)enable);
-}
-
-ServerSocket ServerSocket::null_socket() {
-    return ServerSocket(false, false, false);
 }
 
 } // namespace nano

@@ -28,8 +28,8 @@
 #ifndef NANONET_NET_H
 #define NANONET_NET_H
 
-#if __cplusplus < 201103L
-#error "Nanonet requires at least C++11"
+#if __cplusplus < 201703L
+#error "NanoNet requires at least C++17"
 #endif
 
 #ifdef __linux__ // Linux
@@ -55,6 +55,9 @@
 #endif
 
 #endif
+
+// C++
+#include <vector>
 
 // NanoNet
 #include "except.h"
@@ -89,12 +92,17 @@ port_t port_ntoh(port_t addr) noexcept;
 port_t port_hton(port_t addr) noexcept;
 
 // Converts an ip address to a numeric value and a dotted-decimal string
-addr_t addr_ston(const char* str);
+addr_t addr_ston(std::string_view str);
 std::string addr_ntos(addr_t addr);
 
+bool is_valid_ipv4(std::string_view addr);
+
 // Query the ip address corresponding to the domain name
-size_t dns_query(const char* name, addr_t addrs[], size_t size,
-    int protocol = SockType::UDP_SOCK);
+size_t dns_query(std::string_view name, std::vector<addr_t>& results,
+    int protocol = SOCK_DGRAM);
+
+addr_t dns_query_single(std::string_view name,
+    int protocol = SOCK_DGRAM);
 
 // Create a TCP/UDP socket
 sock_t create_socket(int domain, int type, int protocol = 0) noexcept;
@@ -123,6 +131,12 @@ int send_msg_to(sock_t socket, const char* msg, size_t length,
 
 // Close the socket
 bool close_socket(sock_t socket) noexcept;
+
+// Create an ipv4 sockaddr in object
+void make_sockaddr4(sockaddr_in* sockaddr, addr_t addr = 0, port_t port = 0);
+
+// Gets the address and port bound on the file descriptor
+void get_local_address(sock_t socket, addr_t* addr, port_t* port);
 
 } // namespace nano
 

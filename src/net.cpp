@@ -69,10 +69,10 @@ port_t port_hton(port_t addr) noexcept {
         static_cast<uint16_t>(addr)));
 }
 
-addr_t addr_ston(const char* str) {
+addr_t addr_ston(std::string_view str) {
     addr_t addr;
 #ifdef NANO_LINUX
-    switch (inet_pton(AF_INET, str, &addr))
+    switch (inet_pton(AF_INET, str.data(), &addr))
 #elif NANO_WINDOWS
     switch(InetPtonA(AF_INET, str, &addr))
 #endif
@@ -107,25 +107,58 @@ std::string addr_ntos(addr_t addr) {
     return std::string(result);
 }
 
-size_t dns_query(const char* name, addr_t addrs[], size_t size, int type) {
+bool is_valid_ipv4(std::string_view addr) {
+    int count = 0, value = 0;
+    char prev = '.';
+    for (const char& c : addr) {
+        if (c == '.') {
+            if (prev == '.') return false;
+            if (value > 255 || count == 3)
+                return false;
+            value = 0;
+            ++count;
+        } else if (c >= '0' && c <= '9') {
+            value = value * 10 + (c & 0xF);
+        } else {
+            return false;
+        }
+        prev = c;
+    }
+    return (value <= 255) && (count == 3);
+}
+
+size_t dns_query(std::string_view name,
+        std::vector<addr_t>& results, int protocol) {
     addrinfo info {};
     info.ai_family = AF_INET;
-    info.ai_socktype = type;
-    addrinfo* result = nullptr;
-    int status = getaddrinfo(name, nullptr, &info, &result);
-    addr_t addr = INADDR_ANY;
-    size_t cnt = 0;
+    info.ai_socktype = protocol;
+    addrinfo* addrs = nullptr;
+    int status = getaddrinfo(name.data(), nullptr, &info, &addrs);
+    results.clear();
     if (status == 0) {
-        for (addrinfo* p = result; p && cnt != size; p = p->ai_next) {
+        for (addrinfo* p = addrs; p; p = p->ai_next) {
             if (p->ai_family == AF_INET) {
-                addrs[cnt++] = reinterpret_cast<sockaddr_in*>
-                    (p->ai_addr)->sin_addr.s_addr;
+                results.push_back(reinterpret_cast<sockaddr_in*>
+                    (p->ai_addr)->sin_addr.s_addr);
             }
         }
     }
-    freeaddrinfo(result);
+    freeaddrinfo(addrs);
     assert_throw_nanoexcept(status == 0, gai_strerror(status));
-    return cnt;
+    return results.size();
+}
+
+addr_t dns_query_single(std::string_view name, int protocol) {
+    addrinfo info {};
+    info.ai_family = AF_INET;
+    info.ai_socktype = protocol;
+    addrinfo* addrs = nullptr;
+    int status = getaddrinfo(name.data(), nullptr, &info, &addrs);
+    addr_t result = static_cast<addr_t>(reinterpret_cast<sockaddr_in*>
+        (addrs->ai_addr)->sin_addr.s_addr);
+    freeaddrinfo(addrs);
+    assert_throw_nanoexcept(status == 0, gai_strerror(status));
+    return result;
 }
 
 sock_t create_socket(int domain, int type, int protocol) noexcept {
@@ -226,6 +259,21 @@ bool close_socket(sock_t socket) noexcept {
 #elif NANO_WINDOWS
     return 0 == ::closesocket(socket);
 #endif
+}
+
+void make_sockaddr4(sockaddr_in* sockaddr, addr_t addr, port_t port) {
+    sockaddr->sin_family = AF_INET;
+    sockaddr->sin_addr.s_addr = addr;
+    sockaddr->sin_port = port;
+}
+
+void get_local_address(sock_t socket, addr_t* addr, port_t* port) {
+    sockaddr_in local {};
+    local.sin_family = AF_INET;
+    socklen_t addr_len = sizeof(local);
+    getsockname(socket, reinterpret_cast<sockaddr*>(&local), &addr_len);
+    if (addr) *addr = local.sin_addr.s_addr;
+    if (port) *port = local.sin_port;
 }
 
 } // namespace nano

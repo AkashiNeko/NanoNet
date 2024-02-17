@@ -29,13 +29,35 @@
 namespace nano {
 
 // constructor
-SocketBase::SocketBase() : socket_(INVALID_SOCKET), local_({}) {}
-
-SocketBase::SocketBase(int type) : SocketBase() {
-    local_.sin_family = AF_INET;
+SocketBase::SocketBase(int type) : socket_(INVALID_SOCKET),
+        local_addr_(0U), local_port_(0U) {
+    if (type == NULL_SOCKET) return;
     socket_ = ::socket(AF_INET, type, 0);
     assert_throw_nanoexcept(socket_ != INVALID_SOCKET,
-    "[Socket] Create socket faild: ", LAST_ERROR);
+    except_name(), "Create socket faild: ", LAST_ERROR);
+}
+
+SocketBase::SocketBase(SocketBase&& other) noexcept
+        : socket_(other.socket_),
+        local_addr_(other.local_addr_),
+        local_port_(other.local_port_) {
+    other.socket_ = INVALID_SOCKET;
+    other.local_addr_ = 0U;
+    other.local_port_ = 0U;
+}
+
+SocketBase& SocketBase::operator=(SocketBase&& other) noexcept {
+    // close itself
+    this->close();
+    // copy
+    socket_ = other.socket_;
+    local_addr_ = other.local_addr_;
+    local_port_ = other.local_port_;
+    // clear other
+    other.socket_ = INVALID_SOCKET;
+    other.local_addr_ = 0U;
+    other.local_port_ = 0U;
+    return *this;
 }
 
 // close socket
@@ -54,30 +76,31 @@ bool SocketBase::is_open() const {
     return socket_ != INVALID_SOCKET;
 }
 
-sock_t SocketBase::get_sock() const {
+sock_t SocketBase::get() const {
     return socket_;
 }
 
 void SocketBase::bind(const Addr& addr, const Port& port) {
     assert_throw_nanoexcept(socket_ != INVALID_SOCKET,
-        "[Socket] bind(): Socket is closed");
-    local_.sin_addr.s_addr = addr.net_order();
-    local_.sin_port = port.net_order();
-    int ret = ::bind(socket_,
-        reinterpret_cast<const sockaddr*>(&local_), sizeof(local_));
-    assert_throw_nanoexcept(ret >= 0, "[Socket] bind(): Bind address \'",
-        AddrPort::to_string(addr, port), "\' failed: ", LAST_ERROR);
+        except_name(), "bind(): Socket is closed");
+    assert_throw_nanoexcept(bind_address(socket_, addr.get(), port.get()),
+        except_name(), "bind(): Bind address \'",
+        AddrPort(addr, port).to_string(), "\' failed: ", LAST_ERROR);
+}
+
+void SocketBase::bind(const AddrPort& addrport) {
+    this->bind(addrport.addr(), addrport.port());
 }
 
 // get local
-AddrPort SocketBase::get_local() const {
-    return AddrPort::to_addrport(local_);
+AddrPort SocketBase::local() const {
+    return AddrPort(local_addr_, local_port_);
 }
 
 // blocking
 bool SocketBase::set_blocking(bool blocking) {
     assert_throw_nanoexcept(socket_ != INVALID_SOCKET,
-        "[Socket] set_blocking(): Socket is closed");
+        except_name(), "set_blocking(): Socket is closed");
 #ifdef NANO_LINUX
     int flags = fcntl(socket_, F_GETFL, 0);
     if (flags == -1) return false;
@@ -90,6 +113,10 @@ bool SocketBase::set_blocking(bool blocking) {
     u_long mode = blocking ? 0 : 1;
     return 0 == ioctlsocket(socket_, FIONBIO, &mode);
 #endif
+}
+
+const char* SocketBase::except_name() const noexcept {
+    return "[socket] ";
 }
 
 } // namespace nano

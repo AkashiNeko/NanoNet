@@ -35,21 +35,31 @@ namespace nano {
 class TransSocket : public SocketBase {
 protected:
     // remote address
-    sockaddr_in remote_;
+    addr_t remote_addr_;
+    port_t remote_port_;
 
-    // ctor
-    TransSocket();
+    // ctor & dtor
     TransSocket(int type);
-
-    int send_(const char* msg, size_t length, int type) const;
-    int receive_(char* buf, size_t buf_size, int type) const;
-
-public:
-    // dtor
     virtual ~TransSocket() = default;
 
+    // move
+    TransSocket(TransSocket&& other);
+    TransSocket& operator=(TransSocket&& other);
+
+    // uncopyable
+    TransSocket(const TransSocket&) = delete;
+    TransSocket& operator=(const TransSocket&) = delete;
+
+public:
+
+    AddrPort remote() const;
+
     // connect to remote
-    virtual void connect(const Addr& addr, const Port& port) = 0;
+    void connect(const Addr& addr, const Port& port);
+    int send(const char* msg, size_t length);
+    int receive(char* buf, size_t buf_size);
+
+    bool recv_timeout(long ms) const;
 
 }; // class TransSocket
 

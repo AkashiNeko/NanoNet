@@ -44,22 +44,25 @@ public:
     // ctor & dtor
     AddrPort() = default;
     AddrPort(const Addr& addr, const Port& port);
-    AddrPort(const char* addrport, char separator = ':');
-    AddrPort(const std::string& addrport, char separator = ':');
+    AddrPort(std::string_view addrport, char separator = ':');
+
+    AddrPort(const AddrPort&) = default;
+    AddrPort(AddrPort&&) = default;
     virtual ~AddrPort() = default;
+
+    // assignment
+    AddrPort& operator=(const AddrPort&) = default;
+    AddrPort& operator=(AddrPort&&) = default;
 
     // getter & setter
     Addr addr() const;
-    Port port() const;
     void addr(const Addr& addr);
+
+    Port port() const;
     void port(const Port& port);
 
     // to string
     std::string to_string() const;
-    static std::string to_string(const Addr& addr, const Port& port, char separator = ':');
-
-    // sockaddr_in -> AddrPort
-    static AddrPort to_addrport(sockaddr_in address);
 
 }; // class AddrPort
 

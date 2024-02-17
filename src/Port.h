@@ -45,28 +45,27 @@ public:
 
     // ctor & dtor
     Port(port_t val = 0);
-    Port(const char* port);
-    Port(const std::string& port);
+    Port(std::string_view port);
+
+    Port(const Port&) = default;
+    Port(Port&&) = default;
     virtual ~Port() = default;
 
-    // assign
+    // assignment
     Port& operator=(const Port&) = default;
+    Port& operator=(Port&&) = default;
+
     Port& operator=(port_t other);
-    Port& operator=(const char* other);
-    Port& operator=(const std::string& other);
+    Port& operator=(std::string_view other);
 
     bool operator==(port_t other) const;
-    bool operator!=(port_t other) const;
-    bool operator==(const char* other) const;
-    bool operator!=(const char* other) const;
-    bool operator==(const std::string& other) const;
-    bool operator!=(const std::string& other) const;
+    bool operator==(std::string_view other) const;
 
-    // to network byte order
-    port_t net_order() const;
+    bool operator!=(port_t other) const;
+    bool operator!=(std::string_view other) const;
 
     // getter & setter
-    port_t get() const;
+    port_t get(bool net_order = true) const;
     void set(port_t val);
 
     // to string

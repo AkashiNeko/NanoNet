@@ -33,6 +33,7 @@
 
 // C++
 #include <string>
+#include <string_view>
 
 // NanoNet
 #include "net.h"
@@ -48,39 +49,31 @@ public:
 
     // ctor & dtor
     Addr(addr_t val = 0);
-    Addr(const char* addr);
-    Addr(const std::string& addr);
+    Addr(std::string_view addr);
+
+    Addr(const Addr&) = default;
+    Addr(Addr&&) = default;
     virtual ~Addr() = default;
 
-    // assign
+    // assignment
     Addr& operator=(const Addr&) = default;
+    Addr& operator=(Addr&&) = default;
+
     Addr& operator=(addr_t other);
-    Addr& operator=(const char* other);
-    Addr& operator=(const std::string& other);
+    Addr& operator=(std::string_view addr);
 
     bool operator==(addr_t other) const;
-    bool operator!=(addr_t other) const;
-    bool operator==(const char* other) const;
-    bool operator!=(const char* other) const;
-    bool operator==(const std::string& other) const;
-    bool operator!=(const std::string& other) const;
+    bool operator==(std::string_view other) const;
 
-    // to network byte order
-    addr_t net_order() const;
+    bool operator!=(addr_t other) const;
+    bool operator!=(std::string_view other) const;
 
     // setter & getter
-    addr_t get() const;
+    addr_t get(bool net_order = true) const;
     void set(addr_t val);
 
     // to string
     std::string to_string() const;
-
-    // is valid ipv4 address
-    static bool is_valid(const std::string& addr);
-
-    // DNS query
-    static Addr dns_query(const char* domain, bool use_tcp = true);
-    static Addr dns_query(const std::string& domain, bool use_tcp = true);
 
 };  // class Addr
 

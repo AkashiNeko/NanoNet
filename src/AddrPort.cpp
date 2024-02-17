@@ -47,12 +47,8 @@ inline void parse_(const char* str, char separator, Addr& addr, Port& port) {
 AddrPort::AddrPort(const Addr& addr, const Port& port)
     : addr_(addr), port_(port) {}
 
-AddrPort::AddrPort(const char* addrport, char separator) {
-    parse_(addrport, separator, this->addr_, this->port_);
-}
-
-AddrPort::AddrPort(const std::string& addrport, char separator) {
-    parse_(addrport.c_str(), separator, this->addr_, this->port_);
+AddrPort::AddrPort(std::string_view addrport, char separator) {
+    parse_(addrport.data(), separator, this->addr_, this->port_);
 }
 
 // getter & setter
@@ -60,12 +56,12 @@ void AddrPort::addr(const Addr& addr) {
     this->addr_ = addr;
 }
 
-void AddrPort::port(const Port& port) {
-    this->port_ = port;
-}
-
 Addr AddrPort::addr() const {
     return this->addr_;
+}
+
+void AddrPort::port(const Port& port) {
+    this->port_ = port;
 }
 
 Port AddrPort::port() const {
@@ -75,15 +71,6 @@ Port AddrPort::port() const {
 // to string
 std::string AddrPort::to_string() const {
     return this->addr_.to_string() + ":" + this->port_.to_string();
-}
-
-std::string AddrPort::to_string(const Addr& addr, const Port& port, char separator) {
-    return addr.to_string() + separator + port.to_string();
-}
-
-// sockaddr_in -> AddrPort (static)
-AddrPort AddrPort::to_addrport(sockaddr_in address) {
-    return AddrPort(::ntohl(address.sin_addr.s_addr), ::ntohs(address.sin_port));
 }
 
 } // namespace nano

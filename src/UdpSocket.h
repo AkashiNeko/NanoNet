@@ -34,47 +34,30 @@
 namespace nano {
 
 class UdpSocket : public TransSocket {
-
-    // is connected
-    bool is_connected_;
-
-    // null socket factory
-    explicit UdpSocket(bool, bool, bool);
-
 public:
 
     // ctor & dtor
-    UdpSocket();
+    UdpSocket(bool create = true);
     UdpSocket(const Addr& addr, const Port& port);
-    UdpSocket(const Port& port);
-
     virtual ~UdpSocket() = default;
+
+    // move
+    UdpSocket(UdpSocket&&) = default;
+    UdpSocket& operator=(UdpSocket&&) = default;
+
+    // uncopyable
+    UdpSocket(const UdpSocket&) = delete;
+    UdpSocket& operator=(const UdpSocket&) = delete;
 
     // send to the specified remote
     int send_to(const char* msg, size_t length, const AddrPort& remote);
-    int send_to(const std::string& msg, const AddrPort& remote);
 
     // receive from the specified remote
     int receive_from(char* buf, size_t buf_size, AddrPort& addrport);
     int receive_from(char* buf, size_t buf_size);
 
-    // connect to remote
-    virtual void connect(const Addr& addr, const Port& port) override;
-    void connect(const AddrPort& addrport);
-
-    // send & receive
-    int send(const char* msg, size_t length) const;
-    int send(const std::string& msg) const;
-    int receive(char* buf, size_t buf_size) const;
-
-    // set receive timeout
-    bool recv_timeout(long ms) const;
-
-    // getter
-    AddrPort get_remote() const;
-
-    // null socket factory
-    static UdpSocket null_socket();
+protected:
+    virtual const char* except_name() const noexcept;
 
 }; // class UdpSocket
 

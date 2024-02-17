@@ -42,52 +42,68 @@
 
 #endif
 
+#define NULL_SOCKET (-1)
+
 namespace nano {
 
 class SocketBase {
 protected:
 
-    // Linux   : int
-    // Windows : SOCKET
     sock_t socket_;
 
     // local address
-    sockaddr_in local_;
+    addr_t local_addr_;
+    port_t local_port_;
 
 protected:
 
-    // ctor
-    SocketBase();
+    // ctor & dtor
     SocketBase(int type);
+    virtual ~SocketBase() = default;
+
+    // move
+    SocketBase(SocketBase&& other) noexcept;
+    SocketBase& operator=(SocketBase&& other) noexcept;
+
+    // uncopyable
+    SocketBase(const SocketBase&) = delete;
+    SocketBase& operator=(const SocketBase&) = delete;
 
 public:
-    // dtor
-    virtual ~SocketBase() = default;
 
     // socket
     void close();
     bool is_open() const;
-    sock_t get_sock() const;
+    sock_t get() const;
 
     // bind local
     void bind(const Addr& addr, const Port& port);
+    void bind(const AddrPort& addrport);
 
     // get local
-    AddrPort get_local() const;
+    AddrPort local() const;
 
     // blocking
     bool set_blocking(bool blocking);
 
     // set socket option
     template <class OptionType>
-    inline bool set_option(int level, int optname, const OptionType& optval) const {
-        return ::setsockopt(socket_, level, optname, (const char*)&optval, sizeof(optval)) == 0;
+    inline bool set_option(int level, int optname,
+            const OptionType& optval) const {
+        return ::setsockopt(socket_, level, optname,
+            (const void*)&optval, sizeof(optval)) == 0;
     }
 
     template <class OptionType>
-    inline bool get_option(int level, int optname, OptionType& optval) const {
-        return ::getsockopt(socket_, level, optname, (const char*)&optval, sizeof(optval)) == 0;
+    inline bool get_option(int level, int optname,
+            OptionType& optval) const {
+        socklen_t socklen = sizeof(optval);
+        return ::getsockopt(socket_, level, optname,
+            (void*)&optval, &socklen) == 0;
     }
+
+protected:
+    virtual const char* except_name() const noexcept;
 
 }; // class SocketBase
 

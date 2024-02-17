@@ -38,31 +38,22 @@ class Socket : public TransSocket {
     // server socket
     friend class ServerSocket;
 
-    // null socket factory
-    explicit Socket(bool, bool, bool);
-
 public:
 
     // ctor & dtor
-    Socket();
+    Socket(bool create = true);
     virtual ~Socket() = default;
 
-    // connect to remote
-    virtual void connect(const Addr& addr, const Port& port) override;
-    void connect(const AddrPort& addrport);
+    // move
+    Socket(Socket&&) = default;
+    Socket& operator=(Socket&&) = default;
 
-    // send & receive
-    int send(const char* msg, size_t length) const;
-    int send(const std::string& msg) const;
-    int receive(char* buf, size_t buf_size) const;
+    // uncopyable
+    Socket(const Socket&) = delete;
+    Socket& operator=(const Socket&) = delete;
 
-    // set receive timeout
-    bool recv_timeout(long ms) const;
-
-    // get remote
-    AddrPort get_remote() const;
-
-    static Socket null_socket();
+protected:
+    virtual const char* except_name() const noexcept;
 
 }; // class Socket
 

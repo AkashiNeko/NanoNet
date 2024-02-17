@@ -32,11 +32,16 @@ namespace {
 
 // convert C string to addr_t
 inline addr_t parse_(const char* addr) {
-    if (Addr::is_valid(addr)) {
-        return ::ntohl(inet_addr(addr));
+    if (is_valid_ipv4(addr)) {
+        return inet_addr(addr);
     } else {
-        return Addr::dns_query(addr).get();
+        try {
+            return dns_query_single(addr);
+        } catch (const NanoExcept& ne) {
+            throw_except("[Addr] ", ne.what());
+        }
     }
+    return 0; // never
 }
 
 // compare addr_t and C string
@@ -53,9 +58,7 @@ inline bool equal_(const addr_t& addr, const char* other) {
 // constructor
 Addr::Addr(addr_t val) : val_(val) {}
 
-Addr::Addr(const char* addr) : val_(parse_(addr)) {}
-
-Addr::Addr(const std::string& addr) : Addr(addr.c_str()) {}
+Addr::Addr(std::string_view addr) : val_(parse_(addr.data())) {}
 
 // assign
 Addr& Addr::operator=(addr_t other) {
@@ -63,13 +66,8 @@ Addr& Addr::operator=(addr_t other) {
     return *this;
 }
 
-Addr& Addr::operator=(const char* other) {
-    this->val_ = parse_(other);
-    return *this;
-}
-
-Addr& Addr::operator=(const std::string& other) {
-    this->val_ = parse_(other.c_str());
+Addr& Addr::operator=(std::string_view addr) {
+    this->val_ = parse_(addr.data());
     return *this;
 }
 
@@ -77,34 +75,21 @@ bool Addr::operator==(addr_t other) const {
     return this->val_ == other;
 }
 
+bool Addr::operator==(std::string_view other) const {
+    return equal_(this->val_, other.data());
+}
+
 bool Addr::operator!=(addr_t other) const {
     return this->val_ != other;
 }
 
-bool Addr::operator==(const char* other) const {
-    return equal_(this->val_, other);
-}
-
-bool Addr::operator!=(const char* other) const {
-    return !equal_(this->val_, other);
-}
-
-bool Addr::operator==(const std::string& other) const {
-    return equal_(this->val_, other.c_str());
-}
-
-bool Addr::operator!=(const std::string& other) const {
-    return !equal_(this->val_, other.c_str());
-}
-
-// to network byte order
-addr_t Addr::net_order() const {
-    return ::htonl(this->val_);
+bool Addr::operator!=(std::string_view other) const {
+    return !equal_(this->val_, other.data());
 }
 
 // setter & getter
-addr_t Addr::get() const {
-    return this->val_;
+addr_t Addr::get(bool net_order) const {
+    return net_order ? this->val_ : addr_ntoh(this->val_);
 }
 
 void Addr::set(addr_t val) {
@@ -116,54 +101,6 @@ std::string Addr::to_string() const {
     uint32_t val = static_cast<uint32_t>(::htonl(this->val_));
     return std::to_string(val & 0xFF) + '.' + std::to_string((val >> 8) & 0xFF) + '.'
         + std::to_string((val >> 16) & 0xFF) + '.' + std::to_string((val >> 24) & 0xFF);
-}
-
-// is valid ipv4 address
-bool Addr::is_valid(const std::string& addr) {
-    int count = 0, value = 0;
-    char prev = '.';
-    for (const char& c : addr) {
-        if (c == '.') {
-            if (prev == '.') return false;
-            if (value > 255 || count == 3)
-                return false;
-            value = 0;
-            ++count;
-        } else if (c >= '0' && c <= '9') {
-            value = value * 10 + (c & 0xF);
-        } else {
-            return false;
-        }
-        prev = c;
-    }
-    return (value <= 255) && (count == 3);
-}
-
-// DNS query
-Addr Addr::dns_query(const char* domain, bool use_tcp) {
-    addrinfo hints = {};
-    // use tcp or udp?
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = use_tcp ? SOCK_STREAM : SOCK_DGRAM;
-    addrinfo* result;
-    int status = getaddrinfo(domain, NULL, &hints, &result);
-    assert_throw_nanoexcept(status == 0,
-        "[Addr] dns_query(): Failed to get the address named \'",
-        domain, "\'. ", gai_strerror(status));
-    addr_t addr = INADDR_ANY;
-    for (addrinfo* p = result; p; p = p->ai_next) {
-        if (p->ai_family == AF_INET) {
-            sockaddr_in* ipv4 = (sockaddr_in*)p->ai_addr;
-            addr = ipv4->sin_addr.s_addr;
-            break;
-        }
-    }
-    freeaddrinfo(result);
-    return Addr(::htonl(addr));
-}
-
-Addr Addr::dns_query(const std::string& domain, bool use_tcp) {
-    return dns_query(domain.c_str(), use_tcp);
 }
 
 }  // namespace nano

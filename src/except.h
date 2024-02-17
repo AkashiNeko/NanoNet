@@ -28,6 +28,10 @@
 #ifndef NANONET_EXCEPT_H
 #define NANONET_EXCEPT_H
 
+#if __cplusplus < 201703L
+#error "NanoNet requires at least C++17"
+#endif
+
 // get last error
 #ifdef __linux__
 
@@ -58,37 +62,12 @@ public:
 };
 
 // throw exceptions
-#if __cplusplus >= 201703L
-
 template <class ExceptType = NanoExcept, class ...Args>
 inline void throw_except(const Args&... args) {
     std::string s;
     ((s += args), ...);
     throw ExceptType(std::move(s));
 }
-
-#else // 201103L <= __cplusplus < 201703L
-
-namespace {
-
-inline void append_string_(std::string&) {}
-
-template <class T, class ...Args>
-inline void append_string_(std::string& s, const T& arg, const Args&... args) {
-    s += arg;
-    append_string_(s, args...);
-}
-
-} // anonymous namespace
-
-template <class ExceptType = NanoExcept, class ...Args>
-inline void throw_except(const Args&... args) {
-    std::string s;
-    append_string_(s, args...);
-    throw ExceptType(std::move(s));
-}
-
-#endif // __cplusplus
 
 #define assert_throw_nanoexcept(condition, ...) \
 (static_cast<bool>(condition) ? void(0)         \

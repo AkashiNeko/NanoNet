@@ -34,22 +34,21 @@
 namespace nano {
 
 class ServerSocket : public SocketBase {
-
-    // null socket factory
-    explicit ServerSocket(bool, bool, bool);
-
 public:
 
     // ctor & dtor
-    ServerSocket();
+    ServerSocket(bool create = true);
     ServerSocket(const Addr& addr, const Port& port);
     ServerSocket(const AddrPort& addrport);
-    ServerSocket(const Port& port);
     virtual ~ServerSocket() = default;
 
-    // bind local
-    void bind(const Addr& addr, const Port& port);
-    void bind(const Port& port);
+    // move
+    ServerSocket(ServerSocket&&) = default;
+    ServerSocket& operator=(ServerSocket&&) = default;
+
+    // uncopyable
+    ServerSocket(const ServerSocket&) = delete;
+    ServerSocket& operator=(const ServerSocket&) = delete;
 
     // listen
     void listen(int backlog = 20);
@@ -59,8 +58,6 @@ public:
 
     // set address reuse
     bool reuse_addr(bool reuseAddr);
-
-    static ServerSocket null_socket();
 
 }; // class ServerSocket
 
