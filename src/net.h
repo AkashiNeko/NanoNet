@@ -34,7 +34,7 @@
 
 #ifdef __linux__ // Linux
 
-#define NANO_LINUX
+#define NANO_LINUX 1
 #define INVALID_SOCKET (-1)
 
 #include <arpa/inet.h>
@@ -44,11 +44,17 @@
 
 #elif _WIN32 // Windows
 
-#define NANO_WINDOWS
+#define NANO_WINDOWS 1
+
+#if _WIN32_WINNT < 0x0600
+#undef _WIN32_WINNT
+#define _WIN32_WINNT 0x0600
+#endif
 
 #include <WinSock2.h>
-#include <ws2ipdef.h>
-#include <ws2tcpip.h>
+#include <Ws2ipdef.h>
+#include <Ws2tcpip.h>
+#include <Ws2def.h>
 
 #ifdef _MSC_VER // MSVC
 #pragma comment(lib, "ws2_32.lib")
@@ -58,6 +64,7 @@
 
 // C++
 #include <vector>
+#include <string>
 
 // NanoNet
 #include "except.h"
@@ -82,7 +89,6 @@ enum Domain {
 enum SockType {
     TCP_SOCK = SOCK_STREAM,
     UDP_SOCK = SOCK_DGRAM,
-    NONBLOCK = SOCK_NONBLOCK,
 }; // protocol type
 
 // Convert network byte order and host byte order

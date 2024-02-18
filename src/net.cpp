@@ -71,11 +71,7 @@ port_t port_hton(port_t addr) noexcept {
 
 addr_t addr_ston(std::string_view str) {
     addr_t addr;
-#ifdef NANO_LINUX
     switch (inet_pton(AF_INET, str.data(), &addr))
-#elif NANO_WINDOWS
-    switch(InetPtonA(AF_INET, str, &addr))
-#endif
     {
     case 1:  // success
         return addr;
@@ -99,12 +95,12 @@ std::string addr_ntos(addr_t addr) {
     sockaddr_in sa {};
     sa.sin_family = AF_INET;
     sa.sin_addr.s_addr = addr;
-    DWORD length = sizeof(result);
+    DWORD length = sizeof(buf);
     assert_throw_nanoexcept(0 == WSAAddressToStringA(
-        static_cast<LPSOCKADDR>(&sa), sizeof(sa),
-        NULL, result, &length), LAST_ERROR);
+        reinterpret_cast<LPSOCKADDR>(&sa), sizeof(sa),
+        NULL, buf, &length), LAST_ERROR);
 #endif
-    return std::string(result);
+    return std::string(buf);
 }
 
 bool is_valid_ipv4(std::string_view addr) noexcept {

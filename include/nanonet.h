@@ -39,7 +39,7 @@
 // platform
 #ifdef __linux__ // Linux
 
-#define NANO_LINUX
+#define NANO_LINUX 1
 #define INVALID_SOCKET (-1)
 
 #include <arpa/inet.h>
@@ -48,7 +48,7 @@
 
 #elif _WIN32 // Windows
 
-#define NANO_WINDOWS
+#define NANO_WINDOWS 1
 
 #include <WinSock2.h>
 #include <ws2ipdef.h>
@@ -299,20 +299,28 @@ public:
     // blocking
     bool set_blocking(bool blocking);
 
-    // set socket option
-    template <class OptionType>
-    inline bool set_option(int level, int optname,
-            const OptionType& optval) const {
-        return ::setsockopt(socket_, level, optname,
-            (const void*)&optval, sizeof(optval)) == 0;
+    // socket option
+    template <class Ty>
+    inline bool set_option(int level, int optname, const Ty& optval) const {
+#ifdef NANO_LINUX
+        using const_arg_t = const void*;
+#elif NANO_WINDOWS
+        using const_arg_t = const char*;
+#endif
+        return 0 == ::setsockopt(socket_, level, optname,
+            (const_arg_t)&optval, sizeof(optval));
     }
 
-    template <class OptionType>
-    inline bool get_option(int level, int optname,
-            OptionType& optval) const {
+    template <class Ty>
+    inline bool get_option(int level, int optname, Ty& optval) const {
         socklen_t socklen = sizeof(optval);
+#ifdef NANO_LINUX
+        using arg_t = void*;
+#elif NANO_WINDOWS
+        using arg_t = char*;
+#endif
         return ::getsockopt(socket_, level, optname,
-            (void*)&optval, &socklen) == 0;
+            (arg_t)&optval, &socklen) == 0;
     }
 
 protected:
