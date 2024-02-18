@@ -53,7 +53,7 @@ public:
     Socket& operator=(const Socket&) = delete;
 
 protected:
-    virtual const char* except_name() const noexcept;
+    virtual const char* except_name() const noexcept override;
 
 }; // class Socket
 

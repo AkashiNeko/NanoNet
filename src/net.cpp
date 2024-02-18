@@ -107,7 +107,7 @@ std::string addr_ntos(addr_t addr) {
     return std::string(result);
 }
 
-bool is_valid_ipv4(std::string_view addr) {
+bool is_valid_ipv4(std::string_view addr) noexcept {
     int count = 0, value = 0;
     char prev = '.';
     for (const char& c : addr) {
@@ -261,13 +261,13 @@ bool close_socket(sock_t socket) noexcept {
 #endif
 }
 
-void make_sockaddr4(sockaddr_in* sockaddr, addr_t addr, port_t port) {
+void make_sockaddr4(sockaddr_in* sockaddr, addr_t addr, port_t port) noexcept {
     sockaddr->sin_family = AF_INET;
     sockaddr->sin_addr.s_addr = addr;
     sockaddr->sin_port = port;
 }
 
-void get_local_address(sock_t socket, addr_t* addr, port_t* port) {
+void get_local_address(sock_t socket, addr_t* addr, port_t* port) noexcept {
     sockaddr_in local {};
     local.sin_family = AF_INET;
     socklen_t addr_len = sizeof(local);

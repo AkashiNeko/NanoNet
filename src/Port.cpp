@@ -56,13 +56,13 @@ inline bool equal_(const port_t& port, const char* other) {
 } // anonymous namespace
 
 // constructor
-Port::Port(port_t port) : val_(port_hton(port)) {}
+Port::Port(port_t port) noexcept : val_(port_hton(port)) {}
 
 Port::Port(std::string_view port) : val_(parse_(port.data())) {}
 
 // assignment
-Port& Port::operator=(port_t other) {
-    this->val_ = other;
+Port& Port::operator=(port_t other) noexcept {
+    this->val_ = port_hton(other);
     return *this;
 }
 
@@ -71,33 +71,41 @@ Port& Port::operator=(std::string_view other) {
     return *this;
 }
 
-bool Port::operator==(port_t other) const {
-    return this->val_ == other;
+bool Port::operator==(port_t other) const noexcept {
+    return this->val_ == port_hton(other);
 }
 
 bool Port::operator==(std::string_view other) const {
-    return equal_(this->val_, other.data());
+    try {
+        return val_ == parse_(other.data());
+    } catch (...) {
+        return false;
+    }
 }
 
-bool Port::operator!=(port_t other) const {
-    return this->val_ != other;
+bool Port::operator!=(port_t other) const noexcept {
+    return this->val_ != port_hton(other);
 }
 
 bool Port::operator!=(std::string_view other) const {
-    return !equal_(this->val_, other.data());
+    try {
+        return val_ != parse_(other.data());
+    } catch (...) {
+        return true;
+    }
 }
 
 // getter & setter
-port_t Port::get(bool net_order) const {
+port_t Port::get(bool net_order) const noexcept {
     return net_order ? this->val_ : port_ntoh(this->val_);
 }
 
-void Port::set(port_t val) {
-    this->val_ = val;
+void Port::set(port_t val) noexcept {
+    this->val_ = port_hton(val);
 }
 
 // to string
-std::string Port::to_string() const {
+std::string Port::to_string() const noexcept {
     return std::to_string(port_ntoh(this->val_));
 }
 

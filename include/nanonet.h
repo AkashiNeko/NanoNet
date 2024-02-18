@@ -106,7 +106,7 @@ port_t port_hton(port_t addr) noexcept;
 addr_t addr_ston(std::string_view str);
 std::string addr_ntos(addr_t addr);
 
-bool is_valid_ipv4(std::string_view addr);
+bool is_valid_ipv4(std::string_view addr) noexcept;
 
 // Query the ip address corresponding to the domain name
 size_t dns_query(std::string_view name, std::vector<addr_t>& results,
@@ -144,23 +144,24 @@ int send_msg_to(sock_t socket, const char* msg, size_t length,
 bool close_socket(sock_t socket) noexcept;
 
 // Create an ipv4 sockaddr in object
-void make_sockaddr4(sockaddr_in* sockaddr, addr_t addr = 0, port_t port = 0);
+void make_sockaddr4(sockaddr_in* sockaddr,
+    addr_t addr = 0, port_t port = 0) noexcept;
 
 // Gets the address and port bound on the file descriptor
-void get_local_address(sock_t socket, addr_t* addr, port_t* port);
+void get_local_address(sock_t socket, addr_t* addr, port_t* port) noexcept;
 
 
 // Classes
 
 class Addr {
 
-    // host byte order addr (ipv4)
+    // net byte order addr (ipv4)
     addr_t val_;
 
 public:
 
     // ctor & dtor
-    Addr(addr_t val = 0);
+    Addr(addr_t val = 0) noexcept;
     Addr(std::string_view addr);
 
     Addr(const Addr&) = default;
@@ -171,33 +172,33 @@ public:
     Addr& operator=(const Addr&) = default;
     Addr& operator=(Addr&&) = default;
 
-    Addr& operator=(addr_t other);
+    Addr& operator=(addr_t other) noexcept;
     Addr& operator=(std::string_view addr);
 
-    bool operator==(addr_t other) const;
+    bool operator==(addr_t other) const noexcept;
     bool operator==(std::string_view other) const;
 
-    bool operator!=(addr_t other) const;
+    bool operator!=(addr_t other) const noexcept;
     bool operator!=(std::string_view other) const;
 
     // setter & getter
-    addr_t get(bool net_order = true) const;
-    void set(addr_t val);
+    addr_t get(bool net_order = true) const noexcept;
+    void set(addr_t val) noexcept;
 
     // to string
-    std::string to_string() const;
+    std::string to_string() const noexcept;
 
 };  // class Addr
 
 class Port {
 
-    // host byte order port
+    // net byte order port
     port_t val_;
 
 public:
 
     // ctor & dtor
-    Port(port_t val = 0);
+    Port(port_t val = 0) noexcept;
     Port(std::string_view port);
 
     Port(const Port&) = default;
@@ -208,21 +209,21 @@ public:
     Port& operator=(const Port&) = default;
     Port& operator=(Port&&) = default;
 
-    Port& operator=(port_t other);
+    Port& operator=(port_t other) noexcept;
     Port& operator=(std::string_view other);
 
-    bool operator==(port_t other) const;
+    bool operator==(port_t other) const noexcept;
     bool operator==(std::string_view other) const;
 
-    bool operator!=(port_t other) const;
+    bool operator!=(port_t other) const noexcept;
     bool operator!=(std::string_view other) const;
 
     // getter & setter
-    port_t get(bool net_order = true) const;
-    void set(port_t val);
+    port_t get(bool net_order = true) const noexcept;
+    void set(port_t val) noexcept;
 
     // to string
-    std::string to_string() const;
+    std::string to_string() const noexcept;
 
 }; // class Port
 
@@ -235,7 +236,7 @@ public:
 
     // ctor & dtor
     AddrPort() = default;
-    AddrPort(const Addr& addr, const Port& port);
+    AddrPort(const Addr& addr, const Port& port) noexcept;
     AddrPort(std::string_view addrport, char separator = ':');
 
     AddrPort(const AddrPort&) = default;
@@ -247,14 +248,14 @@ public:
     AddrPort& operator=(AddrPort&&) = default;
 
     // getter & setter
-    Addr addr() const;
-    void addr(const Addr& addr);
+    Addr addr() const noexcept;
+    void addr(const Addr& addr) noexcept;
 
-    Port port() const;
-    void port(const Port& port);
+    Port port() const noexcept;
+    void port(const Port& port) noexcept;
 
     // to string
-    std::string to_string() const;
+    std::string to_string(char separator = ':') const noexcept;
 
 }; // class AddrPort
 
@@ -284,16 +285,16 @@ protected:
 public:
 
     // socket
-    void close();
-    bool is_open() const;
-    sock_t get() const;
+    void close() noexcept;
+    bool is_open() const noexcept;
+    sock_t get() const noexcept;
 
     // bind local
     void bind(const Addr& addr, const Port& port);
     void bind(const AddrPort& addrport);
 
     // get local
-    AddrPort local() const;
+    AddrPort local() const noexcept;
 
     // blocking
     bool set_blocking(bool blocking);
@@ -330,8 +331,8 @@ protected:
     virtual ~TransSocket() = default;
 
     // move
-    TransSocket(TransSocket&& other);
-    TransSocket& operator=(TransSocket&& other);
+    TransSocket(TransSocket&& other) noexcept;
+    TransSocket& operator=(TransSocket&& other) noexcept;
 
     // uncopyable
     TransSocket(const TransSocket&) = delete;
@@ -339,14 +340,14 @@ protected:
 
 public:
 
-    AddrPort remote() const;
+    AddrPort remote() const noexcept;
 
     // connect to remote
     void connect(const Addr& addr, const Port& port);
     int send(const char* msg, size_t length);
     int receive(char* buf, size_t buf_size);
 
-    bool recv_timeout(long ms) const;
+    bool recv_timeout(long ms) const noexcept;
 
 }; // class TransSocket
 
@@ -370,7 +371,7 @@ public:
     Socket& operator=(const Socket&) = delete;
 
 protected:
-    virtual const char* except_name() const noexcept;
+    virtual const char* except_name() const noexcept override;
 
 }; // class Socket
 
@@ -398,7 +399,7 @@ public:
     int receive_from(char* buf, size_t buf_size);
 
 protected:
-    virtual const char* except_name() const noexcept;
+    virtual const char* except_name() const noexcept override;
 
 }; // class UdpSocket
 
@@ -426,7 +427,10 @@ public:
     Socket accept();
 
     // set address reuse
-    bool reuse_addr(bool reuseAddr);
+    bool reuse_addr(bool reuseAddr) noexcept;
+
+protected:
+    virtual const char* except_name() const noexcept override;
 
 }; // class ServerSocket
 

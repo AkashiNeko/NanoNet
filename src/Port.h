@@ -38,13 +38,13 @@ namespace nano {
 
 class Port {
 
-    // host byte order port
+    // net byte order port
     port_t val_;
 
 public:
 
     // ctor & dtor
-    Port(port_t val = 0);
+    Port(port_t val = 0) noexcept;
     Port(std::string_view port);
 
     Port(const Port&) = default;
@@ -55,21 +55,21 @@ public:
     Port& operator=(const Port&) = default;
     Port& operator=(Port&&) = default;
 
-    Port& operator=(port_t other);
+    Port& operator=(port_t other) noexcept;
     Port& operator=(std::string_view other);
 
-    bool operator==(port_t other) const;
+    bool operator==(port_t other) const noexcept;
     bool operator==(std::string_view other) const;
 
-    bool operator!=(port_t other) const;
+    bool operator!=(port_t other) const noexcept;
     bool operator!=(std::string_view other) const;
 
     // getter & setter
-    port_t get(bool net_order = true) const;
-    void set(port_t val);
+    port_t get(bool net_order = true) const noexcept;
+    void set(port_t val) noexcept;
 
     // to string
-    std::string to_string() const;
+    std::string to_string() const noexcept;
 
 }; // class Port
 

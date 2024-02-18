@@ -44,25 +44,16 @@ inline addr_t parse_(const char* addr) {
     return 0; // never
 }
 
-// compare addr_t and C string
-inline bool equal_(const addr_t& addr, const char* other) {
-    try {
-        return addr == parse_(other);
-    } catch (...) {
-        return false;
-    }
-}
-
 } // anonymous namespace
 
 // constructor
-Addr::Addr(addr_t val) : val_(addr_hton(val)) {}
+Addr::Addr(addr_t val) noexcept : val_(addr_hton(val)) {}
 
 Addr::Addr(std::string_view addr) : val_(parse_(addr.data())) {}
 
 // assign
-Addr& Addr::operator=(addr_t other) {
-    this->val_ = other;
+Addr& Addr::operator=(addr_t other) noexcept {
+    this->val_ = addr_hton(other);
     return *this;
 }
 
@@ -71,34 +62,47 @@ Addr& Addr::operator=(std::string_view addr) {
     return *this;
 }
 
-bool Addr::operator==(addr_t other) const {
-    return this->val_ == other;
+bool Addr::operator==(addr_t other) const noexcept {
+    return this->val_ == addr_hton(other);
 }
 
 bool Addr::operator==(std::string_view other) const {
-    return equal_(this->val_, other.data());
+    try {
+        return val_ == parse_(other.data());
+    } catch (...) {
+        return false;
+    }
 }
 
-bool Addr::operator!=(addr_t other) const {
-    return this->val_ != other;
+bool Addr::operator!=(addr_t other) const noexcept {
+    return this->val_ != addr_hton(other);
 }
 
 bool Addr::operator!=(std::string_view other) const {
-    return !equal_(this->val_, other.data());
+    try {
+        return val_ != parse_(other.data());
+    } catch (...) {
+        return true;
+    }
 }
 
 // setter & getter
-addr_t Addr::get(bool net_order) const {
+addr_t Addr::get(bool net_order) const noexcept {
     return net_order ? this->val_ : addr_ntoh(this->val_);
 }
 
-void Addr::set(addr_t val) {
-    this->val_ = val;
+void Addr::set(addr_t val) noexcept {
+    this->val_ = addr_hton(val);
 }
 
 // to string
-std::string Addr::to_string() const {
-    return addr_ntos(this->val_);
+std::string Addr::to_string() const noexcept {
+    try {
+        return addr_ntos(this->val_);
+    } catch (const NanoExcept& e) {
+        throw_except("[Addr] ", e.what());
+    }
+    return std::string(); // never
 }
 
 }  // namespace nano

@@ -31,7 +31,7 @@ namespace nano {
 TransSocket::TransSocket(int type) : SocketBase(type),
     remote_addr_(0U), remote_port_(0U) {}
 
-TransSocket::TransSocket(TransSocket&& other)
+TransSocket::TransSocket(TransSocket&& other) noexcept
         : SocketBase(std::move(other)),
         remote_addr_(other.remote_addr_),
         remote_port_(other.remote_port_) {
@@ -39,7 +39,7 @@ TransSocket::TransSocket(TransSocket&& other)
     other.remote_port_ = 0U;
 }
 
-TransSocket& TransSocket::operator=(TransSocket&& other) {
+TransSocket& TransSocket::operator=(TransSocket&& other) noexcept {
     SocketBase::operator=(std::move(other));
     // copy
     remote_addr_ = other.remote_addr_;
@@ -50,7 +50,7 @@ TransSocket& TransSocket::operator=(TransSocket&& other) {
     return *this;
 }
 
-AddrPort TransSocket::remote() const {
+AddrPort TransSocket::remote() const noexcept {
     return AddrPort(addr_ntoh(remote_addr_), port_ntoh(remote_port_));
 }
 
@@ -85,7 +85,7 @@ int TransSocket::receive(char* buf, size_t buf_size) {
     return 0; // never
 }
 
-bool TransSocket::recv_timeout(long ms) const {
+bool TransSocket::recv_timeout(long ms) const noexcept {
     timeval tm = {ms / 1000, ms % 1000 * 1000};
     return set_option(SOL_SOCKET, SO_RCVTIMEO, tm);
 }

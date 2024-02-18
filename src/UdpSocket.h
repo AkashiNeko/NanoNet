@@ -57,7 +57,7 @@ public:
     int receive_from(char* buf, size_t buf_size);
 
 protected:
-    virtual const char* except_name() const noexcept;
+    virtual const char* except_name() const noexcept override;
 
 }; // class UdpSocket
 

@@ -95,7 +95,7 @@ port_t port_hton(port_t addr) noexcept;
 addr_t addr_ston(std::string_view str);
 std::string addr_ntos(addr_t addr);
 
-bool is_valid_ipv4(std::string_view addr);
+bool is_valid_ipv4(std::string_view addr) noexcept;
 
 // Query the ip address corresponding to the domain name
 size_t dns_query(std::string_view name, std::vector<addr_t>& results,
@@ -133,10 +133,11 @@ int send_msg_to(sock_t socket, const char* msg, size_t length,
 bool close_socket(sock_t socket) noexcept;
 
 // Create an ipv4 sockaddr in object
-void make_sockaddr4(sockaddr_in* sockaddr, addr_t addr = 0, port_t port = 0);
+void make_sockaddr4(sockaddr_in* sockaddr,
+    addr_t addr = 0, port_t port = 0) noexcept;
 
 // Gets the address and port bound on the file descriptor
-void get_local_address(sock_t socket, addr_t* addr, port_t* port);
+void get_local_address(sock_t socket, addr_t* addr, port_t* port) noexcept;
 
 } // namespace nano
 

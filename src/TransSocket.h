@@ -43,8 +43,8 @@ protected:
     virtual ~TransSocket() = default;
 
     // move
-    TransSocket(TransSocket&& other);
-    TransSocket& operator=(TransSocket&& other);
+    TransSocket(TransSocket&& other) noexcept;
+    TransSocket& operator=(TransSocket&& other) noexcept;
 
     // uncopyable
     TransSocket(const TransSocket&) = delete;
@@ -52,14 +52,14 @@ protected:
 
 public:
 
-    AddrPort remote() const;
+    AddrPort remote() const noexcept;
 
     // connect to remote
     void connect(const Addr& addr, const Port& port);
     int send(const char* msg, size_t length);
     int receive(char* buf, size_t buf_size);
 
-    bool recv_timeout(long ms) const;
+    bool recv_timeout(long ms) const noexcept;
 
 }; // class TransSocket
 

@@ -42,13 +42,13 @@ namespace nano {
 
 class Addr {
 
-    // host byte order addr (ipv4)
+    // net byte order addr (ipv4)
     addr_t val_;
 
 public:
 
     // ctor & dtor
-    Addr(addr_t val = 0);
+    Addr(addr_t val = 0) noexcept;
     Addr(std::string_view addr);
 
     Addr(const Addr&) = default;
@@ -59,21 +59,21 @@ public:
     Addr& operator=(const Addr&) = default;
     Addr& operator=(Addr&&) = default;
 
-    Addr& operator=(addr_t other);
+    Addr& operator=(addr_t other) noexcept;
     Addr& operator=(std::string_view addr);
 
-    bool operator==(addr_t other) const;
+    bool operator==(addr_t other) const noexcept;
     bool operator==(std::string_view other) const;
 
-    bool operator!=(addr_t other) const;
+    bool operator!=(addr_t other) const noexcept;
     bool operator!=(std::string_view other) const;
 
     // setter & getter
-    addr_t get(bool net_order = true) const;
-    void set(addr_t val);
+    addr_t get(bool net_order = true) const noexcept;
+    void set(addr_t val) noexcept;
 
     // to string
-    std::string to_string() const;
+    std::string to_string() const noexcept;
 
 };  // class Addr
 

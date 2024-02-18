@@ -60,9 +60,13 @@ Socket ServerSocket::accept() {
     return std::move(ret);
 }
 
-// set addr reuse
-bool ServerSocket::reuse_addr(bool enable) {
+// set address reuse
+bool ServerSocket::reuse_addr(bool enable) noexcept {
     return this->set_option(SOL_SOCKET, SO_REUSEADDR, (int)enable);
+}
+
+const char* ServerSocket::except_name() const noexcept {
+    return "[TCP] ";
 }
 
 } // namespace nano

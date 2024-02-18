@@ -57,7 +57,10 @@ public:
     Socket accept();
 
     // set address reuse
-    bool reuse_addr(bool reuseAddr);
+    bool reuse_addr(bool reuseAddr) noexcept;
+
+protected:
+    virtual const char* except_name() const noexcept override;
 
 }; // class ServerSocket
 

@@ -43,7 +43,7 @@ public:
 
     // ctor & dtor
     AddrPort() = default;
-    AddrPort(const Addr& addr, const Port& port);
+    AddrPort(const Addr& addr, const Port& port) noexcept;
     AddrPort(std::string_view addrport, char separator = ':');
 
     AddrPort(const AddrPort&) = default;
@@ -55,14 +55,14 @@ public:
     AddrPort& operator=(AddrPort&&) = default;
 
     // getter & setter
-    Addr addr() const;
-    void addr(const Addr& addr);
+    Addr addr() const noexcept;
+    void addr(const Addr& addr) noexcept;
 
-    Port port() const;
-    void port(const Port& port);
+    Port port() const noexcept;
+    void port(const Port& port) noexcept;
 
     // to string
-    std::string to_string() const;
+    std::string to_string(char separator = ':') const noexcept;
 
 }; // class AddrPort
 

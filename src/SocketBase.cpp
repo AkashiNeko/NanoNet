@@ -61,7 +61,7 @@ SocketBase& SocketBase::operator=(SocketBase&& other) noexcept {
 }
 
 // close socket
-void SocketBase::close() {
+void SocketBase::close() noexcept {
     if (socket_ != INVALID_SOCKET) {
 #ifdef NANO_LINUX
         ::close(socket_);
@@ -72,11 +72,11 @@ void SocketBase::close() {
     }
 }
 
-bool SocketBase::is_open() const {
+bool SocketBase::is_open() const noexcept {
     return socket_ != INVALID_SOCKET;
 }
 
-sock_t SocketBase::get() const {
+sock_t SocketBase::get() const noexcept {
     return socket_;
 }
 
@@ -93,7 +93,7 @@ void SocketBase::bind(const AddrPort& addrport) {
 }
 
 // get local
-AddrPort SocketBase::local() const {
+AddrPort SocketBase::local() const noexcept {
     return AddrPort(addr_ntoh(local_addr_), port_ntoh(local_port_));
 }
 
@@ -104,10 +104,8 @@ bool SocketBase::set_blocking(bool blocking) {
 #ifdef NANO_LINUX
     int flags = fcntl(socket_, F_GETFL, 0);
     if (flags == -1) return false;
-    if (blocking)
-        flags &= ~O_NONBLOCK;
-    else
-        flags |= O_NONBLOCK;
+    if (blocking) flags &= ~O_NONBLOCK;
+    else flags |= O_NONBLOCK;
     return 0 == fcntl(socket_, F_SETFL, flags);
 #elif NANO_WINDOWS
     u_long mode = blocking ? 0 : 1;

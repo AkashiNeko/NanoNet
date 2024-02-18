@@ -72,16 +72,16 @@ protected:
 public:
 
     // socket
-    void close();
-    bool is_open() const;
-    sock_t get() const;
+    void close() noexcept;
+    bool is_open() const noexcept;
+    sock_t get() const noexcept;
 
     // bind local
     void bind(const Addr& addr, const Port& port);
     void bind(const AddrPort& addrport);
 
     // get local
-    AddrPort local() const;
+    AddrPort local() const noexcept;
 
     // blocking
     bool set_blocking(bool blocking);

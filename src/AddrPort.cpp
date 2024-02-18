@@ -44,7 +44,7 @@ inline void parse_(const char* str, char separator, Addr& addr, Port& port) {
 } // anonymous namespace
 
 // constructor
-AddrPort::AddrPort(const Addr& addr, const Port& port)
+AddrPort::AddrPort(const Addr& addr, const Port& port) noexcept
     : addr_(addr), port_(port) {}
 
 AddrPort::AddrPort(std::string_view addrport, char separator) {
@@ -52,25 +52,25 @@ AddrPort::AddrPort(std::string_view addrport, char separator) {
 }
 
 // getter & setter
-void AddrPort::addr(const Addr& addr) {
+void AddrPort::addr(const Addr& addr) noexcept {
     this->addr_ = addr;
 }
 
-Addr AddrPort::addr() const {
+Addr AddrPort::addr() const noexcept {
     return this->addr_;
 }
 
-void AddrPort::port(const Port& port) {
+void AddrPort::port(const Port& port) noexcept {
     this->port_ = port;
 }
 
-Port AddrPort::port() const {
+Port AddrPort::port() const noexcept {
     return this->port_;
 }
 
 // to string
-std::string AddrPort::to_string() const {
-    return this->addr_.to_string() + ":" + this->port_.to_string();
+std::string AddrPort::to_string(char separator) const noexcept {
+    return this->addr_.to_string() + separator + this->port_.to_string();
 }
 
 } // namespace nano
