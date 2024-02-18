@@ -1,12 +1,12 @@
 # NanoNet
 
-C++跨平台网络通信库，封装了Linux和Windows系统原生的网络类型和接口，提供了简单易用且功能丰富的接口。
+NanoNet is a cross-platform network communication library that uses C++17. It encapsulates the native network programming methods of the Linux and Windows operating systems and provides a set of simple and easy-to-use network programming interfaces.
 
-库文档👉[**NanoNet**](https://akashi.top/proj/nanonet)
+Document 👉 [**NanoNet**](https://akashi.top/proj/nanonet) // TODO
 
-## 生成库
+## build
 
-NanoNet库使用的最低C++标准为C++11。
+NanoNet requires a minimum C++17 standard. You can build it using CMake.
 
 ~~~bash
 git clone https://github.com/AkashiNeko/NanoNet.git
@@ -15,8 +15,6 @@ mkdir build && cd build
 cmake ..
 ~~~
 
-在Windows下，`cmake` 将生成 `nanonet.sln`，Linux则生成 `Makefile` 文件。
+## use
 
-## 使用库
-
-库的公共头文件位于 `include/nanonet.h`。使用 `g++` 进行编译链接时，需要附加 `-lnanonet` 选项。如果在Windows平台使用 `g++`，还需附加 `-lws2_32` 选项。
+The public header file for the library is located at `include/nanonet.h`. When using it on the Windows platform, you need to link the library `ws2_32.lib`.
