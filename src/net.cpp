@@ -272,4 +272,18 @@ void get_local_address(sock_t socket, addr_t* addr, port_t* port) noexcept {
     if (port) *port = local.sin_port;
 }
 
+// Set non-blocking
+bool set_blocking(sock_t socket, bool blocking) noexcept {
+#ifdef NANO_LINUX
+    int flags = fcntl(socket, F_GETFL, 0);
+    if (flags == -1) return false;
+    if (blocking) flags &= ~O_NONBLOCK;
+    else flags |= O_NONBLOCK;
+    return 0 == fcntl(socket, F_SETFL, flags);
+#elif NANO_WINDOWS
+    u_long mode = blocking ? 0 : 1;
+    return 0 == ioctlsocket(socket, FIONBIO, &mode);
+#endif
+}
+
 } // namespace nano

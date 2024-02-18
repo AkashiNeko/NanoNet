@@ -28,7 +28,7 @@
 #ifndef __NANONET__
 #define __NANONET__ 2.3
 
-#if __cplusplus < 201103L
+#if __cplusplus < 201703L
 #error "Nanonet requires at least C++11"
 #endif
 
@@ -82,7 +82,6 @@ enum Domain {
 enum SockType {
     TCP_SOCK = SOCK_STREAM,
     UDP_SOCK = SOCK_DGRAM,
-    NONBLOCK = SOCK_NONBLOCK,
 }; // protocol type
 
 class NanoExcept : public std::exception {
@@ -150,6 +149,8 @@ void make_sockaddr4(sockaddr_in* sockaddr,
 // Gets the address and port bound on the file descriptor
 void get_local_address(sock_t socket, addr_t* addr, port_t* port) noexcept;
 
+// Set non-blocking
+bool set_blocking(sock_t socket, bool blocking) noexcept;
 
 // Classes
 

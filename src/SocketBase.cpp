@@ -101,16 +101,7 @@ AddrPort SocketBase::local() const noexcept {
 bool SocketBase::set_blocking(bool blocking) {
     assert_throw_nanoexcept(socket_ != INVALID_SOCKET,
         except_name(), "set_blocking(): Socket is closed");
-#ifdef NANO_LINUX
-    int flags = fcntl(socket_, F_GETFL, 0);
-    if (flags == -1) return false;
-    if (blocking) flags &= ~O_NONBLOCK;
-    else flags |= O_NONBLOCK;
-    return 0 == fcntl(socket_, F_SETFL, flags);
-#elif NANO_WINDOWS
-    u_long mode = blocking ? 0 : 1;
-    return 0 == ioctlsocket(socket_, FIONBIO, &mode);
-#endif
+    return nano::set_blocking(socket_, blocking);
 }
 
 const char* SocketBase::except_name() const noexcept {

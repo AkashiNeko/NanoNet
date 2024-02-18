@@ -41,6 +41,7 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 #elif _WIN32 // Windows
 
@@ -144,6 +145,9 @@ void make_sockaddr4(sockaddr_in* sockaddr,
 
 // Gets the address and port bound on the file descriptor
 void get_local_address(sock_t socket, addr_t* addr, port_t* port) noexcept;
+
+// Set non-blocking
+bool set_blocking(sock_t socket, bool blocking) noexcept;
 
 } // namespace nano
 
