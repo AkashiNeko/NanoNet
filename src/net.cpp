@@ -34,7 +34,6 @@ namespace nano {
 namespace {
 
 class WSAInit {
-public:
     WSAInit() {
         WSADATA wsa;
         int result = WSAStartup(MAKEWORD(2, 2), &wsa);
@@ -43,7 +42,8 @@ public:
     ~WSAInit() {
         WSACleanup();
     }
-}__wsa_initializer_; // RAII
+    static WSAInit _;
+}
 
 } // anonymous namespace
 
