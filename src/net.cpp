@@ -199,14 +199,9 @@ int recv_msg(sock_t socket, char* buf, size_t buf_size, int flags) {
         // truncate buffer
         if (len < buf_size) buf[len] = 0;
         return len;
+    } else {
+        return -ERR_CODE;
     }
-#ifdef NANO_LINUX
-    if (ERR_CODE != EWOULDBLOCK)
-#elif NANO_WINDOWS
-    if (ERR_CODE != WSAEWOULDBLOCK)
-#endif
-        throw_except(LAST_ERROR);
-    return -1;
 }
 
 int recv_msg_from(sock_t socket, char* buf, size_t buf_size,
@@ -221,14 +216,9 @@ int recv_msg_from(sock_t socket, char* buf, size_t buf_size,
         if (addr) *addr = remote.sin_addr.s_addr;
         if (port) *port = remote.sin_port;
         return len;
+    } else {
+        return -ERR_CODE;
     }
-#ifdef NANO_LINUX
-    if (ERR_CODE != EWOULDBLOCK)
-#elif NANO_WINDOWS
-    if (ERR_CODE != WSAEWOULDBLOCK)
-#endif
-        throw_except(LAST_ERROR);
-    return -1;
 }
 
 int send_msg(sock_t socket, const char* msg, size_t length, int flags) {

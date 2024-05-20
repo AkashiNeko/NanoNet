@@ -77,12 +77,7 @@ int TransSocket::send(const char* msg, size_t length) {
 }
 
 int TransSocket::receive(char* buf, size_t buf_size) {
-    try {
-        return recv_msg(socket_, buf, buf_size);
-    } catch (const NanoExcept& e) {
-        throw_except(except_name(), e.what());
-    }
-    return 0; // never
+    return recv_msg(socket_, buf, buf_size);
 }
 
 bool TransSocket::recv_timeout(long ms) const noexcept {

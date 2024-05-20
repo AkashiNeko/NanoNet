@@ -54,8 +54,10 @@ int UdpSocket::receive_from(char* buf, size_t buf_size, AddrPort& addrport) {
     addr_t addr = 0;
     port_t port = 0;
     int ret = recv_msg_from(socket_, buf, buf_size, &addr, &port);
-    addrport.addr(addr_ntoh(addr));
-    addrport.port(port_ntoh(port));
+    if (ret >= 0) {
+        addrport.addr(addr_ntoh(addr));
+        addrport.port(port_ntoh(port));
+    }
     return ret;
 }
 
